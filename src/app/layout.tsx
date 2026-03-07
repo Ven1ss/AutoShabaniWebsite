@@ -21,11 +21,17 @@ export const metadata: Metadata = {
     "genuine parts",
     "AUTO SHABANI",
   ],
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "AUTO SHABANI | Premium Car Spare Parts — Prishtina",
     description:
       "Precision. Performance. Perfection. Premium car spare parts in Kosovo.",
     type: "website",
+    images: ["/logo.png"],
   },
   robots: "index, follow",
 };
