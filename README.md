@@ -64,9 +64,10 @@ src/
 
 ## Design
 
-- **Background:** Deep black (`#0b0b0b`)
-- **Accent:** Metallic red (`#c41e3a`), subtle gold where needed
-- **Font:** Inter (via Next.js font optimization)
-- **Behavior:** Smooth scroll, scroll-triggered animations, loading screen, button hover glow
+- **Background:** Cool light steel (`#F4F6F8` / `#E8ECF0`)
+- **Accent:** Automotive signal red (`#C8102E`)
+- **Fonts:** Barlow Condensed (display), Manrope (body), Ethnocentric (brand)
+- **Hero:** Full-bleed workshop photography with brand-first typography
+- **Behavior:** Smooth scroll, scroll-triggered section reveals, light loading screen
 
-Replace placeholder contact details (phone, Instagram) with real values before going live.
+Contact details are live in `Contact.tsx`.

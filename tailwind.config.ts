@@ -9,44 +9,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        black: {
-          deep: "#0b0b0b",
-          softer: "#111111",
-          card: "#141414",
+        surface: {
+          DEFAULT: "#F4F6F8",
+          alt: "#E8ECF0",
+          white: "#FFFFFF",
         },
-        accent: {
-          red: "#c41e3a",
-          "red-glow": "rgba(196, 30, 58, 0.4)",
-          gold: "#c9a962",
-          "gold-muted": "#a68b4b",
+        ink: {
+          DEFAULT: "#12151A",
+          muted: "#5C6570",
+          faint: "#8A939E",
+        },
+        steel: {
+          DEFAULT: "#3D4654",
+          light: "#C5CCD6",
+        },
+        signal: {
+          DEFAULT: "#C8102E",
+          deep: "#9E0C24",
         },
       },
       fontFamily: {
-        sans: ["var(--font-satoshi)", "system-ui", "sans-serif"],
-        display: ["var(--font-satoshi)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        brand: ["Ethnocentric Rg", "var(--font-display)", "sans-serif"],
       },
-      animation: {
-        "fade-in": "fadeIn 0.8s ease-out forwards",
-        "slide-up": "slideUp 0.6s ease-out forwards",
-      },
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        slideUp: {
-          "0%": { opacity: "0", transform: "translateY(24px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
+      letterSpacing: {
+        brand: "0.22em",
       },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "hero-pattern":
-          "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(196, 30, 58, 0.08), transparent), radial-gradient(ellipse 60% 40% at 80% 50%, rgba(201, 169, 98, 0.04), transparent)",
+        "surface-noise":
+          "radial-gradient(ellipse 80% 50% at 10% 0%, rgba(200,16,46,0.05), transparent 50%), radial-gradient(ellipse 60% 40% at 100% 20%, rgba(61,70,84,0.06), transparent 45%)",
       },
     },
   },

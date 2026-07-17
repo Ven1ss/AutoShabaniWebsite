@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -8,37 +8,30 @@ export default function Vision() {
   const { t } = useLanguage();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  const gradientY = useTransform(scrollYProgress, [0, 0.5, 1], ["0%", "8%", "0%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.25, 0.75, 1], [0.3, 0.5, 0.5, 0.3]);
 
   return (
     <section
       id="vision"
       ref={ref}
-      className="relative py-24 md:py-32 lg:py-40 bg-black-softer overflow-hidden"
+      className="relative py-24 md:py-32 lg:py-40 bg-ink text-white overflow-hidden"
     >
-      {/* Parallax gradient */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
+      <div
+        className="absolute inset-0 opacity-40 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(196, 30, 58, 0.08), transparent 70%)",
-          y: gradientY,
-          opacity,
+          background:
+            "radial-gradient(ellipse 70% 60% at 80% 20%, rgba(200,16,46,0.35), transparent 55%)",
         }}
+        aria-hidden
       />
-
       <div className="container relative z-10 mx-auto px-6 md:px-8 lg:px-12">
         <motion.blockquote
-          className="max-w-5xl mx-auto text-center"
-          initial={{ opacity: 0, y: 48, scale: 0.98 }}
-          animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 48, scale: 0.98 }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-4xl"
+          initial={{ opacity: 0, y: 36 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight text-white leading-[1.15]">
+          <div className="h-1 w-14 bg-signal mb-10" />
+          <p className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-semibold uppercase tracking-tight leading-[1.12] text-white">
             {t.visionQuote}
           </p>
         </motion.blockquote>

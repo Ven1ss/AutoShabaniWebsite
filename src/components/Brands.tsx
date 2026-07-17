@@ -1,20 +1,21 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
+import Image from "next/image";
 import { useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const brands = [
-  "BOSCH",
-  "BREMBO",
-  "CONTINENTAL",
-  "DENSO",
-  "GATES",
-  "MAHLE",
-  "MANN-FILTER",
-  "SKF",
-  "VALEO",
-  "ZF",
+  { name: "Bosch", src: "/brands/bosch.svg" },
+  { name: "Brembo", src: "/brands/brembo.svg" },
+  { name: "Continental", src: "/brands/continental.svg" },
+  { name: "Denso", src: "/brands/denso.svg" },
+  { name: "Gates", src: "/brands/gates.svg" },
+  { name: "Mahle", src: "/brands/mahle.svg" },
+  { name: "MANN-FILTER", src: "/brands/mann-filter.svg" },
+  { name: "SKF", src: "/brands/skf.svg" },
+  { name: "Valeo", src: "/brands/valeo.svg" },
+  { name: "ZF", src: "/brands/zf.svg" },
 ];
 
 export default function Brands() {
@@ -23,50 +24,41 @@ export default function Brands() {
   const isInView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section
-      id="brands"
-      ref={ref}
-      className="relative py-24 md:py-32 bg-black-softer"
-    >
+    <section id="brands" ref={ref} className="relative py-20 md:py-28 bg-surface-alt">
       <div className="container mx-auto px-6 md:px-8 lg:px-12">
         <motion.p
-          className="text-center text-sm tracking-[0.3em] uppercase text-white/50 mb-16"
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display text-2xl md:text-3xl font-semibold uppercase tracking-tight text-ink mb-12 md:mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
         >
           {t.brandsHeading}
         </motion.p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 border-t border-l border-steel-light/80">
           {brands.map((brand, i) => (
-            <motion.div
-              key={brand}
-              className="group relative flex items-center justify-center py-6 px-4 rounded-lg border border-white/5 bg-black-card/50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-white/10 hover:bg-black-card hover:scale-[1.02] hover:shadow-[0_0_40px_-8px_rgba(196,30,58,0.15)] overflow-hidden"
-              initial={{ opacity: 0, y: 36, scale: 0.94 }}
-              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 36, scale: 0.94 }}
+            <motion.li
+              key={brand.name}
+              className="flex items-center justify-center min-h-[100px] md:min-h-[112px] border-r border-b border-steel-light/80 px-5 py-6"
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
               transition={{
-                duration: 0.75,
-                delay: i * 0.055,
+                duration: 0.5,
+                delay: i * 0.04,
                 ease: [0.16, 1, 0.3, 1],
               }}
             >
-              {/* Shine sweep on hover */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg" aria-hidden>
-                <div
-                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.05), rgba(255,255,255,0.08), rgba(255,255,255,0.05), transparent)",
-                    width: "60%",
-                  }}
-                />
-              </div>
-              <span className="relative z-10 text-sm md:text-base font-medium text-white/70 tracking-widest group-hover:text-white transition-colors duration-300">
-                {brand}
-              </span>
-            </motion.div>
+              <Image
+                src={brand.src}
+                alt={brand.name}
+                width={140}
+                height={48}
+                className="h-9 md:h-10 w-auto max-w-[140px] object-contain opacity-80 hover:opacity-100 transition-opacity duration-200"
+                unoptimized
+              />
+            </motion.li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

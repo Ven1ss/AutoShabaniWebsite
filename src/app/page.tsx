@@ -17,15 +17,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1600);
+    const timer = setTimeout(() => setIsLoading(false), 1200);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen />}
-      </AnimatePresence>
+      <AnimatePresence mode="wait">{isLoading && <LoadingScreen />}</AnimatePresence>
 
       <ScrollProgress />
       <Header />

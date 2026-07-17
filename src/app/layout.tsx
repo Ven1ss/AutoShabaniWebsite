@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Barlow_Condensed, Manrope } from "next/font/google";
 import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
 
-const inter = Inter({
+const display = Barlow_Condensed({
   subsets: ["latin"],
-  variable: "--font-satoshi",
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const body = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -42,8 +50,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sq" className={inter.variable} suppressHydrationWarning>
-      <body className="font-sans antialiased bg-black-deep text-white min-h-screen">
+    <html
+      lang="sq"
+      className={`${display.variable} ${body.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased bg-surface text-ink min-h-screen">
         <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
