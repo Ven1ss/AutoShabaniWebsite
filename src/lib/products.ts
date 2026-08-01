@@ -21,20 +21,31 @@ export const CATEGORY_KEYS: ProductCategory[] = [
   "suspension",
 ];
 
+/** Public catalogue product — never includes purchase price or hidden references. */
 export type Product = {
   id?: string;
+  /** Database id used by the product detail route. */
   slug: string;
   sku: string;
+  code: string;
   name: LocaleText;
   description: LocaleText;
   brand: string;
-  category: ProductCategory;
+  category: string;
   image: string;
-  fitment: LocaleText;
+  sellingPrice: number | null;
 };
 
 export function getLocalized(text: LocaleText, locale: "sq" | "en"): string {
   return text[locale];
+}
+
+export function formatPrice(amount: number | null, locale: "sq" | "en"): string | null {
+  if (amount === null || Number.isNaN(amount)) return null;
+  return new Intl.NumberFormat(locale === "sq" ? "sq-AL" : "en-EU", {
+    style: "currency",
+    currency: "EUR",
+  }).format(amount);
 }
 
 export function isProductCategory(value: string): value is ProductCategory {
@@ -60,6 +71,7 @@ export function filterProducts(
     if (!q) return true;
     const haystack = [
       p.sku,
+      p.code,
       p.brand,
       p.category,
       p.name[locale],
@@ -75,6 +87,12 @@ export function filterProducts(
 
 export function uniqueBrands(products: Product[]): string[] {
   return [...new Set(products.map((p) => p.brand))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+}
+
+export function uniqueCategories(products: Product[]): string[] {
+  return [...new Set(products.map((p) => p.category))].sort((a, b) =>
     a.localeCompare(b)
   );
 }

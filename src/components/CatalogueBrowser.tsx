@@ -4,11 +4,11 @@ import { useMemo, useState, useTransition } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductCard from "@/components/ProductCard";
 import {
-  CATEGORY_KEYS,
   filterProducts,
+  isProductCategory,
   uniqueBrands,
+  uniqueCategories,
   type Product,
-  type ProductCategory,
 } from "@/lib/products";
 
 type Props = {
@@ -23,6 +23,7 @@ export default function CatalogueBrowser({ products }: Props) {
   const [, startTransition] = useTransition();
 
   const brands = useMemo(() => uniqueBrands(products), [products]);
+  const categories = useMemo(() => uniqueCategories(products), [products]);
 
   const filtered = useMemo(
     () => filterProducts(products, { query, brand, category, locale }),
@@ -80,9 +81,9 @@ export default function CatalogueBrowser({ products }: Props) {
             className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none focus:border-ink/30"
           >
             <option value="all">{t.catalogueAll}</option>
-            {CATEGORY_KEYS.map((key) => (
+            {categories.map((key) => (
               <option key={key} value={key}>
-                {t[`cat_${key as ProductCategory}`]}
+                {isProductCategory(key) ? t[`cat_${key}`] : key}
               </option>
             ))}
           </select>

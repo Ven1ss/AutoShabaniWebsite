@@ -4,7 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductEnquiry from "@/components/ProductEnquiry";
-import { getLocalized, type Product } from "@/lib/products";
+import {
+  formatPrice,
+  getLocalized,
+  isProductCategory,
+  type Product,
+} from "@/lib/products";
 
 type Props = {
   product: Product;
@@ -14,8 +19,10 @@ export default function ProductDetail({ product }: Props) {
   const { t, locale } = useLanguage();
   const name = getLocalized(product.name, locale);
   const description = getLocalized(product.description, locale);
-  const fitment = getLocalized(product.fitment, locale);
-  const categoryLabel = t[`cat_${product.category}`];
+  const categoryLabel = isProductCategory(product.category)
+    ? t[`cat_${product.category}`]
+    : product.category;
+  const price = formatPrice(product.sellingPrice, locale);
 
   return (
     <article className="pt-28 md:pt-32 pb-20 md:pb-28">
@@ -51,18 +58,36 @@ export default function ProductDetail({ product }: Props) {
             <h1 className="font-display text-4xl md:text-5xl font-semibold uppercase tracking-tight text-ink leading-tight mb-4">
               {name}
             </h1>
-            <p className="text-sm text-ink-muted mb-6">
-              {t.catalogueSku}: {product.sku}
-            </p>
-            <p className="text-base md:text-lg text-ink-muted leading-relaxed mb-8 max-w-xl">
+
+            <dl className="grid gap-3 text-sm mb-6">
+              <div className="flex gap-3">
+                <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                  {t.catalogueSku}
+                </dt>
+                <dd className="text-ink">{product.sku}</dd>
+              </div>
+              {product.code ? (
+                <div className="flex gap-3">
+                  <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                    {t.catalogueCode}
+                  </dt>
+                  <dd className="text-ink">{product.code}</dd>
+                </div>
+              ) : null}
+              <div className="flex gap-3">
+                <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                  {t.cataloguePrice}
+                </dt>
+                <dd className="text-ink font-semibold text-base">
+                  {price ?? t.cataloguePriceOnRequest}
+                </dd>
+              </div>
+            </dl>
+
+            <p className="text-base md:text-lg text-ink-muted leading-relaxed mb-10 max-w-xl">
               {description}
             </p>
-            <div className="mb-10 pb-10 border-b border-steel-light">
-              <p className="text-xs tracking-widest uppercase text-ink-faint mb-2">
-                {t.catalogueFitment}
-              </p>
-              <p className="text-base text-ink">{fitment}</p>
-            </div>
+
             <ProductEnquiry product={product} />
           </div>
         </div>

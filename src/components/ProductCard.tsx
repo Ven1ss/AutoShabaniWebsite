@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { getLocalized, type Product } from "@/lib/products";
+import {
+  formatPrice,
+  getLocalized,
+  isProductCategory,
+  type Product,
+} from "@/lib/products";
 
 type Props = {
   product: Product;
@@ -12,8 +17,10 @@ type Props = {
 export default function ProductCard({ product }: Props) {
   const { t, locale } = useLanguage();
   const name = getLocalized(product.name, locale);
-  const categoryKey = `cat_${product.category}` as const;
-  const categoryLabel = t[categoryKey];
+  const categoryLabel = isProductCategory(product.category)
+    ? t[`cat_${product.category}`]
+    : product.category;
+  const price = formatPrice(product.sellingPrice, locale);
 
   return (
     <Link
@@ -43,6 +50,10 @@ export default function ProductCard({ product }: Props) {
         </h3>
         <p className="text-sm text-ink-muted">
           {t.catalogueSku}: {product.sku}
+          {product.code ? ` · ${t.catalogueCode}: ${product.code}` : null}
+        </p>
+        <p className="text-base font-semibold text-ink">
+          {price ?? t.cataloguePriceOnRequest}
         </p>
         <span className="mt-auto pt-2 text-xs tracking-widest uppercase text-ink group-hover:text-signal transition-colors">
           {t.catalogueView} →

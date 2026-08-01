@@ -1,27 +1,29 @@
 import { createSupabaseClient } from "@/lib/supabase/client";
-import type { ProductRow } from "@/lib/supabase/database.types";
-import {
-  isProductCategory,
-  type Product,
-  type ProductCategory,
-} from "@/lib/products";
+import type { ProductPublicRow } from "@/lib/supabase/database.types";
+import type { Product } from "@/lib/products";
 
-function mapRow(row: ProductRow): Product | null {
-  if (!isProductCategory(row.category)) return null;
+function mapRow(row: ProductPublicRow): Product {
   return {
     id: row.id,
-    slug: row.slug,
+    slug: row.id,
     sku: row.sku,
-    name: { sq: row.name_sq, en: row.name_en },
-    description: { sq: row.description_sq, en: row.description_en },
+    code: row.code ?? "",
+    name: { sq: row.name, en: row.name },
+    description: { sq: row.description, en: row.description },
     brand: row.brand,
-    category: row.category as ProductCategory,
+    category: row.category,
     image: row.image_url,
-    fitment: { sq: row.fitment_sq, en: row.fitment_en },
+    sellingPrice:
+      row.selling_price === null || row.selling_price === undefined
+        ? null
+        : Number(row.selling_price),
   };
 }
 
-/** Fetch all active products from Supabase. Returns [] if not configured or on error. */
+/**
+ * Fetch active products from the public view only.
+ * purchase_price and hidden_references are never selected / returned.
+ */
 export async function getProducts(): Promise<Product[]> {
   const supabase = createSupabaseClient();
   if (!supabase) {
@@ -32,32 +34,32 @@ export async function getProducts(): Promise<Product[]> {
   }
 
   const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("is_active", true)
+    .from("products_public")
+    .select(
+      "id, name, sku, code, brand, description, category, image_url, selling_price"
+    )
     .order("brand", { ascending: true })
-    .order("name_en", { ascending: true });
+    .order("name", { ascending: true });
 
   if (error) {
     console.error("[products] Failed to fetch products:", error.message);
     return [];
   }
 
-  return (data ?? [])
-    .map(mapRow)
-    .filter((p): p is Product => p !== null);
+  return (data ?? []).map(mapRow);
 }
 
-/** Fetch a single active product by slug. */
+/** Fetch a single product by slug from the public view only. */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = createSupabaseClient();
   if (!supabase) return null;
 
   const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_active", true)
+    .from("products_public")
+    .select(
+      "id, name, sku, code, brand, description, category, image_url, selling_price"
+    )
+    .eq("id", slug)
     .maybeSingle();
 
   if (error) {
