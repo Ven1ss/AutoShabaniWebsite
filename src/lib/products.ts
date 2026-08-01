@@ -40,12 +40,13 @@ export function getLocalized(text: LocaleText, locale: "sq" | "en"): string {
   return text[locale];
 }
 
+// Formatted by hand rather than with Intl: Node and browsers ship different
+// locale data for sq-AL, so Intl produced a different string on the server than
+// on the client and broke hydration.
 export function formatPrice(amount: number | null, locale: "sq" | "en"): string | null {
   if (amount === null || Number.isNaN(amount)) return null;
-  return new Intl.NumberFormat(locale === "sq" ? "sq-AL" : "en-EU", {
-    style: "currency",
-    currency: "EUR",
-  }).format(amount);
+  const value = amount.toFixed(2);
+  return locale === "sq" ? `${value.replace(".", ",")} €` : `€${value}`;
 }
 
 export function isProductCategory(value: string): value is ProductCategory {

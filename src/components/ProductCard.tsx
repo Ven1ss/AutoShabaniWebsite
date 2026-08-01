@@ -25,7 +25,7 @@ export default function ProductCard({ product }: Props) {
   return (
     <Link
       href={`/katalogu/${product.slug}`}
-      className="group flex flex-col border border-steel-light/80 bg-surface-white transition-colors hover:border-ink/20"
+      className="group flex h-full flex-col border border-steel-light/80 bg-surface-white transition-colors hover:border-ink/20"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-white border-b border-steel-light/60">
         <Image
@@ -36,8 +36,8 @@ export default function ProductCard({ product }: Props) {
           className="object-contain p-4 md:p-5 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
-        <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-1 flex-col gap-2 p-4 md:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
             {product.brand}
           </span>
@@ -45,10 +45,10 @@ export default function ProductCard({ product }: Props) {
             {categoryLabel}
           </span>
         </div>
-        <h3 className="font-display text-xl md:text-2xl font-semibold uppercase tracking-tight text-ink leading-tight">
+        <h3 className="font-display text-lg font-semibold uppercase tracking-tight text-ink leading-tight">
           {name}
         </h3>
-        <p className="text-sm text-ink-muted">
+        <p className="text-xs text-ink-muted">
           {t.catalogueSku}: {product.sku}
           {product.code ? ` · ${t.catalogueCode}: ${product.code}` : null}
         </p>

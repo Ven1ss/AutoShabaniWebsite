@@ -99,7 +99,7 @@ export default function CatalogueBrowser({ products }: Props) {
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+        <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
           {filtered.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} />
