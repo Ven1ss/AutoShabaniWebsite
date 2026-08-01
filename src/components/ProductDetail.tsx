@@ -35,14 +35,14 @@ export default function ProductDetail({ product }: Props) {
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <div className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-alt">
+          <div className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white">
             <Image
               src={product.image}
               alt={name}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              className="object-contain p-6 md:p-8"
             />
           </div>
 
