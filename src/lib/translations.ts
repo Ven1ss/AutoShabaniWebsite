@@ -57,7 +57,7 @@ export const translations = {
     catalogueTitle: "Katalogu i Pjesëve",
     catalogueSubtitle:
       "Shfletoni pjesë të zgjedhura OEM dhe origjinale. Pyetni për disponueshmëri dhe çmim.",
-    catalogueSearch: "Kërko sipas emrit ose SKU…",
+    catalogueSearch: "Kërko sipas emrit, SKU, kodit ose markës…",
     catalogueBrand: "Marka",
     catalogueCategory: "Kategoria",
     catalogueAll: "Të gjitha",
@@ -139,7 +139,7 @@ export const translations = {
     catalogueTitle: "Parts Catalogue",
     catalogueSubtitle:
       "Browse selected OEM and genuine parts. Enquire for availability and pricing.",
-    catalogueSearch: "Search by name or SKU…",
+    catalogueSearch: "Search by name, SKU, code or brand…",
     catalogueBrand: "Brand",
     catalogueCategory: "Category",
     catalogueAll: "All",

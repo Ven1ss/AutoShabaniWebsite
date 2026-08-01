@@ -70,16 +70,8 @@ export function filterProducts(
     if (opts.category && opts.category !== "all" && p.category !== opts.category)
       return false;
     if (!q) return true;
-    const haystack = [
-      p.sku,
-      p.code,
-      p.brand,
-      p.category,
-      p.name[locale],
-      p.name.en,
-      p.name.sq,
-      p.description[locale],
-    ]
+    // Public-field fallback only. hidden_references are matched server-side.
+    const haystack = [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq]
       .join(" ")
       .toLowerCase();
     return haystack.includes(q);

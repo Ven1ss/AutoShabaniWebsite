@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductCard from "@/components/ProductCard";
 import {
@@ -20,15 +20,50 @@ export default function CatalogueBrowser({ products }: Props) {
   const [query, setQuery] = useState("");
   const [brand, setBrand] = useState("all");
   const [category, setCategory] = useState("all");
+  const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
   const [, startTransition] = useTransition();
 
   const brands = useMemo(() => uniqueBrands(products), [products]);
   const categories = useMemo(() => uniqueCategories(products), [products]);
 
-  const filtered = useMemo(
-    () => filterProducts(products, { query, brand, category, locale }),
-    [products, query, brand, category, locale]
-  );
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setRemoteMatches(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/products/search?q=${encodeURIComponent(q)}`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+        const data = (await res.json()) as Product[];
+        setRemoteMatches(data);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        // Fall back to public-field client search if the RPC is unreachable.
+        console.error("[catalogue] Remote search failed:", error);
+        setRemoteMatches(null);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [query]);
+
+  const filtered = useMemo(() => {
+    if (remoteMatches) {
+      // Query already applied server-side (includes hidden_references).
+      return filterProducts(remoteMatches, { brand, category, locale });
+    }
+    return filterProducts(products, { query, brand, category, locale });
+  }, [products, remoteMatches, query, brand, category, locale]);
 
   return (
     <div>

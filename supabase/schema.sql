@@ -72,3 +72,6 @@ comment on column public.products.purchase_price is
   'PRIVATE: business cost; never exposed through products_public.';
 comment on column public.products.hidden_references is
   'PRIVATE: supplier/internal references; never exposed through products_public.';
+
+-- After this schema, also run search_products.sql so catalogue search can
+-- match hidden_references without ever returning that column to clients.

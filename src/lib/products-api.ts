@@ -49,6 +49,26 @@ export async function getProducts(): Promise<Product[]> {
   return (data ?? []).map(mapRow);
 }
 
+/**
+ * Search by name, sku, code, brand, or hidden_references.
+ * Returns public product fields only — never purchase_price or hidden_references.
+ */
+export async function searchProducts(query: string): Promise<Product[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("search_products", {
+    search_query: query.trim(),
+  });
+
+  if (error) {
+    console.error("[products] Failed to search products:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map(mapRow);
+}
+
 /** Fetch a single product by slug from the public view only. */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = createSupabaseClient();
