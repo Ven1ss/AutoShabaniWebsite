@@ -62,7 +62,8 @@ export function filterProducts(
     locale?: "sq" | "en";
   }
 ): Product[] {
-  const q = opts.query?.trim().toLowerCase() ?? "";
+  const normalize = (value: string) => value.replace(/\s+/g, "").toLowerCase();
+  const q = normalize(opts.query ?? "");
   const locale = opts.locale ?? "sq";
 
   return products.filter((p) => {
@@ -71,10 +72,10 @@ export function filterProducts(
       return false;
     if (!q) return true;
     // Public-field fallback only. hidden_references are matched server-side.
-    const haystack = [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq]
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(q);
+    // Spaces are ignored so "xxxxx" matches "xxx xx".
+    return [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq]
+      .map(normalize)
+      .some((field) => field.includes(q));
   });
 }
 

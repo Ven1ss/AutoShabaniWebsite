@@ -1,5 +1,6 @@
 -- Catalogue search: match name / sku / code / brand / hidden_references
 -- without ever returning purchase_price or hidden_references.
+-- Spaces are ignored in both the query and the stored values.
 -- Safe to re-run.
 
 create schema if not exists private;
@@ -25,7 +26,7 @@ security definer
 set search_path = public
 as $$
 declare
-  q text := trim(coalesce(search_query, ''));
+  q text := regexp_replace(trim(coalesce(search_query, '')), '\s+', '', 'g');
   pattern text;
 begin
   if q = '' then
@@ -60,11 +61,11 @@ begin
     p.selling_price
   from public.products p
   where
-    p.name ilike pattern escape E'\\'
-    or p.sku ilike pattern escape E'\\'
-    or p.code ilike pattern escape E'\\'
-    or p.brand ilike pattern escape E'\\'
-    or p.hidden_references ilike pattern escape E'\\'
+    regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(p.code, '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(p.brand, '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(p.hidden_references, '\s+', '', 'g') ilike pattern escape E'\\'
   order by p.brand, p.name;
 end;
 $$;
@@ -96,4 +97,4 @@ revoke all on function public.search_products(text) from public;
 grant execute on function public.search_products(text) to anon, authenticated, service_role;
 
 comment on function public.search_products(text) is
-  'Catalogue search by name, sku, code, brand, or hidden_references. Never returns purchase_price or hidden_references.';
+  'Catalogue search by name, sku, code, brand, or hidden_references. Spaces are ignored. Never returns purchase_price or hidden_references.';
