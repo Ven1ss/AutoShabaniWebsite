@@ -1,34 +1,51 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+  useMotionValueEvent,
+} from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
-const navKeys = [
-  { href: "#about", key: "navAbout" as const },
-  { href: "#experience", key: "navExperience" as const },
-  { href: "#contact", key: "navContact" as const },
-];
+type HeaderProps = {
+  /** hero = transparent over home hero; solid = always solid (inner pages) */
+  variant?: "hero" | "solid";
+};
 
-export default function Header() {
+export default function Header({ variant = "hero" }: HeaderProps) {
   const { t, locale, setLocale } = useLanguage();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(variant === "solid");
   const { scrollY } = useScroll();
   const headerBg = useTransform(
     scrollY,
     [0, 80],
-    ["rgba(244, 246, 248, 0)", "rgba(244, 246, 248, 0.94)"]
+    variant === "solid"
+      ? ["rgba(238, 241, 244, 0.96)", "rgba(238, 241, 244, 0.96)"]
+      : ["rgba(238, 241, 244, 0)", "rgba(238, 241, 244, 0.96)"]
   );
   const headerBorder = useTransform(
     scrollY,
     [0, 80],
-    ["rgba(18,21,26,0)", "rgba(18,21,26,0.08)"]
+    variant === "solid"
+      ? ["rgba(22,26,32,0.08)", "rgba(22,26,32,0.08)"]
+      : ["rgba(22,26,32,0)", "rgba(22,26,32,0.08)"]
   );
 
   useMotionValueEvent(scrollY, "change", (v) => {
+    if (variant === "solid") {
+      setScrolled(true);
+      return;
+    }
     setScrolled(v > 48);
   });
 
@@ -46,7 +63,7 @@ export default function Header() {
 
   if (!mounted) return null;
 
-  const onHero = !scrolled && !mobileOpen;
+  const onHero = variant === "hero" && !scrolled && !mobileOpen;
   const linkClass = onHero
     ? "text-white/70 hover:text-white"
     : "text-ink-muted hover:text-ink";
@@ -54,20 +71,33 @@ export default function Header() {
   const activeLang = onHero ? "text-white font-semibold" : "text-signal font-semibold";
   const idleLang = onHero ? "text-white/50 hover:text-white/80" : "text-ink-faint hover:text-ink";
 
+  const sectionHref = (hash: string) => (isHome ? hash : `/${hash}`);
+
+  const navItems = [
+    { href: "/katalogu", key: "navCatalogue" as const, isRoute: true },
+    { href: sectionHref("#about"), key: "navAbout" as const, isRoute: false },
+    { href: sectionHref("#contact"), key: "navContact" as const, isRoute: false },
+  ];
+
+  const isActive = (href: string, isRoute: boolean) => {
+    if (!isRoute) return false;
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <motion.header
       className="fixed top-0 left-0 right-0 z-50 py-5 px-6 md:px-8 lg:px-12"
       style={{
-        backgroundColor: mobileOpen ? "rgba(244, 246, 248, 0.98)" : headerBg,
+        backgroundColor: mobileOpen ? "rgba(238, 241, 244, 0.98)" : headerBg,
         borderBottomWidth: 1,
         borderBottomStyle: "solid",
         borderBottomColor: headerBorder,
-        backdropFilter: scrolled || mobileOpen ? "blur(10px)" : "none",
+        backdropFilter: scrolled || mobileOpen || variant === "solid" ? "blur(10px)" : "none",
       }}
     >
       <div className="relative flex items-center justify-between container mx-auto">
-        <a
-          href="#hero"
+        <Link
+          href="/"
           className={`flex items-center gap-3 transition-opacity hover:opacity-80 ${mobileOpen ? "text-ink" : brandClass}`}
         >
           <Image
@@ -85,17 +115,27 @@ export default function Header() {
           >
             {t.brandName}
           </span>
-        </a>
+        </Link>
         <nav className="hidden md:flex items-center gap-10 ml-auto">
-          {navKeys.map(({ href, key }) => (
-            <a
-              key={href}
-              href={href}
-              className={`text-xs tracking-widest uppercase transition-colors ${linkClass}`}
-            >
-              {t[key]}
-            </a>
-          ))}
+          {navItems.map(({ href, key, isRoute }) => {
+            const active = isActive(href, isRoute);
+            const className = `text-xs tracking-widest uppercase transition-colors ${
+              active
+                ? onHero
+                  ? "text-white font-semibold"
+                  : "text-signal font-semibold"
+                : linkClass
+            }`;
+            return isRoute ? (
+              <Link key={key} href={href} className={className}>
+                {t[key]}
+              </Link>
+            ) : (
+              <a key={key} href={href} className={className}>
+                {t[key]}
+              </a>
+            );
+          })}
           <div
             className={`flex items-center gap-1 border-l pl-6 ml-2 ${
               onHero ? "border-white/25" : "border-steel-light"
@@ -141,7 +181,11 @@ export default function Header() {
             type="button"
             aria-label="Toggle menu"
             className={`md:hidden p-2 transition-colors ${
-              mobileOpen ? "text-ink" : onHero ? "text-white/80 hover:text-white" : "text-ink-muted hover:text-ink"
+              mobileOpen
+                ? "text-ink"
+                : onHero
+                  ? "text-white/80 hover:text-white"
+                  : "text-ink-muted hover:text-ink"
             }`}
             onClick={() => setMobileOpen((o) => !o)}
           >
@@ -167,16 +211,29 @@ export default function Header() {
             transition={{ duration: 0.2 }}
           >
             <nav className="flex flex-col py-6 px-6 gap-6">
-              {navKeys.map(({ href, key }) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="text-sm tracking-widest uppercase text-ink-muted hover:text-ink transition-colors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {t[key]}
-                </a>
-              ))}
+              {navItems.map(({ href, key, isRoute }) => {
+                const className =
+                  "text-sm tracking-widest uppercase text-ink-muted hover:text-ink transition-colors";
+                return isRoute ? (
+                  <Link
+                    key={key}
+                    href={href}
+                    className={className}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t[key]}
+                  </Link>
+                ) : (
+                  <a
+                    key={key}
+                    href={href}
+                    className={className}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t[key]}
+                  </a>
+                );
+              })}
             </nav>
           </motion.div>
         )}

@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f4f6f8;
-  --ink: #12151a;
+  --bg: #eef1f4;
+  --ink: #161a20;
   --signal: #c8102e;
 }
 
@@ -22,8 +22,8 @@ body {
 }
 
 ::selection {
-  background: rgba(200, 16, 46, 0.18);
-  color: #12151a;
+  background: rgba(200, 16, 46, 0.16);
+  color: #161a20;
 }
 
 ::-webkit-scrollbar {
@@ -31,25 +31,69 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #e8ecf0;
+  background: #e3e7ec;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c5ccd6;
+  background: #c2c9d2;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8a939e;
+  background: #8b949e;
 }
 
 .font-ethnocentric {
   font-family: "Ethnocentric Rg", var(--font-display), sans-serif;
 }
 
+/* Parts-counter ticket: perforated left stub */
+.ticket {
+  position: relative;
+  background: #f7f8fa;
+  border: 1px solid #c2c9d2;
+}
+
+.ticket::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 10px;
+  bottom: 10px;
+  width: 10px;
+  background-image: radial-gradient(circle, #eef1f4 3px, transparent 3.2px);
+  background-size: 10px 12px;
+  background-position: -3px 0;
+  background-repeat: repeat-y;
+  pointer-events: none;
+}
+
+/* Hero mesh — animated steel / signal gradients */
+.hero-mesh {
+  background:
+    radial-gradient(ellipse 90% 70% at 15% 20%, rgba(200, 16, 46, 0.45), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 85% 15%, rgba(90, 110, 140, 0.35), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(200, 16, 46, 0.22), transparent 55%),
+    linear-gradient(160deg, #0e1116 0%, #1a222c 45%, #12161c 100%);
+  background-size: 140% 140%, 120% 120%, 100% 100%, 100% 100%;
+  animation: heroMeshShift 18s ease-in-out infinite alternate;
+}
+
+@keyframes heroMeshShift {
+  0% {
+    background-position: 0% 40%, 100% 0%, 50% 100%, 0% 0%;
+  }
+  100% {
+    background-position: 40% 0%, 40% 60%, 60% 80%, 0% 0%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .hero-mesh {
+    animation: none;
   }
   *,
   *::before,

@@ -1,38 +1,26 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import ScrollProgress from "@/components/ScrollProgress";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Brands from "@/components/Brands";
-import Experience from "@/components/Experience";
-import Vision from "@/components/Vision";
+import MarketingHero from "@/components/MarketingHero";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import TrustStrip from "@/components/TrustStrip";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import LoadingScreen from "@/components/LoadingScreen";
+import { getProductsCached } from "@/lib/products-api";
 
-export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+/** Cache product list — inventory updates within ~60s via ISR. */
+export const revalidate = 60;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1200);
-    return () => clearTimeout(timer);
-  }, []);
+export default async function Home() {
+  const products = await getProductsCached();
 
   return (
     <>
-      <AnimatePresence mode="wait">{isLoading && <LoadingScreen />}</AnimatePresence>
-
       <ScrollProgress />
-      <Header />
+      <Header variant="hero" />
       <main>
-        <Hero />
-        <About />
-        <Brands />
-        <Experience />
-        <Vision />
+        <MarketingHero />
+        <FeaturedProducts products={products} />
+        <TrustStrip />
         <Contact />
         <Footer />
       </main>
