@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Manrope } from "next/font/google";
+import { Barlow_Condensed, JetBrains_Mono, Manrope } from "next/font/google";
 import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
 
@@ -17,16 +17,23 @@ const body = Manrope({
   display: "swap",
 });
 
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "AUTO SHABANI | Premium Car Spare Parts — Prishtina, Kosovo",
+  title: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",
   description:
-    "AUTO SHABANI — Precision. Performance. Perfection. Kosovo's leading premium car spare parts provider. Genuine & OEM parts, expert knowledge, trusted by professionals in Prishtina.",
+    "Gjej pjesën e duhur sipas emrit, SKU ose kodit. Pjesë OEM dhe origjinale në Prishtinë — AUTO SHABANI.",
   keywords: [
-    "car spare parts",
+    "pjesë këmbimi",
     "auto parts Kosovo",
     "Prishtina",
-    "OEM parts",
-    "genuine parts",
+    "OEM",
+    "SKU",
     "AUTO SHABANI",
   ],
   icons: {
@@ -35,9 +42,9 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "AUTO SHABANI | Premium Car Spare Parts — Prishtina",
+    title: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",
     description:
-      "Precision. Performance. Perfection. Premium car spare parts in Kosovo.",
+      "Kërko pjesë sipas emrit, SKU ose kodit. Çmime dhe disponueshmëri në Prishtinë.",
     type: "website",
     images: ["/logo.png"],
   },
@@ -52,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="sq"
-      className={`${display.variable} ${body.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-surface text-ink min-h-screen">

@@ -2,67 +2,34 @@ export type Locale = "sq" | "en";
 
 export const translations = {
   sq: {
-    // Hero
-    heroTagline: "Pjesë Këmbimi për Makina",
-    heroTitle1: "Saktësi.",
-    heroTitle2: "Performancë.",
-    heroTitle3: "Perfeksion.",
-    heroSubtitle: "Pjesë këmbimi origjinale në Prishtinë",
-    heroCta: "Shiko Katalogun",
+    brandName: "AUTO SHABANI",
 
-    // About
-    aboutTitle1: "Ndërtuar mbi Besimin.",
-    aboutTitle2: "Drejtuar nga Ekselenca.",
-    aboutText:
-      "AUTO SHABANI është ofruesi kryesor i pjesëve këmbimi premium për makina në Kosovë. Ne kombinojmë cilësinë origjinale, njohurinë e ekspertëve dhe besueshmërinë e patundur për t'u shërbyer profesionistëve dhe entuziastëve që kërkojnë më të mirën. Me qendër në Prishtinë, ne jemi zgjedhja e besuar për ata që refuzojnë të kompromentojnë.",
-
-    // Brands
-    brandsHeading: "Markat e Besuara me të cilat Partnerojmë",
-
-    // Experience
-    experienceLabel: "Pse AUTO SHABANI",
-    experienceTitle: "Eksperienca",
-    exp1Title: "Pjesë Origjinale & OEM",
-    exp1Desc: "Vetëm përbërës autentikë që plotësojnë standardet e prodhuesit.",
-    exp2Title: "Njohuri Ekspertësh",
-    exp2Desc: "Dekada përvojë në drejtimin tuaj drejt pjesës së duhur.",
-    exp3Title: "Disponueshmëri e Shpejtë",
-    exp3Desc: "Qasje e shpejtë te pjesët që ju nevojiten, kur ju nevojiten.",
-    exp4Title: "I Besuar nga Profesionistët",
-    exp4Desc: "Zgjedhja e punishteve dhe entuziastëve në të gjithë rajonin.",
-
-    // Vision
-    visionQuote:
-      "Ne jemi të përkushtuar ndaj rritjes afatgjatë, inovacionit të vazhdueshëm dhe bëhemi autoriteti vendimtar i pjesëve automobilistike në Ballkan—ku cilësia nuk është e negociueshme dhe besimi fitohet çdo ditë.",
-
-    // Contact
-    contactHeading: "Lidhuni me ne",
-    contactTitle: "Na vizitoni në Prishtinë",
-    contactPhone: "Telefoni",
-    contactEmail: "Email",
-    contactInstagram: "Instagram",
-    contactLocation: "Lokacioni",
-    contactMapLink: "Prishtinë, Kosovë — Shiko në hartë",
-
-    // Footer
-    footerRights: "Të gjitha të drejtat e rezervuara.",
+    // Hero / catalogue-first
+    heroTitle: "Gjej pjesën që të duhet",
+    heroSubtitle:
+      "Shkruaj emrin, SKU-në ose kodin — si në tejkaluesin e dyqanit.",
+    heroTradeNote: "Për punishte / shumicë: na shkruani në WhatsApp.",
 
     // Nav
-    navAbout: "Rreth Nesh",
-    navExperience: "Eksperienca",
-    navContact: "Kontakt",
     navCatalogue: "Katalogu",
+    navAbout: "Rreth nesh",
+    navContact: "Kontakt",
+    navTrade: "Shumicë",
+
+    // Search ticket
+    searchLabel: "Kërko",
+    searchPlaceholder: "Emër, SKU, kod ose markë…",
+    searchSubmit: "Kërko",
+    searchHint: "Hapësirat injorohen — p.sh. K607 = K 6 0 7",
 
     // Catalogue
-    catalogueTitle: "Katalogu i Pjesëve",
-    catalogueSubtitle:
-      "Shfletoni pjesë të zgjedhura OEM dhe origjinale. Pyetni për disponueshmëri dhe çmim.",
+    catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
     catalogueSearch: "Kërko sipas emrit, SKU, kodit ose markës…",
     catalogueBrand: "Marka",
     catalogueCategory: "Kategoria",
     catalogueAll: "Të gjitha",
     catalogueResults: "produkte",
-    catalogueEmpty: "Nuk u gjet asnjë produkt. Provoni filtra të tjerë.",
+    catalogueEmpty: "Asnjë rezultat. Provo një SKU tjetër ose na telefononi.",
     catalogueView: "Shiko",
     catalogueSku: "SKU",
     catalogueCode: "Kodi",
@@ -74,12 +41,47 @@ export const translations = {
     catalogueCall: "Telefono",
     catalogueEmail: "Email",
     catalogueEnquireNote:
-      "Nuk ka blerje online — na kontaktoni për disponueshmëri, çmim dhe porosi.",
-    catalogueTeaserLabel: "Katalogu",
-    catalogueTeaserTitle: "Gjeni pjesën e duhur",
-    catalogueTeaserText:
-      "Disa nga pjesët tona — hapni katalogun për të kërkuar sipas emrit, SKU, kodit ose markës.",
-    catalogueTeaserCta: "Hap Katalogun",
+      "Nuk ka blerje online — na kontaktoni për stok, çmim dhe porosi.",
+    catalogueSort: "Rendit",
+    catalogueSortRelevance: "Relevanca",
+    catalogueSortPriceAsc: "Çmimi ↑",
+    catalogueSortPriceDesc: "Çmimi ↓",
+    catalogueSortName: "Emri A–Z",
+    catalogueBrowseAll: "Shiko të gjithë katalogun",
+    catalogueFeatured: "Disa nga pjesët",
+
+    // Trust strip
+    trustHeading: "Pse te ne",
+    trust1Title: "OEM & origjinale",
+    trust1Desc: "Pjesë që përputhen me specifikën e makinës.",
+    trust2Title: "E dimë çfarë kërkon",
+    trust2Desc: "Thuaj kodin ose dërgo foto — ta gjejmë shpejt.",
+    trust3Title: "Në Prishtinë",
+    trust3Desc: "Merre sot ose porosit — pa komplikime.",
+
+    // Brands
+    brandsHeading: "Markat që mbajmë",
+
+    // About (compressed)
+    aboutTitle: "Dyqani i pjesëve, jo fjalë të mëdha",
+    aboutText:
+      "AUTO SHABANI në Prishtinë — pjesë këmbimi për makina, për klientë që duan pjesën e saktë me çmim të qartë. Nëse je punishte, pyet për shumicë; nëse je individ, çmimet e shfaqura janë për ty.",
+
+    // Contact
+    contactHeading: "Kontakt",
+    contactTitle: "Na gjeni në Prishtinë",
+    contactPhone: "Telefoni",
+    contactEmail: "Email",
+    contactInstagram: "Instagram",
+    contactLocation: "Lokacioni",
+    contactMapLink: "Prishtinë — hap hartën",
+    contactHours: "Orari",
+    contactHoursValue: "Hën–Sht · telefononi për orar",
+
+    // Footer
+    footerRights: "Të gjitha të drejtat e rezervuara.",
+
+    // Legacy category keys (kept for typed categories)
     cat_filters: "Filtra",
     cat_brakes: "Frena",
     cat_engine: "Motor",
@@ -88,63 +90,31 @@ export const translations = {
     cat_lighting: "Ndriçim",
     cat_clutch: "Ambrejazh",
     cat_suspension: "Pezullim",
-
-    // Brand (used in header, loading, footer)
-    brandName: "AUTO SHABANI",
   },
   en: {
-    heroTagline: "Car Spare Parts",
-    heroTitle1: "Precision.",
-    heroTitle2: "Performance.",
-    heroTitle3: "Perfection.",
-    heroSubtitle: "Original Car Spare Parts in Prishtina",
-    heroCta: "Browse Catalogue",
+    brandName: "AUTO SHABANI",
 
-    aboutTitle1: "Built on Trust.",
-    aboutTitle2: "Driven by Excellence.",
-    aboutText:
-      "AUTO SHABANI is Kosovo's leading provider of premium car spare parts. We combine genuine quality, expert knowledge, and unwavering reliability to serve professionals and enthusiasts who demand the best. Based in Prishtina, we are the trusted choice for those who refuse to compromise.",
+    heroTitle: "Find the part you need",
+    heroSubtitle: "Type the name, SKU, or code — like at the counter.",
+    heroTradeNote: "Workshops / wholesale: message us on WhatsApp.",
 
-    brandsHeading: "Trusted Brands We Partner With",
-
-    experienceLabel: "Why AUTO SHABANI",
-    experienceTitle: "The Experience",
-    exp1Title: "Genuine & OEM Parts",
-    exp1Desc: "Only authentic components that meet manufacturer standards.",
-    exp2Title: "Expert Knowledge",
-    exp2Desc: "Decades of experience guiding you to the right part.",
-    exp3Title: "Fast Availability",
-    exp3Desc: "Quick access to the parts you need, when you need them.",
-    exp4Title: "Trusted by Professionals",
-    exp4Desc: "The choice of workshops and enthusiasts across the region.",
-
-    visionQuote:
-      "We are committed to long-term growth, continuous innovation, and becoming the definitive automotive parts authority in the Balkans—where quality is non-negotiable and trust is earned every day.",
-
-    contactHeading: "Get in Touch",
-    contactTitle: "Visit Us in Prishtina",
-    contactPhone: "Phone",
-    contactEmail: "Email",
-    contactInstagram: "Instagram",
-    contactLocation: "Location",
-    contactMapLink: "Prishtina, Kosovo — View on map",
-
-    footerRights: "All rights reserved.",
-
-    navAbout: "About",
-    navExperience: "Experience",
-    navContact: "Contact",
     navCatalogue: "Catalogue",
+    navAbout: "About",
+    navContact: "Contact",
+    navTrade: "Wholesale",
 
-    catalogueTitle: "Parts Catalogue",
-    catalogueSubtitle:
-      "Browse selected OEM and genuine parts. Enquire for availability and pricing.",
+    searchLabel: "Search",
+    searchPlaceholder: "Name, SKU, code or brand…",
+    searchSubmit: "Search",
+    searchHint: "Spaces are ignored — e.g. K607 = K 6 0 7",
+
+    catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueSearch: "Search by name, SKU, code or brand…",
     catalogueBrand: "Brand",
     catalogueCategory: "Category",
     catalogueAll: "All",
     catalogueResults: "products",
-    catalogueEmpty: "No products found. Try different filters.",
+    catalogueEmpty: "No results. Try another SKU or call us.",
     catalogueView: "View",
     catalogueSku: "SKU",
     catalogueCode: "Code",
@@ -156,12 +126,41 @@ export const translations = {
     catalogueCall: "Call",
     catalogueEmail: "Email",
     catalogueEnquireNote:
-      "No online checkout — contact us for availability, pricing, and ordering.",
-    catalogueTeaserLabel: "Catalogue",
-    catalogueTeaserTitle: "Find the right part",
-    catalogueTeaserText:
-      "A selection of our parts — open the catalogue to search by name, SKU, code, or brand.",
-    catalogueTeaserCta: "Open Catalogue",
+      "No online checkout — contact us for stock, pricing, and ordering.",
+    catalogueSort: "Sort",
+    catalogueSortRelevance: "Relevance",
+    catalogueSortPriceAsc: "Price ↑",
+    catalogueSortPriceDesc: "Price ↓",
+    catalogueSortName: "Name A–Z",
+    catalogueBrowseAll: "Browse full catalogue",
+    catalogueFeatured: "A few parts",
+
+    trustHeading: "Why us",
+    trust1Title: "OEM & genuine",
+    trust1Desc: "Parts that match the car’s spec.",
+    trust2Title: "We know the codes",
+    trust2Desc: "Say the code or send a photo — we’ll find it fast.",
+    trust3Title: "In Prishtina",
+    trust3Desc: "Pick up today or order — no fuss.",
+
+    brandsHeading: "Brands we stock",
+
+    aboutTitle: "A parts counter, not a slogan",
+    aboutText:
+      "AUTO SHABANI in Prishtina — car parts for people who want the right part at a clear price. Workshops: ask about wholesale. Retail: the prices you see are for you.",
+
+    contactHeading: "Contact",
+    contactTitle: "Find us in Prishtina",
+    contactPhone: "Phone",
+    contactEmail: "Email",
+    contactInstagram: "Instagram",
+    contactLocation: "Location",
+    contactMapLink: "Prishtina — open map",
+    contactHours: "Hours",
+    contactHoursValue: "Mon–Sat · call for hours",
+
+    footerRights: "All rights reserved.",
+
     cat_filters: "Filters",
     cat_brakes: "Brakes",
     cat_engine: "Engine",
@@ -170,8 +169,6 @@ export const translations = {
     cat_lighting: "Lighting",
     cat_clutch: "Clutch",
     cat_suspension: "Suspension",
-
-    brandName: "AUTO SHABANI",
   },
 } as const;
 

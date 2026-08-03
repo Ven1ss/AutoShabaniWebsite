@@ -4,12 +4,9 @@ import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import ScrollProgress from "@/components/ScrollProgress";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
+import CatalogueHero from "@/components/CatalogueHero";
+import TrustStrip from "@/components/TrustStrip";
 import Brands from "@/components/Brands";
-import CatalogueTeaser from "@/components/CatalogueTeaser";
-import Experience from "@/components/Experience";
-import Vision from "@/components/Vision";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -17,13 +14,15 @@ import type { Product } from "@/lib/products";
 
 type Props = {
   featuredProducts: Product[];
+  allProducts: Product[];
 };
 
-export default function HomeClient({ featuredProducts }: Props) {
+export default function HomeClient({ featuredProducts, allProducts }: Props) {
   const [isLoading, setIsLoading] = useState(true);
+  const products = allProducts.length > 0 ? allProducts : featuredProducts;
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 900);
+    const timer = setTimeout(() => setIsLoading(false), 700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -32,14 +31,11 @@ export default function HomeClient({ featuredProducts }: Props) {
       <AnimatePresence mode="wait">{isLoading && <LoadingScreen />}</AnimatePresence>
 
       <ScrollProgress />
-      <Header />
+      <Header variant="solid" />
       <main>
-        <Hero />
-        <CatalogueTeaser products={featuredProducts} />
-        <About />
+        <CatalogueHero products={products} />
+        <TrustStrip />
         <Brands />
-        <Experience />
-        <Vision />
         <Contact />
         <Footer />
       </main>

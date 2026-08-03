@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
+import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
 import ProductCard from "@/components/ProductCard";
 import {
   filterProducts,
   isProductCategory,
+  sortProducts,
   uniqueBrands,
   uniqueCategories,
   type Product,
+  type ProductSort,
 } from "@/lib/products";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -20,14 +24,27 @@ type Props = {
 
 export default function CatalogueBrowser({ products }: Props) {
   const { t, locale } = useLanguage();
-  const [query, setQuery] = useState("");
-  const [brand, setBrand] = useState("all");
-  const [category, setCategory] = useState("all");
-  const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [brand, setBrand] = useState(searchParams.get("brand") ?? "all");
+  const [category, setCategory] = useState(searchParams.get("category") ?? "all");
+  const [sort, setSort] = useState<ProductSort>("relevance");
+  const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
 
   const brands = useMemo(() => uniqueBrands(products), [products]);
   const categories = useMemo(() => uniqueCategories(products), [products]);
+
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    const b = searchParams.get("brand") ?? "all";
+    const c = searchParams.get("category") ?? "all";
+    setQuery(q);
+    setBrand(b);
+    setCategory(c);
+  }, [searchParams]);
 
   useEffect(() => {
     const q = query.trim();
@@ -51,7 +68,7 @@ export default function CatalogueBrowser({ products }: Props) {
         console.error("[catalogue] Remote search failed:", error);
         setRemoteMatches(null);
       }
-    }, 220);
+    }, 200);
 
     return () => {
       controller.abort();
@@ -59,44 +76,65 @@ export default function CatalogueBrowser({ products }: Props) {
     };
   }, [query]);
 
-  const filtered = useMemo(() => {
-    if (remoteMatches) {
-      return filterProducts(remoteMatches, { brand, category, locale });
-    }
-    return filterProducts(products, { query, brand, category, locale });
-  }, [products, remoteMatches, query, brand, category, locale]);
+  function syncUrl(next: { q?: string; brand?: string; category?: string }) {
+    const params = new URLSearchParams();
+    const q = (next.q ?? query).trim();
+    const b = next.brand ?? brand;
+    const c = next.category ?? category;
+    if (q) params.set("q", q);
+    if (b && b !== "all") params.set("brand", b);
+    if (c && c !== "all") params.set("category", c);
+    const qs = params.toString();
+    router.replace(qs ? `/katalogu?${qs}` : "/katalogu", { scroll: false });
+  }
 
-  const resultsKey = `${query}|${brand}|${category}|${filtered.map((p) => p.slug).join(",")}`;
+  const filtered = useMemo(() => {
+    const base = remoteMatches
+      ? filterProducts(remoteMatches, { brand, category, locale })
+      : filterProducts(products, { query, brand, category, locale });
+    return sortProducts(base, sort, locale);
+  }, [products, remoteMatches, query, brand, category, locale, sort]);
+
+  const resultsKey = `${query}|${brand}|${category}|${sort}|${filtered
+    .map((p) => p.slug)
+    .join(",")}`;
+
+  const fieldClass =
+    "w-full border border-steel-light bg-surface-white px-3 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(22,26,32,0.06)]";
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr] mb-10 md:mb-12">
-        <label className="flex flex-col gap-2">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
-            {t.catalogueSearch}
-          </span>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => {
-              const value = e.target.value;
-              startTransition(() => setQuery(value));
-            }}
-            placeholder={t.catalogueSearch}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
-          />
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
+      <div className="mb-8 md:mb-10">
+        <CatalogueSearchTicket
+          value={query}
+          onChange={(v) => {
+            startTransition(() => setQuery(v));
+          }}
+          onSubmit={(v) => {
+            startTransition(() => {
+              setQuery(v);
+              syncUrl({ q: v });
+            });
+          }}
+          size="bar"
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <label className="flex flex-col gap-1.5">
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
             {t.catalogueBrand}
           </span>
           <select
             value={brand}
             onChange={(e) => {
               const value = e.target.value;
-              startTransition(() => setBrand(value));
+              startTransition(() => {
+                setBrand(value);
+                syncUrl({ brand: value });
+              });
             }}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
+            className={fieldClass}
           >
             <option value="all">{t.catalogueAll}</option>
             {brands.map((b) => (
@@ -106,17 +144,20 @@ export default function CatalogueBrowser({ products }: Props) {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-2">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
+        <label className="flex flex-col gap-1.5">
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
             {t.catalogueCategory}
           </span>
           <select
             value={category}
             onChange={(e) => {
               const value = e.target.value;
-              startTransition(() => setCategory(value));
+              startTransition(() => {
+                setCategory(value);
+                syncUrl({ category: value });
+              });
             }}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
+            className={fieldClass}
           >
             <option value="all">{t.catalogueAll}</option>
             {categories.map((key) => (
@@ -126,9 +167,26 @@ export default function CatalogueBrowser({ products }: Props) {
             ))}
           </select>
         </label>
+        <label className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
+            {t.catalogueSort}
+          </span>
+          <select
+            value={sort}
+            onChange={(e) =>
+              startTransition(() => setSort(e.target.value as ProductSort))
+            }
+            className={fieldClass}
+          >
+            <option value="relevance">{t.catalogueSortRelevance}</option>
+            <option value="price-asc">{t.catalogueSortPriceAsc}</option>
+            <option value="price-desc">{t.catalogueSortPriceDesc}</option>
+            <option value="name">{t.catalogueSortName}</option>
+          </select>
+        </label>
       </div>
 
-      <p className="text-sm text-ink-muted mb-8 tabular-nums">
+      <p className="font-mono text-sm text-ink-muted mb-6 tabular-nums">
         {filtered.length} {t.catalogueResults}
       </p>
 
@@ -147,20 +205,20 @@ export default function CatalogueBrowser({ products }: Props) {
         ) : (
           <motion.ul
             key={resultsKey}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.32, ease }}
-            className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5"
+            transition={{ duration: 0.3, ease }}
+            className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4"
           >
             {filtered.map((product, i) => (
               <motion.li
                 key={product.slug}
-                initial={{ opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.4,
-                  delay: Math.min(i, 12) * 0.028,
+                  duration: 0.35,
+                  delay: Math.min(i, 12) * 0.022,
                   ease,
                 }}
               >

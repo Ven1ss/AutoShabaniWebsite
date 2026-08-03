@@ -21,39 +21,34 @@ const brands = [
 export default function Brands() {
   const { t } = useLanguage();
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const isInView = useInView(ref, { once: true, margin: "-40px" });
 
   return (
-    <section id="brands" ref={ref} className="relative py-20 md:py-28 bg-surface-alt">
+    <section id="brands" ref={ref} className="relative py-12 md:py-16 bg-surface">
       <div className="container mx-auto px-6 md:px-8 lg:px-12">
         <motion.p
-          className="font-display text-2xl md:text-3xl font-semibold uppercase tracking-tight text-ink mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="font-mono text-[10px] tracking-[0.22em] uppercase text-ink-faint mb-6"
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.4 }}
         >
           {t.brandsHeading}
         </motion.p>
 
-        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 border-t border-l border-steel-light/80">
+        <ul className="flex flex-wrap items-center gap-x-8 gap-y-5 md:gap-x-10">
           {brands.map((brand, i) => (
             <motion.li
               key={brand.name}
-              className="flex items-center justify-center min-h-[100px] md:min-h-[112px] border-r border-b border-steel-light/80 px-5 py-6"
-              initial={{ opacity: 0, y: 16 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={{
-                duration: 0.5,
-                delay: i * 0.04,
-                ease: [0.16, 1, 0.3, 1],
-              }}
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.03 }}
             >
               <Image
                 src={brand.src}
                 alt={brand.name}
-                width={140}
-                height={48}
-                className="h-9 md:h-10 w-auto max-w-[140px] object-contain opacity-80 hover:opacity-100 transition-opacity duration-200"
+                width={120}
+                height={40}
+                className="h-7 md:h-8 w-auto max-w-[110px] object-contain opacity-55 hover:opacity-100 transition-opacity duration-200"
                 unoptimized
               />
             </motion.li>

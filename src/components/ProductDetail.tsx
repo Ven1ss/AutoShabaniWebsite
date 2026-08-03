@@ -77,26 +77,26 @@ export default function ProductDetail({ product }: Props) {
               {name}
             </h1>
 
-            <dl className="grid gap-3 text-sm mb-6">
+            <dl className="grid gap-3 text-sm mb-6 font-mono">
               <div className="flex gap-3">
-                <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                <dt className="text-ink-faint uppercase tracking-widest text-[10px] w-20 shrink-0 pt-0.5">
                   {t.catalogueSku}
                 </dt>
                 <dd className="text-ink">{product.sku}</dd>
               </div>
               {product.code ? (
                 <div className="flex gap-3">
-                  <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                  <dt className="text-ink-faint uppercase tracking-widest text-[10px] w-20 shrink-0 pt-0.5">
                     {t.catalogueCode}
                   </dt>
                   <dd className="text-ink">{product.code}</dd>
                 </div>
               ) : null}
               <div className="flex gap-3">
-                <dt className="text-ink-faint uppercase tracking-widest text-xs w-24 shrink-0 pt-0.5">
+                <dt className="text-ink-faint uppercase tracking-widest text-[10px] w-20 shrink-0 pt-0.5">
                   {t.cataloguePrice}
                 </dt>
-                <dd className="text-ink font-semibold text-base">
+                <dd className="text-ink font-semibold text-base tabular-nums">
                   {price ?? t.cataloguePriceOnRequest}
                 </dd>
               </div>

@@ -90,3 +90,24 @@ export function uniqueCategories(products: Product[]): string[] {
     a.localeCompare(b)
   );
 }
+
+export type ProductSort = "relevance" | "price-asc" | "price-desc" | "name";
+
+export function sortProducts(
+  products: Product[],
+  sort: ProductSort,
+  locale: "sq" | "en" = "sq"
+): Product[] {
+  const list = [...products];
+  if (sort === "relevance") return list;
+  if (sort === "name") {
+    return list.sort((a, b) =>
+      a.name[locale].localeCompare(b.name[locale], locale === "sq" ? "sq" : "en")
+    );
+  }
+  return list.sort((a, b) => {
+    const pa = a.sellingPrice ?? Number.POSITIVE_INFINITY;
+    const pb = b.sellingPrice ?? Number.POSITIVE_INFINITY;
+    return sort === "price-asc" ? pa - pb : pb - pa;
+  });
+}

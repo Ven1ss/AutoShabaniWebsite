@@ -30,15 +30,15 @@ export default function Header({ variant = "hero" }: HeaderProps) {
     scrollY,
     [0, 80],
     variant === "solid"
-      ? ["rgba(244, 246, 248, 0.94)", "rgba(244, 246, 248, 0.94)"]
-      : ["rgba(244, 246, 248, 0)", "rgba(244, 246, 248, 0.94)"]
+      ? ["rgba(238, 241, 244, 0.96)", "rgba(238, 241, 244, 0.96)"]
+      : ["rgba(238, 241, 244, 0)", "rgba(238, 241, 244, 0.96)"]
   );
   const headerBorder = useTransform(
     scrollY,
     [0, 80],
     variant === "solid"
-      ? ["rgba(18,21,26,0.08)", "rgba(18,21,26,0.08)"]
-      : ["rgba(18,21,26,0)", "rgba(18,21,26,0.08)"]
+      ? ["rgba(22,26,32,0.08)", "rgba(22,26,32,0.08)"]
+      : ["rgba(22,26,32,0)", "rgba(22,26,32,0.08)"]
   );
 
   useMotionValueEvent(scrollY, "change", (v) => {
@@ -76,7 +76,6 @@ export default function Header({ variant = "hero" }: HeaderProps) {
   const navItems = [
     { href: "/katalogu", key: "navCatalogue" as const, isRoute: true },
     { href: sectionHref("#about"), key: "navAbout" as const, isRoute: false },
-    { href: sectionHref("#experience"), key: "navExperience" as const, isRoute: false },
     { href: sectionHref("#contact"), key: "navContact" as const, isRoute: false },
   ];
 
@@ -89,7 +88,7 @@ export default function Header({ variant = "hero" }: HeaderProps) {
     <motion.header
       className="fixed top-0 left-0 right-0 z-50 py-5 px-6 md:px-8 lg:px-12"
       style={{
-        backgroundColor: mobileOpen ? "rgba(244, 246, 248, 0.98)" : headerBg,
+        backgroundColor: mobileOpen ? "rgba(238, 241, 244, 0.98)" : headerBg,
         borderBottomWidth: 1,
         borderBottomStyle: "solid",
         borderBottomColor: headerBorder,
