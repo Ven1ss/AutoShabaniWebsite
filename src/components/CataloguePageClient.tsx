@@ -29,11 +29,8 @@ export default function CataloguePageClient({ products }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, ease }}
             >
-              <p className="text-xs tracking-[0.28em] uppercase text-signal font-semibold mb-4">
+              <h1 className="text-xs tracking-[0.28em] uppercase text-signal font-semibold mb-4">
                 {t.navCatalogue}
-              </p>
-              <h1 className="font-display text-4xl md:text-6xl font-semibold uppercase tracking-tight text-ink mb-4">
-                {t.catalogueTitle}
               </h1>
               <p className="text-base md:text-lg text-ink-muted max-w-xl leading-relaxed mb-12 md:mb-14">
                 {t.catalogueSubtitle}
