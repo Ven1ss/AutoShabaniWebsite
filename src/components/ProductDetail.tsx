@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductEnquiry from "@/components/ProductEnquiry";
 import {
@@ -10,6 +11,8 @@ import {
   isProductCategory,
   type Product,
 } from "@/lib/products";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 type Props = {
   product: Product;
@@ -27,15 +30,26 @@ export default function ProductDetail({ product }: Props) {
   return (
     <article className="pt-28 md:pt-32 pb-20 md:pb-28">
       <div className="container mx-auto px-6 md:px-8 lg:px-12">
-        <Link
-          href="/katalogu"
-          className="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-ink-muted hover:text-ink transition-colors mb-10"
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease }}
         >
-          ← {t.catalogueBack}
-        </Link>
+          <Link
+            href="/katalogu"
+            className="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-ink-muted hover:text-ink transition-colors mb-10"
+          >
+            ← {t.catalogueBack}
+          </Link>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <div className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white">
+          <motion.div
+            className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease }}
+          >
             <Image
               src={product.image}
               alt={name}
@@ -44,9 +58,13 @@ export default function ProductDetail({ product }: Props) {
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-contain p-6 md:p-8"
             />
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.08, ease }}
+          >
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
                 {product.brand}
@@ -89,7 +107,7 @@ export default function ProductDetail({ product }: Props) {
             </p>
 
             <ProductEnquiry product={product} />
-          </div>
+          </motion.div>
         </div>
       </div>
     </article>

@@ -1,43 +1,14 @@
-"use client";
+import { getProducts } from "@/lib/products-api";
+import HomeClient from "@/components/HomeClient";
 
-import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
-import Header from "@/components/Header";
-import ScrollProgress from "@/components/ScrollProgress";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Brands from "@/components/Brands";
-import CatalogueTeaser from "@/components/CatalogueTeaser";
-import Experience from "@/components/Experience";
-import Vision from "@/components/Vision";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
-import LoadingScreen from "@/components/LoadingScreen";
+// Keep featured catalogue products fresh when inventory changes in Supabase.
+export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+const FEATURED_COUNT = 10;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1200);
-    return () => clearTimeout(timer);
-  }, []);
+export default async function Home() {
+  const products = await getProducts();
+  const featuredProducts = products.slice(0, FEATURED_COUNT);
 
-  return (
-    <>
-      <AnimatePresence mode="wait">{isLoading && <LoadingScreen />}</AnimatePresence>
-
-      <ScrollProgress />
-      <Header />
-      <main>
-        <Hero />
-        <About />
-        <Brands />
-        <CatalogueTeaser />
-        <Experience />
-        <Vision />
-        <Contact />
-        <Footer />
-      </main>
-    </>
-  );
+  return <HomeClient featuredProducts={featuredProducts} />;
 }

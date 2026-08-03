@@ -8,7 +8,7 @@ export const translations = {
     heroTitle2: "Performancë.",
     heroTitle3: "Perfeksion.",
     heroSubtitle: "Pjesë këmbimi origjinale në Prishtinë",
-    heroCta: "Eksploro Botën Tonë",
+    heroCta: "Shiko Katalogun",
 
     // About
     aboutTitle1: "Ndërtuar mbi Besimin.",
@@ -78,7 +78,7 @@ export const translations = {
     catalogueTeaserLabel: "Katalogu",
     catalogueTeaserTitle: "Gjeni pjesën e duhur",
     catalogueTeaserText:
-      "Shfletoni pjesë nga markat që u besojmë — pastaj na shkruani për disponueshmëri.",
+      "Disa nga pjesët tona — hapni katalogun për të kërkuar sipas emrit, SKU, kodit ose markës.",
     catalogueTeaserCta: "Hap Katalogun",
     cat_filters: "Filtra",
     cat_brakes: "Frena",
@@ -98,7 +98,7 @@ export const translations = {
     heroTitle2: "Performance.",
     heroTitle3: "Perfection.",
     heroSubtitle: "Original Car Spare Parts in Prishtina",
-    heroCta: "Explore Our World",
+    heroCta: "Browse Catalogue",
 
     aboutTitle1: "Built on Trust.",
     aboutTitle2: "Driven by Excellence.",
@@ -160,7 +160,7 @@ export const translations = {
     catalogueTeaserLabel: "Catalogue",
     catalogueTeaserTitle: "Find the right part",
     catalogueTeaserText:
-      "Browse parts from brands we trust — then message us for availability.",
+      "A selection of our parts — open the catalogue to search by name, SKU, code, or brand.",
     catalogueTeaserCta: "Open Catalogue",
     cat_filters: "Filters",
     cat_brakes: "Brakes",

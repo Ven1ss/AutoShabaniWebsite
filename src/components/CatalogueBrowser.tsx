@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductCard from "@/components/ProductCard";
 import {
@@ -10,6 +11,8 @@ import {
   uniqueCategories,
   type Product,
 } from "@/lib/products";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 type Props = {
   products: Product[];
@@ -45,11 +48,10 @@ export default function CatalogueBrowser({ products }: Props) {
         setRemoteMatches(data);
       } catch (error) {
         if (controller.signal.aborted) return;
-        // Fall back to public-field client search if the RPC is unreachable.
         console.error("[catalogue] Remote search failed:", error);
         setRemoteMatches(null);
       }
-    }, 250);
+    }, 220);
 
     return () => {
       controller.abort();
@@ -59,11 +61,12 @@ export default function CatalogueBrowser({ products }: Props) {
 
   const filtered = useMemo(() => {
     if (remoteMatches) {
-      // Query already applied server-side (includes hidden_references).
       return filterProducts(remoteMatches, { brand, category, locale });
     }
     return filterProducts(products, { query, brand, category, locale });
   }, [products, remoteMatches, query, brand, category, locale]);
+
+  const resultsKey = `${query}|${brand}|${category}|${filtered.map((p) => p.slug).join(",")}`;
 
   return (
     <div>
@@ -80,7 +83,7 @@ export default function CatalogueBrowser({ products }: Props) {
               startTransition(() => setQuery(value));
             }}
             placeholder={t.catalogueSearch}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint outline-none focus:border-ink/30"
+            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
           />
         </label>
         <label className="flex flex-col gap-2">
@@ -93,7 +96,7 @@ export default function CatalogueBrowser({ products }: Props) {
               const value = e.target.value;
               startTransition(() => setBrand(value));
             }}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none focus:border-ink/30"
+            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
           >
             <option value="all">{t.catalogueAll}</option>
             {brands.map((b) => (
@@ -113,7 +116,7 @@ export default function CatalogueBrowser({ products }: Props) {
               const value = e.target.value;
               startTransition(() => setCategory(value));
             }}
-            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none focus:border-ink/30"
+            className="w-full border border-steel-light bg-surface-white px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(18,21,26,0.06)]"
           >
             <option value="all">{t.catalogueAll}</option>
             {categories.map((key) => (
@@ -125,23 +128,48 @@ export default function CatalogueBrowser({ products }: Props) {
         </label>
       </div>
 
-      <p className="text-sm text-ink-muted mb-8">
+      <p className="text-sm text-ink-muted mb-8 tabular-nums">
         {filtered.length} {t.catalogueResults}
       </p>
 
-      {filtered.length === 0 ? (
-        <p className="py-16 text-center text-ink-muted border border-dashed border-steel-light">
-          {t.catalogueEmpty}
-        </p>
-      ) : (
-        <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-          {filtered.map((product) => (
-            <li key={product.slug}>
-              <ProductCard product={product} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <AnimatePresence mode="wait">
+        {filtered.length === 0 ? (
+          <motion.p
+            key="empty"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.28, ease }}
+            className="py-16 text-center text-ink-muted border border-dashed border-steel-light"
+          >
+            {t.catalogueEmpty}
+          </motion.p>
+        ) : (
+          <motion.ul
+            key={resultsKey}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.32, ease }}
+            className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5"
+          >
+            {filtered.map((product, i) => (
+              <motion.li
+                key={product.slug}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.4,
+                  delay: Math.min(i, 12) * 0.028,
+                  ease,
+                }}
+              >
+                <ProductCard product={product} />
+              </motion.li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

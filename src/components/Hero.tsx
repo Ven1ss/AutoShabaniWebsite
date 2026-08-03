@@ -91,7 +91,7 @@ export default function Hero() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <a
-              href="#about"
+              href="#catalogue-teaser"
               className="inline-flex items-center gap-2 bg-signal hover:bg-signal-deep text-white text-sm font-semibold tracking-wider uppercase px-7 py-3.5 transition-colors duration-200"
             >
               {t.heroCta}
