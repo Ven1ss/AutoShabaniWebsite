@@ -80,7 +80,7 @@ export const translations = {
     contactLocation: "Lokacioni",
     contactMapLink: "Prishtinë — hap hartën",
     contactHours: "Orari",
-    contactHoursValue: "Hën–Sht · telefononi për orar",
+    contactHoursValue: "Hën–Sht · 09:00–19:00",
 
     // Footer
     footerRights: "Të gjitha të drejtat e rezervuara.",
@@ -166,7 +166,7 @@ export const translations = {
     contactLocation: "Location",
     contactMapLink: "Prishtina — open map",
     contactHours: "Hours",
-    contactHoursValue: "Mon–Sat · call for hours",
+    contactHoursValue: "Mon–Sat · 09:00–19:00",
 
     footerRights: "All rights reserved.",
 
