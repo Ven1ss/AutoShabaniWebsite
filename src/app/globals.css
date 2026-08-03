@@ -12,6 +12,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -19,6 +21,7 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -86,6 +89,29 @@ body {
   100% {
     background-position: 40% 0%, 40% 60%, 60% 80%, 0% 0%;
   }
+}
+
+/* Hide scrollbar on logo strip / horizontal rails */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Clamp utility for product titles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Tap highlight — cleaner on mobile WebKit */
+a,
+button {
+  -webkit-tap-highlight-color: rgba(200, 16, 46, 0.12);
 }
 
 @media (prefers-reduced-motion: reduce) {

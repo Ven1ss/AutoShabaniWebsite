@@ -92,12 +92,13 @@ export default function CatalogueBrowser({ products }: Props) {
     return sortProducts(base, sort, locale);
   }, [products, remoteMatches, query, brand, category, locale, sort]);
 
+  // text-base (16px) prevents iOS input zoom
   const fieldClass =
-    "w-full border border-steel-light bg-surface-white px-3 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(22,26,32,0.06)]";
+    "w-full min-h-12 appearance-none border border-steel-light bg-surface-white px-3 py-3 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(22,26,32,0.06)]";
 
   return (
     <div>
-      <div className="mb-8 md:mb-10">
+      <div className="mb-6 md:mb-10">
         <CatalogueSearchTicket
           value={query}
           onChange={(v) => {
@@ -113,7 +114,7 @@ export default function CatalogueBrowser({ products }: Props) {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 md:mb-8">
         <label className="flex flex-col gap-1.5">
           <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
             {t.catalogueBrand}
@@ -161,7 +162,7 @@ export default function CatalogueBrowser({ products }: Props) {
           </select>
         </label>
         <label className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
-          <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-ink-faint">
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
             {t.catalogueSort}
           </span>
           <select
@@ -179,16 +180,16 @@ export default function CatalogueBrowser({ products }: Props) {
         </label>
       </div>
 
-      <p className="font-mono text-sm text-ink-muted mb-6 tabular-nums">
+      <p className="font-mono text-sm text-ink-muted mb-4 md:mb-6 tabular-nums">
         {filtered.length} {t.catalogueResults}
       </p>
 
       {filtered.length === 0 ? (
-        <p className="py-16 text-center text-ink-muted border border-dashed border-steel-light">
+        <p className="py-12 sm:py-16 px-4 text-center text-ink-muted border border-dashed border-steel-light text-sm sm:text-base">
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
           {filtered.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} />

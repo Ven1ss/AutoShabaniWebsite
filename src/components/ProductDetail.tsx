@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductEnquiry from "@/components/ProductEnquiry";
 import {
@@ -11,8 +10,6 @@ import {
   isProductCategory,
   type Product,
 } from "@/lib/products";
-
-const ease = [0.16, 1, 0.3, 1] as const;
 
 type Props = {
   product: Product;
@@ -28,44 +25,35 @@ export default function ProductDetail({ product }: Props) {
   const price = formatPrice(product.sellingPrice, locale);
 
   return (
-    <article className="pt-28 md:pt-32 pb-20 md:pb-28">
-      <div className="container mx-auto px-6 md:px-8 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease }}
+    <article className="pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-16 sm:pb-20 md:pb-28">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+        <Link
+          href="/katalogu"
+          className="inline-flex min-h-11 items-center gap-2 text-xs tracking-widest uppercase text-ink-muted hover:text-ink active:text-ink transition-colors mb-6 sm:mb-10"
         >
-          <Link
-            href="/katalogu"
-            className="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-ink-muted hover:text-ink transition-colors mb-10"
-          >
-            ← {t.catalogueBack}
-          </Link>
-        </motion.div>
+          ← {t.catalogueBack}
+        </Link>
 
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <motion.div
-            className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease }}
-          >
-            <Image
-              src={product.image}
-              alt={name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-6 md:p-8"
-            />
-          </motion.div>
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-start">
+          <div className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white">
+            {product.image ? (
+              <Image
+                src={product.image}
+                alt={name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-contain p-4 sm:p-6 md:p-8"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-ink-faint">
+                {product.sku || "—"}
+              </div>
+            )}
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.08, ease }}
-          >
-            <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
               <span className="text-[11px] tracking-[0.2em] uppercase text-ink-faint">
                 {product.brand}
               </span>
@@ -73,7 +61,7 @@ export default function ProductDetail({ product }: Props) {
                 {categoryLabel}
               </span>
             </div>
-            <h1 className="font-display text-4xl md:text-5xl font-semibold uppercase tracking-tight text-ink leading-tight mb-4">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold uppercase tracking-tight text-ink leading-tight mb-4">
               {name}
             </h1>
 
@@ -82,14 +70,14 @@ export default function ProductDetail({ product }: Props) {
                 <dt className="text-ink-faint uppercase tracking-widest text-[10px] w-20 shrink-0 pt-0.5">
                   {t.catalogueSku}
                 </dt>
-                <dd className="text-ink">{product.sku}</dd>
+                <dd className="text-ink break-all">{product.sku}</dd>
               </div>
               {product.code ? (
                 <div className="flex gap-3">
                   <dt className="text-ink-faint uppercase tracking-widest text-[10px] w-20 shrink-0 pt-0.5">
                     {t.catalogueCode}
                   </dt>
-                  <dd className="text-ink">{product.code}</dd>
+                  <dd className="text-ink break-all">{product.code}</dd>
                 </div>
               ) : null}
               <div className="flex gap-3">
@@ -102,12 +90,16 @@ export default function ProductDetail({ product }: Props) {
               </div>
             </dl>
 
-            <p className="text-base md:text-lg text-ink-muted leading-relaxed mb-10 max-w-xl">
-              {description}
-            </p>
+            {description ? (
+              <p className="text-base md:text-lg text-ink-muted leading-relaxed mb-8 sm:mb-10 max-w-xl">
+                {description}
+              </p>
+            ) : (
+              <div className="mb-8 sm:mb-10" />
+            )}
 
             <ProductEnquiry product={product} />
-          </motion.div>
+          </div>
         </div>
       </div>
     </article>

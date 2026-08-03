@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, JetBrains_Mono, Manrope } from "next/font/google";
 import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
@@ -23,6 +23,13 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#161A20",
+};
 
 export const metadata: Metadata = {
   title: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",

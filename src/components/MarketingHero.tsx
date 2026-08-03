@@ -19,7 +19,6 @@ export default function MarketingHero() {
       id="hero"
       className="relative min-h-[100svh] flex flex-col justify-end overflow-hidden bg-ink text-white"
     >
-      {/* Steel mesh / animated gradient — no photography required */}
       <div className="absolute inset-0 hero-mesh" aria-hidden />
       <div
         className="absolute inset-0 opacity-[0.07] pointer-events-none"
@@ -28,26 +27,30 @@ export default function MarketingHero() {
         }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/40" aria-hidden />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-ink/45"
+        aria-hidden
+      />
 
-      <div className="relative z-10 container mx-auto px-6 md:px-8 lg:px-12 pt-28 pb-10 md:pb-14 flex flex-col flex-1 justify-end">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-10 md:pb-14 flex flex-col flex-1 justify-end">
         <div className="max-w-3xl">
-          <p className="font-ethnocentric text-lg sm:text-xl md:text-2xl tracking-brand text-white mb-5">
+          <p className="font-ethnocentric text-sm sm:text-lg md:text-2xl tracking-[0.14em] sm:tracking-brand text-white mb-3 sm:mb-5">
             {t.brandName}
           </p>
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold uppercase tracking-tight text-white leading-[0.95]">
-            {t.heroTitle1} {t.heroTitle2}
-            <br />
-            <span className="text-white/90">{t.heroTitle3}</span>
+          <h1 className="font-display text-[2.65rem] leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl font-semibold uppercase tracking-tight text-white">
+            <span className="block sm:inline">{t.heroTitle1}</span>{" "}
+            <span className="block sm:inline">{t.heroTitle2}</span>
+            <br className="hidden sm:block" />
+            <span className="block sm:inline text-white/90">{t.heroTitle3}</span>
           </h1>
-          <p className="mt-6 text-base md:text-lg text-white/80 max-w-md leading-relaxed">
+          <p className="mt-4 sm:mt-6 text-[0.95rem] sm:text-base md:text-lg text-white/80 max-w-md leading-relaxed">
             {t.heroSubtitle}
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-8 sm:mt-10 flex flex-col xs:flex-row sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
             <Link
               href="/katalogu"
-              className="inline-flex items-center justify-center gap-2 bg-signal hover:bg-signal-deep text-white text-sm font-semibold tracking-wider uppercase px-7 py-3.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 bg-signal hover:bg-signal-deep active:bg-signal-deep text-white text-sm font-semibold tracking-wider uppercase px-7 py-3.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t.heroCtaPrimary}
             </Link>
@@ -55,31 +58,34 @@ export default function MarketingHero() {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 border border-white/45 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold tracking-wider uppercase px-7 py-3.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 border border-white/45 bg-white/5 hover:bg-white/10 active:bg-white/10 text-white text-sm font-semibold tracking-wider uppercase px-7 py-3.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t.heroCtaSecondary}
             </a>
           </div>
         </div>
 
-        <div className="mt-14 md:mt-16 pt-8 border-t border-white/15">
-          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/55 mb-5">
+        <div className="mt-10 sm:mt-14 md:mt-16 pt-6 sm:pt-8 border-t border-white/15">
+          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/55 mb-4 sm:mb-5">
             {t.brandsHeading}
           </p>
-          <ul className="flex flex-wrap items-center gap-x-7 gap-y-4 md:gap-x-9">
-            {PARTNER_BRANDS.map((brand) => (
-              <li key={brand.name}>
-                <Image
-                  src={brand.src}
-                  alt={brand.name}
-                  width={120}
-                  height={40}
-                  className="h-6 md:h-7 w-auto max-w-[100px] object-contain brightness-0 invert opacity-70"
-                  unoptimized
-                />
-              </li>
-            ))}
-          </ul>
+          {/* Horizontal scroll on small screens — avoids cramped wrap */}
+          <div className="-mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto overscroll-x-contain scrollbar-none">
+            <ul className="flex items-center gap-6 sm:gap-x-8 md:gap-x-9 sm:flex-wrap min-w-max sm:min-w-0 pb-1">
+              {PARTNER_BRANDS.map((brand) => (
+                <li key={brand.name} className="shrink-0">
+                  <Image
+                    src={brand.src}
+                    alt={brand.name}
+                    width={120}
+                    height={40}
+                    className="h-5 sm:h-6 md:h-7 w-auto max-w-[88px] sm:max-w-[100px] object-contain brightness-0 invert opacity-70"
+                    unoptimized
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
