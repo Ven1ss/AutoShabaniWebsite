@@ -28,6 +28,9 @@ export const translations = {
 
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
+    catalogueInteriorNotice:
+      "Për pjesët e brendshme të makinës na kontaktoni",
+    catalogueInteriorNoticeLink: "na kontaktoni",
     catalogueSearch: "Kërko sipas emrit, SKU, kodit ose markës…",
     catalogueBrand: "Marka",
     catalogueCategory: "Kategoria",
@@ -54,14 +57,16 @@ export const translations = {
     catalogueBrowseAll: "Shiko të gjitha",
     catalogueFeatured: "Disa nga pjesët tona",
 
-    // Trust strip
+    // Trust / Why us
     trustHeading: "Pse te ne",
-    trust1Title: "OEM & origjinale",
-    trust1Desc: "Pjesë që përputhen me specifikën e makinës.",
-    trust2Title: "E dimë çfarë kërkon",
+    trust1Title: "Origjinale & OEM",
+    trust1Desc: "Pjesë autentike që përputhen me specifikën e prodhuesit.",
+    trust2Title: "Njohuri ekspertësh",
     trust2Desc: "Thuaj kodin ose dërgo foto — ta gjejmë shpejt.",
-    trust3Title: "Në Prishtinë",
-    trust3Desc: "Merre sot ose porosit — pa komplikime.",
+    trust3Title: "Disponueshmëri e shpejtë",
+    trust3Desc: "Qasje e shpejtë te pjesët që të duhen, kur të duhen.",
+    trust4Title: "I besuar nga profesionistët",
+    trust4Desc: "Zgjedhja e punishteve dhe entuziastëve në rajon.",
 
     // Brands
     brandsHeading: "Markat që mbajmë",
@@ -118,6 +123,8 @@ export const translations = {
     searchHint: "Spaces are ignored — e.g. K607 = K 6 0 7",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
+    catalogueInteriorNotice: "For interior car parts, contact us",
+    catalogueInteriorNoticeLink: "contact us",
     catalogueSearch: "Search by name, SKU, code or brand…",
     catalogueBrand: "Brand",
     catalogueCategory: "Category",
@@ -145,12 +152,14 @@ export const translations = {
     catalogueFeatured: "Some of our parts",
 
     trustHeading: "Why us",
-    trust1Title: "OEM & genuine",
-    trust1Desc: "Parts that match the car’s spec.",
-    trust2Title: "We know the codes",
+    trust1Title: "Genuine & OEM",
+    trust1Desc: "Authentic parts that match manufacturer specs.",
+    trust2Title: "Expert knowledge",
     trust2Desc: "Say the code or send a photo — we’ll find it fast.",
-    trust3Title: "In Prishtina",
-    trust3Desc: "Pick up today or order — no fuss.",
+    trust3Title: "Fast availability",
+    trust3Desc: "Quick access to the parts you need, when you need them.",
+    trust4Title: "Trusted by professionals",
+    trust4Desc: "The choice of workshops and enthusiasts across the region.",
 
     brandsHeading: "Brands we stock",
 

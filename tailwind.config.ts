@@ -1,5 +1,10 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * AUTO SHABANI — Apple-inspired design tokens
+ * Accent: brand signal red #C8102E (kept from logo)
+ * Base: near-monochrome whites / near-blacks / grays
+ */
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,46 +14,120 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Workshop bench / parts-bin system — not cream, not neon-dark.
-        surface: {
-          DEFAULT: "#EEF1F4",
-          alt: "#E3E7EC",
+        // Apple-like neutrals
+        as: {
           white: "#FFFFFF",
-          ticket: "#F7F8FA",
+          snow: "#F5F5F7",
+          mist: "#E8E8ED",
+          gray: "#86868B",
+          secondary: "#6E6E73",
+          dark: "#1D1D1F",
+          black: "#000000",
+        },
+        // Single accent — brand red
+        accent: {
+          DEFAULT: "#C8102E",
+          deep: "#9E0C24",
+          soft: "rgba(200, 16, 46, 0.1)",
+        },
+        // Legacy aliases (keep existing pages compiling during Phase 2+)
+        surface: {
+          DEFAULT: "#F5F5F7",
+          alt: "#E8E8ED",
+          white: "#FFFFFF",
+          ticket: "#F5F5F7",
         },
         ink: {
-          DEFAULT: "#161A20",
-          muted: "#5A6370",
-          faint: "#8B949E",
+          DEFAULT: "#1D1D1F",
+          muted: "#6E6E73",
+          faint: "#86868B",
         },
         steel: {
-          DEFAULT: "#3F4854",
-          light: "#C2C9D2",
-          mid: "#7A8491",
+          DEFAULT: "#6E6E73",
+          light: "#D2D2D7",
+          mid: "#86868B",
         },
-        // Brand red — brake-light / packaging signal already on the logo.
         signal: {
           DEFAULT: "#C8102E",
           deep: "#9E0C24",
         },
       },
       fontFamily: {
-        sans: ["var(--font-body)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
-        brand: ["Ethnocentric Rg", "var(--font-display)", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        brand: ["Ethnocentric Rg", "var(--font-geist-sans)", "sans-serif"],
+      },
+      fontSize: {
+        // Type scale — Apple-adjacent
+        caption: [
+          "0.75rem",
+          { lineHeight: "1.333", letterSpacing: "0.01em", fontWeight: "400" },
+        ],
+        body: [
+          "1.0625rem",
+          { lineHeight: "1.4706", letterSpacing: "-0.011em", fontWeight: "400" },
+        ],
+        price: [
+          "1.0625rem",
+          { lineHeight: "1.2", letterSpacing: "-0.011em", fontWeight: "600" },
+        ],
+        button: [
+          "1.0625rem",
+          { lineHeight: "1.176", letterSpacing: "-0.022em", fontWeight: "500" },
+        ],
+        subhead: [
+          "1.3125rem",
+          { lineHeight: "1.381", letterSpacing: "-0.016em", fontWeight: "400" },
+        ],
+        section: [
+          "clamp(2rem, 4.2vw, 3rem)",
+          { lineHeight: "1.083", letterSpacing: "-0.025em", fontWeight: "600" },
+        ],
+        hero: [
+          "clamp(2.75rem, 7.5vw, 5rem)",
+          { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "600" },
+        ],
+      },
+      maxWidth: {
+        content: "980px",
+        wide: "1120px",
+        shelf: "1280px",
+      },
+      spacing: {
+        section: "7.5rem", // 120px
+        "section-lg": "10rem", // 160px
+        "section-xl": "11.25rem", // 180px
+      },
+      borderRadius: {
+        control: "980px", // pill
+        card: "1.125rem", // 18px Apple-ish
+        media: "1.5rem",
+      },
+      transitionDuration: {
+        motion: "280ms",
+        "motion-fast": "200ms",
+        "motion-slow": "400ms",
+      },
+      transitionTimingFunction: {
+        apple: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+      },
+      boxShadow: {
+        card: "0 2px 12px rgba(0,0,0,0.06)",
+        "card-hover": "0 12px 40px rgba(0,0,0,0.12)",
+        nav: "0 1px 0 rgba(0,0,0,0.06)",
       },
       letterSpacing: {
-        brand: "0.22em",
+        brand: "0.18em",
       },
-      backgroundImage: {
-        "surface-noise":
-          "radial-gradient(ellipse 70% 45% at 0% 0%, rgba(200,16,46,0.04), transparent 55%), radial-gradient(ellipse 55% 40% at 100% 10%, rgba(63,72,84,0.07), transparent 50%)",
-        "ticket-perforation":
-          "radial-gradient(circle, #EEF1F4 2.5px, transparent 2.6px)",
+      keyframes: {
+        "fade-rise": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
-      backgroundSize: {
-        perforation: "12px 12px",
+      animation: {
+        "fade-rise": "fade-rise 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards",
       },
     },
   },

@@ -3,7 +3,7 @@ export const CONTACT = {
   phoneDisplay: ["+383 49 238 509", "+383 49 848 760"],
   phoneTel: ["+38349238509", "+38349848760"],
   /** WhatsApp without + */
-  whatsapp: "38349238509",
+  whatsapp: "38349848760",
   email: "auto.shabaniii@gmail.com",
 } as const;
 

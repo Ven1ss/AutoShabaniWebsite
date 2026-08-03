@@ -1,34 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, JetBrains_Mono, Manrope } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { LanguageProvider } from "@/context/LanguageContext";
 import "./globals.css";
-
-const display = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-mono",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#161A20",
+  themeColor: "#1D1D1F",
 };
 
 export const metadata: Metadata = {
@@ -66,10 +46,10 @@ export default function RootLayout({
   return (
     <html
       lang="sq"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans antialiased bg-surface text-ink min-h-screen">
+      <body className="font-sans antialiased bg-as-snow text-as-dark min-h-screen">
         <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>

@@ -5,9 +5,17 @@
 @tailwind utilities;
 
 :root {
-  --bg: #eef1f4;
-  --ink: #161a20;
-  --signal: #c8102e;
+  --as-white: #ffffff;
+  --as-snow: #f5f5f7;
+  --as-mist: #e8e8ed;
+  --as-gray: #86868b;
+  --as-secondary: #6e6e73;
+  --as-dark: #1d1d1f;
+  --as-black: #000000;
+  --as-accent: #c8102e;
+  --section-pad: clamp(4.5rem, 10vw, 10rem);
+  --container-wide: 1120px;
+  --container-content: 980px;
 }
 
 html {
@@ -17,8 +25,8 @@ html {
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--ink);
+  background-color: var(--as-snow);
+  color: var(--as-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -26,72 +34,92 @@ body {
 
 ::selection {
   background: rgba(200, 16, 46, 0.16);
-  color: #161a20;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #e3e7ec;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c2c9d2;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #8b949e;
+  color: #1d1d1f;
 }
 
 .font-ethnocentric {
-  font-family: "Ethnocentric Rg", var(--font-display), sans-serif;
+  font-family: "Ethnocentric Rg", var(--font-geist-sans), sans-serif;
 }
 
-/* Parts-counter ticket: perforated left stub */
-.ticket {
-  position: relative;
-  background: #f7f8fa;
-  border: 1px solid #c2c9d2;
+.section-pad {
+  padding-top: var(--section-pad);
+  padding-bottom: var(--section-pad);
 }
 
-.ticket::before {
-  content: "";
-  position: absolute;
-  left: -1px;
-  top: 10px;
-  bottom: 10px;
-  width: 10px;
-  background-image: radial-gradient(circle, #eef1f4 3px, transparent 3.2px);
-  background-size: 10px 12px;
-  background-position: -3px 0;
-  background-repeat: repeat-y;
-  pointer-events: none;
+.container-as {
+  width: 100%;
+  max-width: var(--container-wide);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
-/* Hero mesh — animated steel / signal gradients */
-.hero-mesh {
-  background:
-    radial-gradient(ellipse 90% 70% at 15% 20%, rgba(200, 16, 46, 0.45), transparent 55%),
-    radial-gradient(ellipse 70% 60% at 85% 15%, rgba(90, 110, 140, 0.35), transparent 50%),
-    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(200, 16, 46, 0.22), transparent 55%),
-    linear-gradient(160deg, #0e1116 0%, #1a222c 45%, #12161c 100%);
-  background-size: 140% 140%, 120% 120%, 100% 100%, 100% 100%;
-  animation: heroMeshShift 18s ease-in-out infinite alternate;
+.container-as-narrow {
+  width: 100%;
+  max-width: var(--container-content);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
-@keyframes heroMeshShift {
-  0% {
-    background-position: 0% 40%, 100% 0%, 50% 100%, 0% 0%;
-  }
-  100% {
-    background-position: 40% 0%, 40% 60%, 60% 80%, 0% 0%;
+@media (min-width: 640px) {
+  .container-as,
+  .container-as-narrow {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
 
-/* Hide scrollbar on logo strip / horizontal rails */
+@media (min-width: 768px) {
+  .container-as,
+  .container-as-narrow {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-as,
+  .container-as-narrow {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+.surface-light {
+  background-color: var(--as-snow);
+  color: var(--as-dark);
+}
+
+.surface-white {
+  background-color: var(--as-white);
+  color: var(--as-dark);
+}
+
+.surface-dark {
+  background-color: var(--as-dark);
+  color: var(--as-white);
+}
+
+.surface-black {
+  background-color: var(--as-black);
+  color: var(--as-white);
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: rgba(200, 16, 46, 0.12);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -100,26 +128,9 @@ body {
   display: none;
 }
 
-/* Clamp utility for product titles */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-/* Tap highlight — cleaner on mobile WebKit */
-a,
-button {
-  -webkit-tap-highlight-color: rgba(200, 16, 46, 0.12);
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-  .hero-mesh {
-    animation: none;
   }
   *,
   *::before,

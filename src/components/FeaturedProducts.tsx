@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import FadeIn from "@/components/ui/FadeIn";
+import SectionHeading from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Product } from "@/lib/products";
 
@@ -19,32 +21,31 @@ export default function FeaturedProducts({ products }: Props) {
   if (featured.length === 0) return null;
 
   return (
-    <section
-      id="featured"
-      className="relative py-12 sm:py-16 md:py-20 bg-surface bg-surface-noise"
-    >
-      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4 mb-6 sm:mb-8 md:mb-10">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-signal font-semibold mb-2">
-              {t.navCatalogue}
-            </p>
-            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-tight text-ink">
-              {t.catalogueFeatured}
-            </h2>
+    <section id="featured" className="surface-white section-pad">
+      <div className="container-as">
+        <FadeIn>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12 md:mb-16">
+            <SectionHeading
+              eyebrow={t.navCatalogue}
+              title={t.catalogueFeatured}
+              align="left"
+              className="mb-0"
+            />
+            <Link
+              href="/katalogu"
+              className="inline-flex min-h-11 items-center text-body font-medium text-accent hover:text-accent-deep transition-colors self-start sm:self-auto sm:mb-1"
+            >
+              {t.catalogueBrowseAll} →
+            </Link>
           </div>
-          <Link
-            href="/katalogu"
-            className="inline-flex min-h-11 items-center text-xs tracking-widest uppercase text-signal font-semibold hover:text-signal-deep transition-colors self-start sm:self-auto"
-          >
-            {t.catalogueBrowseAll} →
-          </Link>
-        </div>
+        </FadeIn>
 
-        <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
-          {featured.map((product) => (
+        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+          {featured.map((product, i) => (
             <li key={product.slug}>
-              <ProductCard product={product} />
+              <FadeIn delay={Math.min(i, 7) * 0.03}>
+                <ProductCard product={product} />
+              </FadeIn>
             </li>
           ))}
         </ul>

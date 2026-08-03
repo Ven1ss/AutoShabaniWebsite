@@ -1,9 +1,9 @@
-import Header from "@/components/Header";
-import ScrollProgress from "@/components/ScrollProgress";
-import MarketingHero from "@/components/MarketingHero";
+import SiteNav from "@/components/ui/SiteNav";
+import HomeHero from "@/components/home/HomeHero";
+import BrandLogoStrip from "@/components/home/BrandLogoStrip";
+import WhyUs from "@/components/home/WhyUs";
 import FeaturedProducts from "@/components/FeaturedProducts";
-import TrustStrip from "@/components/TrustStrip";
-import Contact from "@/components/Contact";
+import HomeContact from "@/components/home/HomeContact";
 import Footer from "@/components/Footer";
 import { getProductsCached } from "@/lib/products-api";
 
@@ -15,13 +15,13 @@ export default async function Home() {
 
   return (
     <>
-      <ScrollProgress />
-      <Header variant="hero" />
+      <SiteNav overDark />
       <main>
-        <MarketingHero />
+        <HomeHero />
+        <BrandLogoStrip />
+        <WhyUs />
         <FeaturedProducts products={products} />
-        <TrustStrip />
-        <Contact />
+        <HomeContact />
         <Footer />
       </main>
     </>
