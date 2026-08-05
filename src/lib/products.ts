@@ -40,6 +40,25 @@ export function getLocalized(text: LocaleText, locale: "sq" | "en"): string {
   return text[locale];
 }
 
+/**
+ * Next/Image throws on truthy but invalid `src` values (e.g. bare filenames).
+ * Returns a usable local path / absolute http(s) URL, or "" when unusable.
+ */
+export function resolveProductImageUrl(
+  value: string | null | undefined
+): string {
+  const raw = (value ?? "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("/")) return raw;
+  try {
+    const url = new URL(raw);
+    if (url.protocol === "http:" || url.protocol === "https:") return url.href;
+  } catch {
+    /* invalid absolute URL */
+  }
+  return "";
+}
+
 // Formatted by hand rather than with Intl: Node and browsers ship different
 // locale data for sq-AL, so Intl produced a different string on the server than
 // on the client and broke hydration.

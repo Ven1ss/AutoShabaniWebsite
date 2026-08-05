@@ -8,6 +8,7 @@ import {
   formatPrice,
   getLocalized,
   isProductCategory,
+  resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
 
@@ -23,6 +24,7 @@ export default function ProductDetail({ product }: Props) {
     ? t[`cat_${product.category}`]
     : product.category;
   const price = formatPrice(product.sellingPrice, locale);
+  const imageSrc = resolveProductImageUrl(product.image);
 
   return (
     <article className="pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-16 sm:pb-20 md:pb-28">
@@ -36,9 +38,9 @@ export default function ProductDetail({ product }: Props) {
 
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-start">
           <div className="relative aspect-[4/3] overflow-hidden border border-steel-light bg-surface-white">
-            {product.image ? (
+            {imageSrc ? (
               <Image
-                src={product.image}
+                src={imageSrc}
                 alt={name}
                 fill
                 priority

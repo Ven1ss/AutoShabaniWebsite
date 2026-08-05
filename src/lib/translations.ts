@@ -55,7 +55,7 @@ export const translations = {
     catalogueSortPriceDesc: "Çmimi ↓",
     catalogueSortName: "Emri A–Z",
     catalogueBrowseAll: "Shiko të gjitha",
-    catalogueFeatured: "Disa nga pjesët tona",
+    catalogueFeatured: "Disa nga produktet tona",
 
     // Trust / Why us
     trustHeading: "Pse te ne",

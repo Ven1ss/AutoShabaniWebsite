@@ -29,7 +29,7 @@ export default function CatalogueSearchTicket({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className={`ticket overflow-hidden ${large ? "pl-3 sm:pl-4 md:pl-5" : "pl-3"}`}>
+      <div className="ticket overflow-hidden border border-steel-light bg-surface-white">
         <div className="flex flex-col sm:flex-row sm:items-stretch">
           <label
             htmlFor={id}

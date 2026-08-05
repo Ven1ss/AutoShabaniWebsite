@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { ProductPublicRow } from "@/lib/supabase/database.types";
-import type { Product } from "@/lib/products";
+import { resolveProductImageUrl, type Product } from "@/lib/products";
 
 function mapRow(row: ProductPublicRow): Product {
   return {
@@ -13,7 +13,7 @@ function mapRow(row: ProductPublicRow): Product {
     description: { sq: row.description, en: row.description },
     brand: row.brand,
     category: row.category,
-    image: row.image_url,
+    image: resolveProductImageUrl(row.image_url),
     sellingPrice:
       row.selling_price === null || row.selling_price === undefined
         ? null

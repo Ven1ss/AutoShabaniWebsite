@@ -8,6 +8,7 @@ import {
   formatPrice,
   getLocalized,
   isProductCategory,
+  resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
 
@@ -27,16 +28,17 @@ export default function ProductCard({ product, compact = false }: Props) {
     ? t[`cat_${product.category}`]
     : product.category;
   const price = formatPrice(product.sellingPrice, locale);
+  const imageSrc = resolveProductImageUrl(product.image);
 
   return (
     <Link
       href={`/katalogu/${product.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-card bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover"
+      className="group flex h-full flex-col overflow-hidden rounded-card border border-steel-light bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover"
     >
-      <div className="relative aspect-square overflow-hidden bg-as-snow">
-        {product.image ? (
+      <div className="relative aspect-square overflow-hidden border-b border-steel-light bg-as-snow">
+        {imageSrc ? (
           <Image
-            src={product.image}
+            src={imageSrc}
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

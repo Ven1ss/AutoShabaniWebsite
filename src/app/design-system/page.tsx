@@ -251,7 +251,7 @@ export default function DesignSystemPage() {
           <div className="container-as space-y-14">
             <SectionHeading
               eyebrow="Katalogu"
-              title="Disa nga pjesët tona"
+              title="Disa nga produktet tona"
               subhead="E njëjta ProductCard do të përdoret në homepage dhe /katalogu."
             />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 max-w-shelf mx-auto">
