@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
@@ -12,12 +13,15 @@ import {
   type Product,
 } from "@/lib/products";
 
+const DESCRIPTION_COLLAPSE_CHARS = 180;
+
 type Props = {
   product: Product;
 };
 
 export default function ProductDetail({ product }: Props) {
   const { t, locale } = useLanguage();
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const name = getLocalized(product.name, locale);
   const description = getLocalized(product.description, locale);
   const categoryLabel = isProductCategory(product.category)
@@ -25,6 +29,8 @@ export default function ProductDetail({ product }: Props) {
     : product.category;
   const price = formatPrice(product.sellingPrice, locale);
   const imageSrc = resolveProductImageUrl(product.image);
+  const descriptionNeedsToggle =
+    description.trim().length > DESCRIPTION_COLLAPSE_CHARS;
 
   return (
     <article className="pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-16 sm:pb-20 md:pb-28">
@@ -93,9 +99,28 @@ export default function ProductDetail({ product }: Props) {
             </dl>
 
             {description ? (
-              <p className="text-base md:text-lg text-ink-muted leading-relaxed mb-8 sm:mb-10 max-w-xl">
-                {description}
-              </p>
+              <div className="mb-8 sm:mb-10 max-w-xl">
+                <p
+                  className={`text-sm text-ink-muted leading-relaxed ${
+                    descriptionNeedsToggle && !descriptionExpanded
+                      ? "line-clamp-3"
+                      : ""
+                  }`}
+                >
+                  {description}
+                </p>
+                {descriptionNeedsToggle ? (
+                  <button
+                    type="button"
+                    onClick={() => setDescriptionExpanded((open) => !open)}
+                    className="mt-2 text-sm font-medium text-signal hover:text-signal-deep transition-colors"
+                  >
+                    {descriptionExpanded
+                      ? t.catalogueViewLess
+                      : t.catalogueViewMore}
+                  </button>
+                ) : null}
+              </div>
             ) : (
               <div className="mb-8 sm:mb-10" />
             )}

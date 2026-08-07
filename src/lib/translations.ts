@@ -56,6 +56,8 @@ export const translations = {
     catalogueSortName: "Emri A–Z",
     catalogueBrowseAll: "Shiko të gjitha",
     catalogueFeatured: "Disa nga produktet tona",
+    catalogueViewMore: "Shiko më shumë",
+    catalogueViewLess: "Shiko më pak",
 
     // Trust / Why us
     trustHeading: "Pse te ne",
@@ -150,6 +152,8 @@ export const translations = {
     catalogueSortName: "Name A–Z",
     catalogueBrowseAll: "See all",
     catalogueFeatured: "Some of our parts",
+    catalogueViewMore: "View more",
+    catalogueViewLess: "View less",
 
     trustHeading: "Why us",
     trust1Title: "Genuine & OEM",
