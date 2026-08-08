@@ -32,7 +32,7 @@
   --text-price-lg: clamp(1.35rem, 1rem + 1.6vw, 2rem);
   --media-pad: clamp(0.75rem, 0.4rem + 1.5vw, 2.5rem);
   --control-h: clamp(2.5rem, 2.2rem + 0.8vw, 3rem);
-  --container-wide: 1120px;
+  --container-wide: 1480px;
   --container-content: 980px;
 }
 

@@ -49,7 +49,7 @@ export default function ProductCard({
             alt={name}
             fill
             priority={priority}
-            sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             className="object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04]"
             style={{
               padding: compact

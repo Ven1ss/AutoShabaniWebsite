@@ -91,7 +91,7 @@ const config: Config = {
       },
       maxWidth: {
         content: "980px",
-        wide: "1120px",
+        wide: "1480px",
         shelf: "1280px",
       },
       spacing: {

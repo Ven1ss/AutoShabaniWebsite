@@ -32,7 +32,7 @@ export default function CataloguePageClient({ products }: Props) {
       <SiteNav />
       <main className="min-h-screen bg-surface">
         <section className="pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,5rem)]">
-          <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
+          <div className="mx-auto w-full max-w-wide px-[clamp(0.75rem,0.4rem+1.5vw,1.5rem)]">
             <p className="mb-[clamp(1rem,0.6rem+1.5vw,2rem)] text-[length:var(--text-body)] text-ink leading-relaxed max-w-2xl">
               {linkIndex >= 0 ? (
                 <>
