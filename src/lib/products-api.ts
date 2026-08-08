@@ -4,14 +4,15 @@ import type { ProductPublicRow } from "@/lib/supabase/database.types";
 import { resolveProductImageUrl, type Product } from "@/lib/products";
 
 function mapRow(row: ProductPublicRow): Product {
+  const description = row.description ?? "";
   return {
     id: row.id,
     slug: row.id,
     sku: row.sku,
     code: row.code ?? "",
     name: { sq: row.name, en: row.name },
-    description: { sq: row.description, en: row.description },
-    brand: row.brand,
+    description: { sq: description, en: description },
+    brand: row.brand ?? "",
     category: row.category,
     image: resolveProductImageUrl(row.image_url),
     sellingPrice:

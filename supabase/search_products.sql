@@ -42,7 +42,7 @@ begin
       p.image_url,
       p.selling_price
     from public.products p
-    order by p.brand, p.name;
+    order by p.brand nulls last, p.name;
     return;
   end if;
 
@@ -63,10 +63,10 @@ begin
   where
     regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
     or regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(p.code, '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(p.brand, '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(p.hidden_references, '\s+', '', 'g') ilike pattern escape E'\\'
-  order by p.brand, p.name;
+    or regexp_replace(coalesce(p.code, ''), '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(coalesce(p.brand, ''), '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(coalesce(p.hidden_references, ''), '\s+', '', 'g') ilike pattern escape E'\\'
+  order by p.brand nulls last, p.name;
 end;
 $$;
 

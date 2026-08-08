@@ -11,14 +11,14 @@ create table public.products (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   sku text not null unique,
-  code text not null unique,
-  brand text not null,
-  description text not null default '',
+  code text unique,
+  brand text,
+  description text default '',
   category text not null,
-  image_url text not null,
+  image_url text,
   purchase_price numeric(12, 2) not null check (purchase_price >= 0),
   selling_price numeric(12, 2) not null check (selling_price >= 0),
-  hidden_references text not null default ''
+  hidden_references text default ''
 );
 
 create index products_brand_idx on public.products (brand);
@@ -70,8 +70,16 @@ grant select, insert, update, delete on table public.products to service_role;
 
 comment on column public.products.purchase_price is
   'PRIVATE: business cost; never exposed through products_public.';
+comment on column public.products.code is
+  'OPTIONAL: manufacturer/supplier code; unique when present.';
+comment on column public.products.brand is
+  'OPTIONAL: product brand.';
+comment on column public.products.description is
+  'OPTIONAL: product description.';
+comment on column public.products.image_url is
+  'OPTIONAL: product image URL.';
 comment on column public.products.hidden_references is
-  'PRIVATE: supplier/internal references; never exposed through products_public.';
+  'PRIVATE OPTIONAL: supplier/internal references; never exposed through products_public.';
 
 -- After this schema, also run search_products.sql so catalogue search can
 -- match hidden_references without ever returning that column to clients.

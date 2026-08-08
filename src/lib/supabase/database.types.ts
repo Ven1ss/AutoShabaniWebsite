@@ -11,14 +11,14 @@ export type ProductTableRow = {
   id: string;
   name: string;
   sku: string;
-  code: string;
-  brand: string;
-  description: string;
+  code: string | null;
+  brand: string | null;
+  description: string | null;
   category: string;
-  image_url: string;
+  image_url: string | null;
   selling_price: number | null;
   purchase_price: number | null;
-  hidden_references: string;
+  hidden_references: string | null;
 };
 
 /** Public view row — never includes purchase_price or hidden_references. */
@@ -26,11 +26,11 @@ export type ProductPublicRow = {
   id: string;
   name: string;
   sku: string;
-  code: string;
-  brand: string;
-  description: string;
+  code: string | null;
+  brand: string | null;
+  description: string | null;
   category: string;
-  image_url: string;
+  image_url: string | null;
   selling_price: number | null;
 };
 
@@ -43,14 +43,14 @@ export type Database = {
           id?: string;
           name: string;
           sku: string;
-          code?: string;
-          brand: string;
-          description?: string;
+          code?: string | null;
+          brand?: string | null;
+          description?: string | null;
           category: string;
-          image_url: string;
+          image_url?: string | null;
           selling_price?: number | null;
           purchase_price?: number | null;
-          hidden_references?: string;
+          hidden_references?: string | null;
         };
         Update: Partial<ProductTableRow>;
         Relationships: [];
