@@ -41,8 +41,10 @@ export default function ProductCard({ product, compact = false }: Props) {
             src={imageSrc}
             alt={name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-5 sm:p-7 transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04]"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            className={`object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04] ${
+              compact ? "p-3 sm:p-4" : "p-4 sm:p-5"
+            }`}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center font-mono text-caption uppercase tracking-wider text-as-gray">
@@ -51,7 +53,7 @@ export default function ProductCard({ product, compact = false }: Props) {
         )}
       </div>
 
-      <div className={`flex flex-1 flex-col ${compact ? "gap-1.5 p-4" : "gap-2 p-5"}`}>
+      <div className={`flex flex-1 flex-col ${compact ? "gap-1 p-3" : "gap-1.5 p-4"}`}>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-caption uppercase tracking-wider text-as-gray">
             {product.brand}

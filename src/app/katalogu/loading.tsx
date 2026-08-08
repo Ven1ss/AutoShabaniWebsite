@@ -13,8 +13,8 @@ export default function CatalogueLoading() {
               <div key={i} className="h-12 bg-steel-light/35 animate-pulse" />
             ))}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+            {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
                 className="border border-steel-light/70 bg-surface-white"
