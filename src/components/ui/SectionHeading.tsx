@@ -18,14 +18,12 @@ export default function SectionHeading({
   const alignCls = align === "center" ? "text-center mx-auto" : "text-left";
   const titleCls = tone === "dark" ? "text-as-white" : "text-as-dark";
   const subCls = tone === "dark" ? "text-white/70" : "text-as-secondary";
-  const eyeCls = tone === "dark" ? "text-accent" : "text-accent";
+  const eyeCls = tone === "dark" ? "text-white/55" : "text-as-gray";
 
   return (
     <div className={`max-w-3xl ${alignCls} ${className}`}>
       {eyebrow ? (
-        <p className={`mb-3 text-caption font-semibold uppercase tracking-[0.14em] ${eyeCls}`}>
-          {eyebrow}
-        </p>
+        <p className={`mb-3 text-sm ${eyeCls}`}>{eyebrow}</p>
       ) : null}
       <h2 className={`text-section ${titleCls}`}>{title}</h2>
       {subhead ? (

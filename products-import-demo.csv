@@ -1,0 +1,3 @@
+name,name_en,sku,code,brand,category,description,description_en,image_url,selling_price,purchase_price,featured,stock_status,hidden_references
+Sprej pastrues kontakti,Electronic contact cleaner,EC533-DEMO,EC533,ABRO,Aksesore per veture,Pastrues kontakti elektrik,Electronic contact cleaner spray,,4.00,2.00,true,in_stock,abro-ec533
+Filtër vaji shembull,Oil filter sample,F026407006-DEMO,0986AF1050,BOSCH,Filtra,Filtër vaji demonstrues,Demo oil filter,,12.50,7.00,false,on_request,bosch-oil

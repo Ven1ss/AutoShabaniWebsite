@@ -1,4 +1,4 @@
--- Catalogue search: match name / sku / code / brand / hidden_references
+-- Catalogue search: match name / name_en / sku / code / brand / hidden_references
 -- without ever returning purchase_price or hidden_references.
 -- Spaces are ignored in both the query and the stored values.
 -- Safe to re-run.
@@ -11,14 +11,19 @@ grant usage on schema private to postgres, anon, authenticated, service_role;
 create or replace function private.search_products(search_query text)
 returns table (
   id uuid,
+  slug text,
   name text,
+  name_en text,
   sku text,
   code text,
   brand text,
   description text,
+  description_en text,
   category text,
   image_url text,
-  selling_price numeric
+  selling_price numeric,
+  featured boolean,
+  stock_status text
 )
 language plpgsql
 stable
@@ -33,16 +38,21 @@ begin
     return query
     select
       p.id,
+      p.slug,
       p.name,
+      p.name_en,
       p.sku,
       p.code,
       p.brand,
       p.description,
+      p.description_en,
       p.category,
       p.image_url,
-      p.selling_price
+      p.selling_price,
+      p.featured,
+      p.stock_status
     from public.products p
-    order by p.brand nulls last, p.name;
+    order by p.featured desc, p.brand nulls last, p.name;
     return;
   end if;
 
@@ -51,22 +61,37 @@ begin
   return query
   select
     p.id,
+    p.slug,
     p.name,
+    p.name_en,
     p.sku,
     p.code,
     p.brand,
     p.description,
+    p.description_en,
     p.category,
     p.image_url,
-    p.selling_price
+    p.selling_price,
+    p.featured,
+    p.stock_status
   from public.products p
   where
     regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
+    or regexp_replace(coalesce(p.name_en, ''), '\s+', '', 'g') ilike pattern escape E'\\'
     or regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\'
     or regexp_replace(coalesce(p.code, ''), '\s+', '', 'g') ilike pattern escape E'\\'
     or regexp_replace(coalesce(p.brand, ''), '\s+', '', 'g') ilike pattern escape E'\\'
     or regexp_replace(coalesce(p.hidden_references, ''), '\s+', '', 'g') ilike pattern escape E'\\'
-  order by p.brand nulls last, p.name;
+  order by
+    case
+      when regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\' then 0
+      when regexp_replace(coalesce(p.brand, ''), '\s+', '', 'g') ilike pattern escape E'\\' then 1
+      when regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\' then 2
+      else 3
+    end,
+    p.featured desc,
+    p.brand nulls last,
+    p.name;
 end;
 $$;
 
@@ -76,14 +101,19 @@ grant execute on function private.search_products(text) to anon, authenticated, 
 create or replace function public.search_products(search_query text)
 returns table (
   id uuid,
+  slug text,
   name text,
+  name_en text,
   sku text,
   code text,
   brand text,
   description text,
+  description_en text,
   category text,
   image_url text,
-  selling_price numeric
+  selling_price numeric,
+  featured boolean,
+  stock_status text
 )
 language sql
 stable

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -17,6 +18,24 @@ import {
   getLocalized,
   resolveProductImageUrl,
 } from "@/lib/products";
+
+async function saveEnquiryOrder(payload: {
+  locale: string;
+  channel: "whatsapp" | "email" | "phone";
+  message: string;
+  items: unknown;
+  subtotal: number | null;
+}) {
+  try {
+    await fetch("/api/enquiry-orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    /* non-blocking */
+  }
+}
 
 export default function CartDrawer() {
   const { t, locale } = useLanguage();
@@ -250,20 +269,51 @@ export default function CartDrawer() {
                         href={whatsappHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-12 w-full items-center justify-center bg-accent hover:bg-accent-deep text-white text-sm font-semibold tracking-wider uppercase px-5 transition-colors"
+                        onClick={() => {
+                          trackEvent("whatsapp_click", {
+                            place: "cart",
+                            items: itemCount,
+                          });
+                          void saveEnquiryOrder({
+                            locale,
+                            channel: "whatsapp",
+                            message,
+                            items,
+                            subtotal,
+                          });
+                        }}
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-control bg-accent hover:bg-accent-deep text-white text-sm font-semibold px-5 transition-colors"
                       >
-                        {t.catalogueWhatsApp}
+                        {t.cartSendWhatsApp}
                       </a>
                       <div className="grid grid-cols-2 gap-2.5">
                         <a
                           href={`tel:${CONTACT.phoneTel[0]}`}
-                          className="inline-flex min-h-12 items-center justify-center border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold tracking-wider uppercase px-4 transition-colors"
+                          onClick={() =>
+                            void saveEnquiryOrder({
+                              locale,
+                              channel: "phone",
+                              message,
+                              items,
+                              subtotal,
+                            })
+                          }
+                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold uppercase px-4 transition-colors"
                         >
                           {t.catalogueCall}
                         </a>
                         <a
                           href={mailtoHref}
-                          className="inline-flex min-h-12 items-center justify-center border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold tracking-wider uppercase px-4 transition-colors"
+                          onClick={() =>
+                            void saveEnquiryOrder({
+                              locale,
+                              channel: "email",
+                              message,
+                              items,
+                              subtotal,
+                            })
+                          }
+                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold uppercase px-4 transition-colors"
                         >
                           {t.catalogueEmail}
                         </a>

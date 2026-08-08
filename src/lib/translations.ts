@@ -61,6 +61,8 @@ export const translations = {
     catalogueViewLess: "Shiko më pak",
 
     productDescription: "Përshkrimi",
+    productImageZoom: "Zmadho foton",
+    productImageZoomClose: "Mbyll zmadhimin",
     productRate: "Vlerëso",
     productRateTitle: "Vlerëso këtë produkt",
     productRatePrompt: "Sa yje do t’i jepje?",
@@ -98,6 +100,36 @@ export const translations = {
       "Nuk ka blerje online — dërgo listën në WhatsApp, telefon ose email për stok dhe porosi.",
     cartItems: "produkte",
     cartItem: "produkt",
+    cartSendWhatsApp: "Dërgo listën në WhatsApp",
+    cartSaveEnquiry: "Ruaj kërkesën",
+
+    productRelated: "Produkte të ngjashme",
+    productStockIn: "Në stok",
+    productStockRequest: "Me kërkesë",
+    productStockOut: "Jo në stok",
+    productLoginTitle: "Kyçu",
+    productLoginEmail: "Email",
+    productLoginSend: "Dërgo linkun",
+    productLoginSent: "Kontrollo emailin për linkun e hyrjes.",
+    productLogout: "Dil",
+    productCommentPending: "Komenti pret aprovim.",
+
+    brandPageTitle: "Marka",
+    categoryPageTitle: "Kategoria",
+    notFoundTitle: "Faqja nuk u gjet",
+    notFoundBody: "Kjo faqe nuk ekziston. Kthehu te katalogu.",
+    errorTitle: "Diçka shkoi keq",
+    errorRetry: "Provo përsëri",
+    trustResponse: "Përgjigjemi shpejt në WhatsApp",
+    trustLocations: "Prishtinë",
+    adminTitle: "Admin",
+    adminProducts: "Produktet",
+    adminOrders: "Kërkesat",
+    adminSave: "Ruaj",
+    adminNew: "Produkt i ri",
+    adminImport: "Importo CSV",
+    adminFeatured: "I veçuar",
+    adminStock: "Stoku",
 
     // Trust / Why us
     trustHeading: "Pse te ne",
@@ -197,6 +229,8 @@ export const translations = {
     catalogueViewLess: "View less",
 
     productDescription: "Description",
+    productImageZoom: "Zoom image",
+    productImageZoomClose: "Close zoom",
     productRate: "Rate",
     productRateTitle: "Rate this product",
     productRatePrompt: "How many stars would you give?",
@@ -234,6 +268,36 @@ export const translations = {
       "No online checkout — send this list via WhatsApp, call, or email for stock and ordering.",
     cartItems: "items",
     cartItem: "item",
+    cartSendWhatsApp: "Send list on WhatsApp",
+    cartSaveEnquiry: "Save enquiry",
+
+    productRelated: "Related products",
+    productStockIn: "In stock",
+    productStockRequest: "On request",
+    productStockOut: "Out of stock",
+    productLoginTitle: "Sign in",
+    productLoginEmail: "Email",
+    productLoginSend: "Send magic link",
+    productLoginSent: "Check your email for the sign-in link.",
+    productLogout: "Sign out",
+    productCommentPending: "Comment awaiting approval.",
+
+    brandPageTitle: "Brand",
+    categoryPageTitle: "Category",
+    notFoundTitle: "Page not found",
+    notFoundBody: "This page doesn’t exist. Back to the catalogue.",
+    errorTitle: "Something went wrong",
+    errorRetry: "Try again",
+    trustResponse: "We reply quickly on WhatsApp",
+    trustLocations: "Prishtina",
+    adminTitle: "Admin",
+    adminProducts: "Products",
+    adminOrders: "Enquiries",
+    adminSave: "Save",
+    adminNew: "New product",
+    adminImport: "Import CSV",
+    adminFeatured: "Featured",
+    adminStock: "Stock",
 
     trustHeading: "Why us",
     trust1Title: "Genuine & OEM",
@@ -276,16 +340,22 @@ export const translations = {
 
 export const defaultLocale: Locale = "sq";
 
+export const LOCALE_COOKIE = "as_locale";
 const STORAGE_KEY = "auto-shabani-locale";
+
+export function isLocale(value: string): value is Locale {
+  return value === "sq" || value === "en";
+}
 
 export function getStoredLocale(): Locale {
   if (typeof window === "undefined") return defaultLocale;
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "sq") return stored;
+  if (isLocale(stored ?? "")) return stored as Locale;
   return defaultLocale;
 }
 
 export function setStoredLocale(locale: Locale): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, locale);
+  document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=31536000;samesite=lax`;
 }

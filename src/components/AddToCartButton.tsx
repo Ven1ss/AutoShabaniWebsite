@@ -53,7 +53,7 @@ export default function AddToCartButton({
         }}
         aria-label={t.cartAdd}
         title={t.cartAdd}
-        className={`inline-flex min-h-9 min-w-9 items-center justify-center border border-steel-light bg-as-white text-as-dark hover:border-accent hover:text-accent transition-colors ${className}`}
+        className={`inline-flex min-h-8 min-w-8 items-center justify-center rounded-md text-as-gray hover:bg-as-snow hover:text-as-dark transition-colors ${className}`}
       >
         <svg
           className="h-4 w-4"

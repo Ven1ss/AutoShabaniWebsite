@@ -4,7 +4,7 @@ import FadeIn from "@/components/ui/FadeIn";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/context/LanguageContext";
 
-/** Spacious “why us” value props — one clear idea each. */
+/** Local trust — short facts, not icon marketing cards. */
 export default function WhyUs() {
   const { t } = useLanguage();
 
@@ -16,25 +16,22 @@ export default function WhyUs() {
   ];
 
   return (
-    <section id="about" className="surface-light section-pad">
+    <section id="about" className="section-pad bg-as-snow">
       <div className="container-as">
         <FadeIn>
           <SectionHeading
-            eyebrow={t.trustHeading}
             title={t.aboutTitle}
             subhead={t.aboutText}
-            className="mb-14 md:mb-20"
+            align="left"
+            className="mb-10 md:mb-14"
           />
         </FadeIn>
 
-        <div className="grid sm:grid-cols-2 gap-6 md:gap-8 max-w-shelf mx-auto">
+        <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8 max-w-shelf">
           {items.map((item, i) => (
-            <FadeIn key={item.title} delay={0.04 * i}>
-              <article className="h-full rounded-media bg-as-white p-8 sm:p-10 md:p-12">
-                <p className="text-caption font-semibold text-accent mb-4 tabular-nums">
-                  {String(i + 1).padStart(2, "0")}
-                </p>
-                <h3 className="text-[1.375rem] sm:text-2xl font-semibold tracking-tight text-as-dark leading-snug mb-3">
+            <FadeIn key={item.title} delay={0.03 * i}>
+              <article className="border-t border-steel-light pt-5">
+                <h3 className="text-lg font-semibold tracking-tight text-as-dark mb-2">
                   {item.title}
                 </h3>
                 <p className="text-body text-as-secondary leading-relaxed">

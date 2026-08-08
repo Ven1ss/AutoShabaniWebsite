@@ -1,143 +1,173 @@
-const RATINGS_STORAGE_KEY = "auto-shabani-product-ratings";
-const COMMENTS_STORAGE_KEY = "auto-shabani-product-comments";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export type ProductRatingRecord = {
-  /** Average 1–5 */
   average: number;
-  /** Total ratings counted */
   count: number;
-  /** Current visitor's rating, if any */
   userRating: number | null;
 };
 
 export type ProductComment = {
   id: string;
   productSlug: string;
-  authorId: string;
-  authorName: string;
-  text: string;
-  rating: number | null;
+  author: string;
+  body: string;
   createdAt: string;
+  pending?: boolean;
 };
 
-type RatingStore = Record<
-  string,
-  {
-    sum: number;
-    count: number;
-    userRating: number | null;
+const empty: ProductRatingRecord = {
+  average: 0,
+  count: 0,
+  userRating: null,
+};
+
+/** Load aggregate + current user's rating for a product id. */
+export async function fetchProductRating(
+  productId: string,
+  userId?: string | null
+): Promise<ProductRatingRecord> {
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return empty;
+
+  const { data: stats } = await supabase
+    .from("product_rating_stats")
+    .select("average, count")
+    .eq("product_id", productId)
+    .maybeSingle();
+
+  let userRating: number | null = null;
+  if (userId) {
+    const { data: mine } = await supabase
+      .from("product_ratings")
+      .select("rating")
+      .eq("product_id", productId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    userRating = mine?.rating ?? null;
   }
->;
 
-type CommentStore = Record<string, ProductComment[]>;
-
-function readJson<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(key: string, value: unknown): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* ignore */
-  }
-}
-
-function clampStar(n: number): number {
-  if (!Number.isFinite(n)) return 1;
-  return Math.min(5, Math.max(1, Math.round(n)));
-}
-
-export function getProductRating(slug: string): ProductRatingRecord {
-  const store = readJson<RatingStore>(RATINGS_STORAGE_KEY, {});
-  const entry = store[slug];
-  if (!entry || entry.count <= 0) {
-    return { average: 0, count: 0, userRating: entry?.userRating ?? null };
-  }
   return {
-    average: entry.sum / entry.count,
-    count: entry.count,
-    userRating: entry.userRating,
+    average: Number(stats?.average ?? 0),
+    count: Number(stats?.count ?? 0),
+    userRating,
   };
 }
 
-/** Set or update the current visitor's star rating for a product. */
-export function setProductUserRating(
-  slug: string,
-  stars: number
-): ProductRatingRecord {
-  const rating = clampStar(stars);
-  const store = readJson<RatingStore>(RATINGS_STORAGE_KEY, {});
-  const prev = store[slug] ?? { sum: 0, count: 0, userRating: null };
+export async function upsertProductRating(
+  productId: string,
+  userId: string,
+  rating: number
+): Promise<ProductRatingRecord> {
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return empty;
 
-  if (prev.userRating !== null) {
-    store[slug] = {
-      sum: prev.sum - prev.userRating + rating,
-      count: prev.count,
-      userRating: rating,
-    };
-  } else {
-    store[slug] = {
-      sum: prev.sum + rating,
-      count: prev.count + 1,
-      userRating: rating,
-    };
-  }
-
-  writeJson(RATINGS_STORAGE_KEY, store);
-  return getProductRating(slug);
-}
-
-export function getProductComments(slug: string): ProductComment[] {
-  const store = readJson<CommentStore>(COMMENTS_STORAGE_KEY, {});
-  const list = store[slug] ?? [];
-  return [...list].sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const { error } = await supabase.from("product_ratings").upsert(
+    {
+      product_id: productId,
+      user_id: userId,
+      rating,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "product_id,user_id" }
   );
+
+  if (error) {
+    console.error("[ratings]", error.message);
+  }
+
+  return fetchProductRating(productId, userId);
 }
 
-export function addProductComment(opts: {
-  productSlug: string;
-  authorId: string;
+export async function fetchProductComments(
+  productId: string
+): Promise<ProductComment[]> {
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("product_comments")
+    .select("id, product_id, body, author_name, approved, created_at")
+    .eq("product_id", productId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[comments]", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    productSlug: row.product_id,
+    author: row.author_name,
+    body: row.body,
+    createdAt: row.created_at,
+    pending: !row.approved,
+  }));
+}
+
+export async function submitProductComment(opts: {
+  productId: string;
+  userId: string;
   authorName: string;
-  text: string;
-  rating?: number | null;
-}): ProductComment {
-  const text = opts.text.trim();
-  if (!text) {
-    throw new Error("Comment text is required");
-  }
-  if (!opts.authorId) {
-    throw new Error("Login required to comment");
+  body: string;
+}): Promise<{ comment?: ProductComment; error?: string }> {
+  const supabase = createBrowserSupabaseClient();
+  if (!supabase) return { error: "Not configured" };
+
+  const { data, error } = await supabase
+    .from("product_comments")
+    .insert({
+      product_id: opts.productId,
+      user_id: opts.userId,
+      author_name: opts.authorName,
+      body: opts.body.trim(),
+      approved: false,
+    })
+    .select("id, product_id, body, author_name, approved, created_at")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { error: error?.message ?? "Failed to post comment" };
   }
 
-  const comment: ProductComment = {
-    id:
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `c_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    productSlug: opts.productSlug,
-    authorId: opts.authorId,
-    authorName: opts.authorName.trim() || "User",
-    text,
-    rating:
-      opts.rating === null || opts.rating === undefined
-        ? null
-        : clampStar(opts.rating),
-    createdAt: new Date().toISOString(),
+  return {
+    comment: {
+      id: data.id,
+      productSlug: data.product_id,
+      author: data.author_name,
+      body: data.body,
+      createdAt: data.created_at,
+      pending: !data.approved,
+    },
   };
+}
 
-  const store = readJson<CommentStore>(COMMENTS_STORAGE_KEY, {});
-  store[opts.productSlug] = [comment, ...(store[opts.productSlug] ?? [])];
-  writeJson(COMMENTS_STORAGE_KEY, store);
-  return comment;
+/** Compatibility shims used by older call sites — prefer async fetch* APIs. */
+export function getProductRating(_slug: string): ProductRatingRecord {
+  return empty;
+}
+
+export function setProductUserRating(
+  _slug: string,
+  _rating: number
+): ProductRatingRecord {
+  return empty;
+}
+
+export function getProductComments(_slug: string): ProductComment[] {
+  return [];
+}
+
+export function addProductComment(
+  _slug: string,
+  _input: { author: string; body: string }
+): ProductComment {
+  return {
+    id: "local",
+    productSlug: _slug,
+    author: _input.author,
+    body: _input.body,
+    createdAt: new Date().toISOString(),
+    pending: true,
+  };
 }

@@ -26,13 +26,25 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+export function LanguageProvider({
+  children,
+  initialLocale,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(
+    initialLocale ?? defaultLocale
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setLocaleState(getStoredLocale());
+    const stored = getStoredLocale();
+    if (stored !== locale) setLocaleState(stored);
     setMounted(true);
+    // Sync cookie if missing
+    setStoredLocale(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setLocale = useCallback((next: Locale) => {
@@ -55,7 +67,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return (
-      <LanguageContext.Provider value={{ ...value, t: translations.sq }}>
+      <LanguageContext.Provider
+        value={{
+          ...value,
+          locale: initialLocale ?? defaultLocale,
+          t: translations[initialLocale ?? defaultLocale],
+        }}
+      >
         {children}
       </LanguageContext.Provider>
     );
