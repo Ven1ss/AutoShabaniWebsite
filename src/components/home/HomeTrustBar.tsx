@@ -13,23 +13,25 @@ export default function HomeTrustBar() {
   );
 
   return (
-    <section className="border-y border-steel-light bg-as-white">
-      <div className="container-as py-4 sm:py-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 text-sm">
-        <p className="text-as-secondary">
-          <span className="font-medium text-as-dark">{t.trustLocations}</span>
-          <span className="text-as-mist"> · </span>
+    <section className="border-b border-steel-light bg-as-snow">
+      <div className="container-as py-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-6 text-sm text-as-secondary">
+        <p>
+          <span className="text-as-dark font-medium">{t.trustLocations}</span>
+          {" · "}
           {t.contactHoursValue}
         </p>
-        <p className="text-as-secondary sm:text-center">{t.trustResponse}</p>
+        <p className="sm:text-center">{t.trustResponse}</p>
         <p className="sm:text-right">
           <a
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackEvent("whatsapp_click", { place: "home_trust" })}
-            className="font-medium text-accent hover:text-accent-deep"
+            onClick={() =>
+              trackEvent("whatsapp_click", { place: "home_trust" })
+            }
+            className="font-medium text-as-dark underline underline-offset-2 decoration-as-mist hover:text-accent hover:decoration-accent transition-colors"
           >
-            WhatsApp {CONTACT.phoneDisplay[1]} →
+            WhatsApp {CONTACT.phoneDisplay[1]}
           </a>
         </p>
       </div>

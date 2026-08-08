@@ -87,7 +87,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
       <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
         <Link
           href="/katalogu"
-          className="inline-flex min-h-11 items-center gap-2 text-caption uppercase tracking-wider text-as-secondary hover:text-as-dark transition-colors mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]"
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-as-secondary hover:text-as-dark transition-colors mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]"
         >
           <span aria-hidden>←</span> {t.catalogueBack}
         </Link>
@@ -111,7 +111,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
                   type="button"
                   onClick={() => setImageZoomOpen(true)}
                   aria-label={t.productImageZoom}
-                  className="group relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="group relative aspect-square w-full overflow-hidden rounded-xl border border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-card cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   <Image
                     src={imageSrc}
@@ -140,7 +140,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
                   </span>
                 </button>
               ) : (
-                <div className="relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card">
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-card">
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-as-gray px-4 text-center break-all">
                     {product.sku || "—"}
                   </div>
@@ -151,11 +151,11 @@ export default function ProductDetail({ product, related = [] }: Props) {
 
           {/* Buy box */}
           <div className="min-w-0 order-2 md:col-span-6 lg:col-span-5 md:col-start-7 lg:col-start-8 md:row-start-1 md:row-span-3 md:sticky md:top-[clamp(5rem,4rem+2vw,7rem)]">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-[clamp(0.75rem,0.5rem+0.8vw,1rem)]">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-as-secondary mb-[clamp(0.75rem,0.5rem+0.8vw,1rem)]">
               {product.brand ? (
                 <Link
                   href={brandPath(product.brand)}
-                  className="text-caption uppercase tracking-[0.14em] text-as-gray hover:text-accent transition-colors"
+                  className="hover:text-as-dark transition-colors"
                 >
                   {product.brand}
                 </Link>
@@ -168,14 +168,11 @@ export default function ProductDetail({ product, related = [] }: Props) {
               {categoryLabel ? (
                 <Link
                   href={categoryPath(product.category)}
-                  className="text-caption uppercase tracking-[0.12em] text-accent font-medium break-words hover:text-accent-deep transition-colors"
+                  className="hover:text-as-dark transition-colors break-words"
                 >
                   {categoryLabel}
                 </Link>
               ) : null}
-              <span className="inline-flex items-center rounded-full border border-steel-light bg-as-snow px-2.5 py-0.5 text-caption text-as-secondary">
-                {stockLabel}
-              </span>
             </div>
 
             <h1
@@ -191,25 +188,24 @@ export default function ProductDetail({ product, related = [] }: Props) {
               record={rating}
             />
 
-            <p
-              className="font-semibold tracking-tight text-accent tabular-nums mb-[clamp(1rem,0.6rem+1.2vw,1.5rem)]"
-              style={{ fontSize: "var(--text-price-lg)" }}
-            >
-              {price ?? t.cataloguePriceOnRequest}
-            </p>
+            <div className="mb-[clamp(1rem,0.6rem+1.2vw,1.5rem)] flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <p
+                className="font-semibold tracking-tight text-accent tabular-nums"
+                style={{ fontSize: "var(--text-price-lg)" }}
+              >
+                {price ?? t.cataloguePriceOnRequest}
+              </p>
+              <span className="text-sm text-as-gray">{stockLabel}</span>
+            </div>
 
             <dl className="grid gap-[clamp(0.5rem,0.35rem+0.5vw,0.75rem)] mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] text-sm border-y border-steel-light py-[clamp(0.85rem,0.6rem+0.8vw,1.15rem)]">
               <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
-                <dt className="text-caption uppercase tracking-wider text-as-gray">
-                  {t.catalogueSku}
-                </dt>
+                <dt className="text-sm text-as-gray">{t.catalogueSku}</dt>
                 <dd className="font-mono text-as-dark break-all">{product.sku}</dd>
               </div>
               {product.code ? (
                 <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
-                  <dt className="text-caption uppercase tracking-wider text-as-gray">
-                    {t.catalogueCode}
-                  </dt>
+                  <dt className="text-sm text-as-gray">{t.catalogueCode}</dt>
                   <dd className="font-mono text-as-dark break-all">
                     {product.code}
                   </dd>
@@ -229,10 +225,10 @@ export default function ProductDetail({ product, related = [] }: Props) {
 
           {description ? (
             <section className="min-w-0 order-3 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-2">
-              <h2 className="text-caption uppercase tracking-[0.16em] text-accent font-medium mb-3">
+              <h2 className="text-sm font-medium text-as-dark mb-3">
                 {t.productDescription}
               </h2>
-              <div className="border border-steel-light bg-as-white rounded-card p-[clamp(0.85rem,0.55rem+1vw,1.5rem)] overflow-hidden">
+              <div className="border border-steel-light bg-as-white rounded-xl p-[clamp(0.85rem,0.55rem+1vw,1.5rem)] overflow-hidden">
                 <p
                   className={`text-sm text-as-secondary leading-relaxed whitespace-pre-wrap break-words ${
                     descriptionNeedsToggle && !descriptionExpanded
@@ -268,7 +264,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
 
         {related.length > 0 ? (
           <section className="mt-[clamp(2.5rem,1.5rem+3vw,4rem)]">
-            <h2 className="text-caption uppercase tracking-[0.16em] text-accent font-medium mb-4">
+            <h2 className="text-sm font-medium text-as-dark mb-4">
               {t.productRelated}
             </h2>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">

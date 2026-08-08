@@ -97,7 +97,7 @@ export default function SiteNav({ overDark = false }: Props) {
                   pathname.startsWith("/katalogu") && item.href === "/katalogu"
                     ? onDark
                       ? "text-white font-medium"
-                      : "text-accent font-medium"
+                      : "text-as-dark font-medium"
                     : linkBase
                 }`}
               >
@@ -131,7 +131,7 @@ export default function SiteNav({ overDark = false }: Props) {
                   locale === lang
                     ? onDark
                       ? "text-white font-semibold"
-                      : "text-accent font-semibold"
+                      : "text-as-dark font-semibold"
                     : onDark
                       ? "text-white/45"
                       : "text-as-gray"
@@ -161,10 +161,10 @@ export default function SiteNav({ overDark = false }: Props) {
               className={`min-h-11 min-w-9 text-xs uppercase ${
                 locale === lang
                   ? open || solid
-                    ? "text-accent font-semibold"
+                    ? "text-as-dark font-semibold"
                     : onDark
                       ? "text-white font-semibold"
-                      : "text-accent font-semibold"
+                      : "text-as-dark font-semibold"
                   : open || solid
                     ? "text-as-gray"
                     : onDark

@@ -23,8 +23,8 @@
   --gap-sm: clamp(0.5rem, 0.3rem + 0.8vw, 0.75rem);
   --gap-md: clamp(0.75rem, 0.4rem + 1.4vw, 1.5rem);
   --gap-lg: clamp(1.25rem, 0.6rem + 2.5vw, 3.5rem);
-  --radius-card: clamp(0.75rem, 0.55rem + 0.7vw, 1.125rem);
-  --radius-media: clamp(0.875rem, 0.6rem + 1vw, 1.5rem);
+  --radius-card: clamp(0.5rem, 0.4rem + 0.45vw, 0.75rem);
+  --radius-media: clamp(0.625rem, 0.45rem + 0.6vw, 1rem);
   --text-caption: clamp(0.6875rem, 0.64rem + 0.2vw, 0.75rem);
   --text-body: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
   --text-price: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);

@@ -30,10 +30,10 @@ export default function CataloguePageClient({ products }: Props) {
   return (
     <>
       <SiteNav />
-      <main className="min-h-screen bg-surface">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#eef0f3_0%,#f5f5f7_28%,#f5f5f7_100%)]">
         <section className="pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,5rem)]">
           <div className="mx-auto w-full max-w-wide px-[clamp(0.75rem,0.4rem+1.5vw,1.5rem)]">
-            <p className="mb-[clamp(1rem,0.6rem+1.5vw,2rem)] text-[length:var(--text-body)] text-ink leading-relaxed max-w-2xl">
+            <p className="mb-[clamp(1rem,0.6rem+1.5vw,2rem)] text-body text-as-secondary leading-relaxed max-w-2xl">
               {linkIndex >= 0 ? (
                 <>
                   {before}
@@ -41,7 +41,7 @@ export default function CataloguePageClient({ products }: Props) {
                     href={whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-signal underline underline-offset-2 hover:text-signal/80 transition-colors"
+                    className="font-medium text-as-dark underline underline-offset-2 hover:text-accent transition-colors"
                   >
                     {notice.slice(linkIndex, linkIndex + linkText.length)}
                   </a>
@@ -54,7 +54,7 @@ export default function CataloguePageClient({ products }: Props) {
                     href={whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-signal underline underline-offset-2 hover:text-signal/80 transition-colors"
+                    className="font-medium text-as-dark underline underline-offset-2 hover:text-accent transition-colors"
                   >
                     {linkText}
                   </a>

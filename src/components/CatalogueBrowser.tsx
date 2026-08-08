@@ -131,7 +131,9 @@ export default function CatalogueBrowser({ products }: Props) {
         : category;
 
   const selectClass =
-    "peer w-full min-h-12 appearance-none rounded-lg border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow,background-color] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-accent focus:shadow-[0_0_0_3px_rgba(200,16,46,0.12)]";
+    "peer w-full min-h-11 appearance-none rounded-md border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-as-dark/30 focus:shadow-[0_0_0_3px_rgba(29,29,31,0.06)]";
+
+  const labelClass = "text-sm text-as-secondary";
 
   return (
     <div>
@@ -151,12 +153,10 @@ export default function CatalogueBrowser({ products }: Props) {
         />
       </div>
 
-      <div className="mb-[clamp(1rem,0.6rem+1.2vw,2rem)] overflow-hidden rounded-card border border-steel-light bg-as-white shadow-card">
+      <div className="mb-[clamp(1rem,0.6rem+1.2vw,2rem)] overflow-hidden rounded-xl border border-steel-light bg-as-white">
         <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-steel-light">
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
-            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
-              {t.catalogueBrand}
-            </span>
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
+            <span className={labelClass}>{t.catalogueBrand}</span>
             <div className="relative">
               <select
                 value={brand}
@@ -181,10 +181,8 @@ export default function CatalogueBrowser({ products }: Props) {
             </div>
           </label>
 
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
-            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
-              {t.catalogueCategory}
-            </span>
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
+            <span className={labelClass}>{t.catalogueCategory}</span>
             <div className="relative">
               <select
                 value={category}
@@ -209,10 +207,8 @@ export default function CatalogueBrowser({ products }: Props) {
             </div>
           </label>
 
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
-            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
-              {t.catalogueSort}
-            </span>
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
+            <span className={labelClass}>{t.catalogueSort}</span>
             <div className="relative">
               <select
                 value={sort}
@@ -249,7 +245,7 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ brand: "all" });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-accent hover:text-accent transition-colors"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-as-dark/30 transition-colors"
               >
                 <span className="truncate">{brand}</span>
                 <span aria-hidden className="text-as-gray">
@@ -266,7 +262,7 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ category: "all" });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-accent hover:text-accent transition-colors"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-as-dark/30 transition-colors"
               >
                 <span className="truncate">{categoryLabel}</span>
                 <span aria-hidden className="text-as-gray">
@@ -280,7 +276,7 @@ export default function CatalogueBrowser({ products }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="shrink-0 text-sm font-medium text-accent hover:text-accent-deep transition-colors"
+              className="shrink-0 text-sm font-medium text-as-dark underline underline-offset-2 decoration-as-mist hover:decoration-as-dark transition-colors"
             >
               {t.catalogueClearFilters}
             </button>
@@ -289,7 +285,7 @@ export default function CatalogueBrowser({ products }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-12 sm:py-16 px-4 text-center text-ink-muted border border-dashed border-steel-light text-sm sm:text-base rounded-card">
+        <p className="py-12 sm:py-16 px-4 text-center text-as-secondary border border-dashed border-steel-light text-sm sm:text-base rounded-xl">
           {t.catalogueEmpty}
         </p>
       ) : (

@@ -19,20 +19,19 @@ export default function FeaturedProducts({ products }: Props) {
   if (featured.length === 0) return null;
 
   return (
-    <section id="featured" className="surface-white section-pad">
+    <section id="featured" className="bg-as-white section-pad">
       <div className="container-as">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12 md:mb-16">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-10 md:mb-12">
           <SectionHeading
-            eyebrow={t.navCatalogue}
             title={t.catalogueFeatured}
             align="left"
             className="mb-0"
           />
           <Link
             href="/katalogu"
-            className="inline-flex min-h-11 items-center text-body font-medium text-accent hover:text-accent-deep transition-colors self-start sm:self-auto sm:mb-1"
+            className="inline-flex min-h-11 items-center text-body font-medium text-as-dark underline underline-offset-4 decoration-as-mist hover:decoration-as-dark transition-colors self-start sm:self-auto sm:mb-1"
           >
-            {t.catalogueBrowseAll} →
+            {t.catalogueBrowseAll}
           </Link>
         </div>
 
