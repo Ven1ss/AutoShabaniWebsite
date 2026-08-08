@@ -19,6 +19,25 @@ type Props = {
   products: Product[];
 };
 
+function ChevronIcon() {
+  return (
+    <svg
+      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-as-gray"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.75}
+        d="m6 9 6 6 6-6"
+      />
+    </svg>
+  );
+}
+
 export default function CatalogueBrowser({ products }: Props) {
   const { t, locale } = useLanguage();
   const router = useRouter();
@@ -85,6 +104,15 @@ export default function CatalogueBrowser({ products }: Props) {
     router.replace(qs ? `/katalogu?${qs}` : "/katalogu", { scroll: false });
   }
 
+  function clearFilters() {
+    startTransition(() => {
+      setBrand("all");
+      setCategory("all");
+      setSort("relevance");
+      syncUrl({ brand: "all", category: "all" });
+    });
+  }
+
   const filtered = useMemo(() => {
     const base = remoteMatches
       ? filterProducts(remoteMatches, { brand, category, locale })
@@ -92,13 +120,22 @@ export default function CatalogueBrowser({ products }: Props) {
     return sortProducts(base, sort, locale);
   }, [products, remoteMatches, query, brand, category, locale, sort]);
 
-  // text-base (16px) prevents iOS input zoom
-  const fieldClass =
-    "w-full min-h-12 appearance-none border border-steel-light bg-surface-white px-3 py-3 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink/30 focus:shadow-[0_0_0_3px_rgba(22,26,32,0.06)]";
+  const hasActiveFilters =
+    brand !== "all" || category !== "all" || sort !== "relevance";
+
+  const categoryLabel =
+    category === "all"
+      ? t.catalogueAll
+      : isProductCategory(category)
+        ? t[`cat_${category}`]
+        : category;
+
+  const selectClass =
+    "peer w-full min-h-12 appearance-none rounded-lg border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow,background-color] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-accent focus:shadow-[0_0_0_3px_rgba(200,16,46,0.12)]";
 
   return (
     <div>
-      <div className="mb-6 md:mb-10">
+      <div className="mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]">
         <CatalogueSearchTicket
           value={query}
           onChange={(v) => {
@@ -114,82 +151,149 @@ export default function CatalogueBrowser({ products }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 md:mb-8">
-        <label className="flex flex-col gap-1.5">
-          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
-            {t.catalogueBrand}
-          </span>
-          <select
-            value={brand}
-            onChange={(e) => {
-              const value = e.target.value;
-              startTransition(() => {
-                setBrand(value);
-                syncUrl({ brand: value });
-              });
-            }}
-            className={fieldClass}
-          >
-            <option value="all">{t.catalogueAll}</option>
-            {brands.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
-            {t.catalogueCategory}
-          </span>
-          <select
-            value={category}
-            onChange={(e) => {
-              const value = e.target.value;
-              startTransition(() => {
-                setCategory(value);
-                syncUrl({ category: value });
-              });
-            }}
-            className={fieldClass}
-          >
-            <option value="all">{t.catalogueAll}</option>
-            {categories.map((key) => (
-              <option key={key} value={key}>
-                {isProductCategory(key) ? t[`cat_${key}`] : key}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
-          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-faint">
-            {t.catalogueSort}
-          </span>
-          <select
-            value={sort}
-            onChange={(e) =>
-              startTransition(() => setSort(e.target.value as ProductSort))
-            }
-            className={fieldClass}
-          >
-            <option value="relevance">{t.catalogueSortRelevance}</option>
-            <option value="price-asc">{t.catalogueSortPriceAsc}</option>
-            <option value="price-desc">{t.catalogueSortPriceDesc}</option>
-            <option value="name">{t.catalogueSortName}</option>
-          </select>
-        </label>
+      <div className="mb-[clamp(1rem,0.6rem+1.2vw,2rem)] overflow-hidden rounded-card border border-steel-light bg-as-white shadow-card">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-steel-light">
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
+            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
+              {t.catalogueBrand}
+            </span>
+            <div className="relative">
+              <select
+                value={brand}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  startTransition(() => {
+                    setBrand(value);
+                    syncUrl({ brand: value });
+                  });
+                }}
+                className={selectClass}
+                aria-label={t.catalogueBrand}
+              >
+                <option value="all">{t.catalogueAll}</option>
+                {brands.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+              <ChevronIcon />
+            </div>
+          </label>
+
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
+            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
+              {t.catalogueCategory}
+            </span>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  startTransition(() => {
+                    setCategory(value);
+                    syncUrl({ category: value });
+                  });
+                }}
+                className={selectClass}
+                aria-label={t.catalogueCategory}
+              >
+                <option value="all">{t.catalogueAll}</option>
+                {categories.map((key) => (
+                  <option key={key} value={key}>
+                    {isProductCategory(key) ? t[`cat_${key}`] : key}
+                  </option>
+                ))}
+              </select>
+              <ChevronIcon />
+            </div>
+          </label>
+
+          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4 group">
+            <span className="text-caption uppercase tracking-[0.16em] text-as-gray group-focus-within:text-accent transition-colors">
+              {t.catalogueSort}
+            </span>
+            <div className="relative">
+              <select
+                value={sort}
+                onChange={(e) =>
+                  startTransition(() => setSort(e.target.value as ProductSort))
+                }
+                className={selectClass}
+                aria-label={t.catalogueSort}
+              >
+                <option value="relevance">{t.catalogueSortRelevance}</option>
+                <option value="price-asc">{t.catalogueSortPriceAsc}</option>
+                <option value="price-desc">{t.catalogueSortPriceDesc}</option>
+                <option value="name">{t.catalogueSortName}</option>
+              </select>
+              <ChevronIcon />
+            </div>
+          </label>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-steel-light bg-as-snow/70 px-3 py-2.5 sm:px-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <p className="text-sm text-as-secondary tabular-nums">
+              <span className="font-semibold text-as-dark">
+                {filtered.length}
+              </span>{" "}
+              {t.catalogueResults}
+            </p>
+            {brand !== "all" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    setBrand("all");
+                    syncUrl({ brand: "all" });
+                  });
+                }}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-accent hover:text-accent transition-colors"
+              >
+                <span className="truncate">{brand}</span>
+                <span aria-hidden className="text-as-gray">
+                  ×
+                </span>
+              </button>
+            ) : null}
+            {category !== "all" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    setCategory("all");
+                    syncUrl({ category: "all" });
+                  });
+                }}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-accent hover:text-accent transition-colors"
+              >
+                <span className="truncate">{categoryLabel}</span>
+                <span aria-hidden className="text-as-gray">
+                  ×
+                </span>
+              </button>
+            ) : null}
+          </div>
+
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="shrink-0 text-sm font-medium text-accent hover:text-accent-deep transition-colors"
+            >
+              {t.catalogueClearFilters}
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <p className="font-mono text-sm text-ink-muted mb-4 md:mb-6 tabular-nums">
-        {filtered.length} {t.catalogueResults}
-      </p>
-
       {filtered.length === 0 ? (
-        <p className="py-12 sm:py-16 px-4 text-center text-ink-muted border border-dashed border-steel-light text-sm sm:text-base">
+        <p className="py-12 sm:py-16 px-4 text-center text-ink-muted border border-dashed border-steel-light text-sm sm:text-base rounded-card">
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[clamp(0.4rem,0.25rem+0.7vw,0.75rem)]">
+        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[clamp(0.5rem,0.35rem+0.8vw,0.9rem)]">
           {filtered.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} compact />
