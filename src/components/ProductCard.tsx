@@ -38,7 +38,7 @@ export default function ProductCard({
   const imageSrc = resolveProductImageUrl(product.image);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-card border border-steel-light bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover [content-visibility:auto] [contain-intrinsic-size:auto_340px]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-card border border-steel-light bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover [content-visibility:auto] [contain-intrinsic-size:auto_380px]">
       <Link
         href={`/katalogu/${product.slug}`}
         className="relative aspect-square overflow-hidden border-b border-steel-light bg-as-snow"
@@ -49,12 +49,12 @@ export default function ProductCard({
             alt={name}
             fill
             priority={priority}
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
             className="object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04]"
             style={{
               padding: compact
-                ? "clamp(0.5rem, 0.35rem + 0.6vw, 1rem)"
-                : "clamp(0.65rem, 0.4rem + 0.8vw, 1.25rem)",
+                ? "clamp(0.65rem, 0.45rem + 0.7vw, 1.15rem)"
+                : "clamp(0.75rem, 0.5rem + 0.9vw, 1.35rem)",
             }}
           />
         ) : (
@@ -67,13 +67,13 @@ export default function ProductCard({
       <div
         className="flex flex-1 flex-col"
         style={{
-          gap: compact ? "0.25rem" : "0.35rem",
+          gap: compact ? "0.35rem" : "0.4rem",
           padding: compact
-            ? "clamp(0.55rem, 0.4rem + 0.5vw, 0.75rem)"
-            : "clamp(0.7rem, 0.5rem + 0.6vw, 1rem)",
+            ? "clamp(0.7rem, 0.5rem + 0.6vw, 1rem)"
+            : "clamp(0.85rem, 0.6rem + 0.7vw, 1.15rem)",
         }}
       >
-        <Link href={`/katalogu/${product.slug}`} className="flex flex-col gap-1 min-w-0">
+        <Link href={`/katalogu/${product.slug}`} className="flex flex-col gap-1.5 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-caption uppercase tracking-wider text-as-gray">
               {product.brand}
@@ -82,7 +82,7 @@ export default function ProductCard({
           </div>
           <h3
             className={`font-medium text-as-dark leading-snug line-clamp-2 ${
-              compact ? "text-sm" : "text-body"
+              compact ? "text-[0.9375rem] sm:text-body" : "text-body"
             }`}
           >
             {name}
