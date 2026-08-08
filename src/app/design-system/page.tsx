@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 /** Demo product for card preview — not from Supabase */
 const demoProduct: Product = {
+  id: "00000000-0000-4000-8000-000000000001",
   slug: "demo-bosch-filter",
   sku: "F026407006",
   code: "0986AF1050",
@@ -31,16 +32,21 @@ const demoProduct: Product = {
   image:
     "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=800&q=80",
   sellingPrice: 24.5,
+  featured: true,
+  stockStatus: "in_stock",
 };
 
 const demoProduct2: Product = {
   ...demoProduct,
+  id: "00000000-0000-4000-8000-000000000002",
   slug: "demo-brembo",
   sku: "P85020",
   brand: "BREMBO",
   category: "brakes",
   name: { sq: "Disk freni — shembull", en: "Brake disc — sample" },
   sellingPrice: 89,
+  featured: false,
+  stockStatus: "on_request",
   image:
     "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
 };

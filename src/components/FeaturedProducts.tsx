@@ -6,16 +6,15 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Product } from "@/lib/products";
 
-const FEATURED_COUNT = 8;
-
 type Props = {
   products: Product[];
 };
 
-/** Featured strip — same ProductCard as /katalogu. */
+/** Featured strip — curated `featured` products, else first items. */
 export default function FeaturedProducts({ products }: Props) {
   const { t } = useLanguage();
-  const featured = products.slice(0, FEATURED_COUNT);
+  const curated = products.filter((p) => p.featured);
+  const featured = (curated.length > 0 ? curated : products).slice(0, 8);
 
   if (featured.length === 0) return null;
 

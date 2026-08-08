@@ -6,12 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import AddToCartButton from "@/components/AddToCartButton";
+import ProductCard from "@/components/ProductCard";
 import ProductEnquiry from "@/components/ProductEnquiry";
 import {
-  getProductRating,
+  fetchProductRating,
   type ProductRatingRecord,
 } from "@/lib/product-ratings";
 import {
+  brandPath,
+  categoryPath,
   formatPrice,
   getLocalized,
   isProductCategory,
@@ -29,9 +32,10 @@ const DESCRIPTION_COLLAPSE_CHARS = 280;
 
 type Props = {
   product: Product;
+  related?: Product[];
 };
 
-export default function ProductDetail({ product }: Props) {
+export default function ProductDetail({ product, related = [] }: Props) {
   const { t, locale } = useLanguage();
   const zoomTitleId = useId();
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -50,10 +54,16 @@ export default function ProductDetail({ product }: Props) {
   const imageSrc = resolveProductImageUrl(product.image);
   const descriptionNeedsToggle =
     description.trim().length > DESCRIPTION_COLLAPSE_CHARS;
+  const stockLabel =
+    product.stockStatus === "in_stock"
+      ? t.productStockIn
+      : product.stockStatus === "out_of_stock"
+        ? t.productStockOut
+        : t.productStockRequest;
 
   useEffect(() => {
-    setRating(getProductRating(product.slug));
-  }, [product.slug]);
+    fetchProductRating(product.id).then(setRating);
+  }, [product.id]);
 
   useEffect(() => {
     if (!imageZoomOpen) return;
@@ -143,9 +153,12 @@ export default function ProductDetail({ product }: Props) {
           <div className="min-w-0 order-2 md:col-span-6 lg:col-span-5 md:col-start-7 lg:col-start-8 md:row-start-1 md:row-span-3 md:sticky md:top-[clamp(5rem,4rem+2vw,7rem)]">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-[clamp(0.75rem,0.5rem+0.8vw,1rem)]">
               {product.brand ? (
-                <span className="text-caption uppercase tracking-[0.14em] text-as-gray">
+                <Link
+                  href={brandPath(product.brand)}
+                  className="text-caption uppercase tracking-[0.14em] text-as-gray hover:text-accent transition-colors"
+                >
                   {product.brand}
-                </span>
+                </Link>
               ) : null}
               {product.brand && categoryLabel ? (
                 <span className="text-as-mist" aria-hidden>
@@ -153,10 +166,16 @@ export default function ProductDetail({ product }: Props) {
                 </span>
               ) : null}
               {categoryLabel ? (
-                <span className="text-caption uppercase tracking-[0.12em] text-accent font-medium break-words">
+                <Link
+                  href={categoryPath(product.category)}
+                  className="text-caption uppercase tracking-[0.12em] text-accent font-medium break-words hover:text-accent-deep transition-colors"
+                >
                   {categoryLabel}
-                </span>
+                </Link>
               ) : null}
+              <span className="inline-flex items-center rounded-full border border-steel-light bg-as-snow px-2.5 py-0.5 text-caption text-as-secondary">
+                {stockLabel}
+              </span>
             </div>
 
             <h1
@@ -167,7 +186,7 @@ export default function ProductDetail({ product }: Props) {
             </h1>
 
             <ProductRating
-              productSlug={product.slug}
+              productId={product.id}
               compact
               record={rating}
             />
@@ -240,12 +259,27 @@ export default function ProductDetail({ product }: Props) {
 
           <div className="min-w-0 order-4 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-3">
             <ProductRating
-              productSlug={product.slug}
+              productId={product.id}
               record={rating}
               onRated={setRating}
             />
           </div>
         </div>
+
+        {related.length > 0 ? (
+          <section className="mt-[clamp(2.5rem,1.5rem+3vw,4rem)]">
+            <h2 className="text-caption uppercase tracking-[0.16em] text-accent font-medium mb-4">
+              {t.productRelated}
+            </h2>
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
+              {related.map((item) => (
+                <li key={item.id}>
+                  <ProductCard product={item} compact />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
 
       {imageZoomOpen && imageSrc ? (

@@ -1,5 +1,47 @@
 import type { NextConfig } from "next";
 
+function supabaseHostname(): string | null {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return url ? new URL(url).hostname : null;
+  } catch {
+    return null;
+  }
+}
+
+const supabaseHost = supabaseHostname();
+
+const remotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
+  ...(supabaseHost
+    ? [
+        {
+          protocol: "https" as const,
+          hostname: supabaseHost,
+          pathname: "/storage/v1/object/public/**",
+        },
+      ]
+    : []),
+  {
+    protocol: "https",
+    hostname: "images.unsplash.com",
+  },
+  {
+    protocol: "https",
+    hostname: "**.supabase.co",
+    pathname: "/storage/v1/object/public/**",
+  },
+];
+
+const securityHeaders = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
+  },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -9,19 +51,17 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [64, 96, 128, 256, 384],
-    // Product image URLs are entered freely in Supabase, so any https host is allowed.
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-    ],
+    remotePatterns,
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
       {
         source: "/brands/:path*",
         headers: [

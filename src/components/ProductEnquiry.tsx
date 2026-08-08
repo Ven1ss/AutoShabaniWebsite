@@ -31,19 +31,19 @@ export default function ProductEnquiry({ product }: Props) {
           href={whatsappEnquireUrl(message)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 border border-as-dark/10 bg-as-white px-5 text-sm font-medium text-as-dark hover:border-accent hover:text-accent transition-colors"
+          className="inline-flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-control bg-accent px-5 text-sm font-semibold text-white hover:bg-accent-deep transition-colors"
         >
-          {t.catalogueWhatsApp}
+          {t.cartSendWhatsApp}
         </a>
         <a
           href={`tel:${CONTACT.phoneTel[0]}`}
-          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 border border-as-dark/10 bg-as-white px-5 text-sm font-medium text-as-dark hover:border-as-dark/30 transition-colors"
+          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-as-dark/10 bg-as-white px-5 text-sm font-medium text-as-dark hover:border-as-dark/30 transition-colors"
         >
           {t.catalogueCall}
         </a>
         <a
           href={mailtoEnquireUrl({ sku: product.sku, name, message })}
-          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 border border-as-dark/10 bg-as-white px-5 text-sm font-medium text-as-dark hover:border-as-dark/30 transition-colors"
+          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-as-dark/10 bg-as-white px-5 text-sm font-medium text-as-dark hover:border-as-dark/30 transition-colors"
         >
           {t.catalogueEmail}
         </a>

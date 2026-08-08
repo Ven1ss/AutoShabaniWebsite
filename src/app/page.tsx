@@ -1,5 +1,6 @@
 import SiteNav from "@/components/ui/SiteNav";
 import HomeHero from "@/components/home/HomeHero";
+import HomeTrustBar from "@/components/home/HomeTrustBar";
 import BrandLogoStrip from "@/components/home/BrandLogoStrip";
 import WhyUs from "@/components/home/WhyUs";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -18,6 +19,7 @@ export default async function Home() {
       <SiteNav overDark />
       <main>
         <HomeHero />
+        <HomeTrustBar />
         <BrandLogoStrip />
         <WhyUs />
         <FeaturedProducts products={products} />
