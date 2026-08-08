@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import CartButton from "@/components/CartButton";
 
 type HeaderProps = {
   /** hero = transparent over home hero; solid = always solid (inner pages) */
@@ -148,6 +149,7 @@ export default function Header({ variant = "hero" }: HeaderProps) {
               onHero ? "border-white/25" : "border-steel-light"
             }`}
           >
+            <CartButton onDark={onHero} />
             {(["sq", "en"] as const).map((lang) => (
               <button
                 key={lang}
@@ -166,6 +168,7 @@ export default function Header({ variant = "hero" }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-0.5 md:hidden shrink-0">
+          <CartButton onDark={onHero && !mobileOpen} />
           {(["sq", "en"] as const).map((lang) => (
             <button
               key={lang}

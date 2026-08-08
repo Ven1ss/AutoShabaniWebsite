@@ -18,6 +18,43 @@ export function buildEnquireMessage(opts: {
   return `Hello AUTO SHABANI, I would like to enquire about: ${opts.name} (SKU: ${opts.sku}). Is it available?`;
 }
 
+export type CartEnquireLine = {
+  sku: string;
+  name: string;
+  quantity: number;
+  code?: string;
+};
+
+export function buildCartEnquireMessage(opts: {
+  items: CartEnquireLine[];
+  locale: "sq" | "en";
+}): string {
+  const lines = opts.items.map((item) => {
+    const code = item.code ? ` · ${item.code}` : "";
+    return `• ${item.name} — SKU ${item.sku}${code} × ${item.quantity}`;
+  });
+
+  if (opts.locale === "sq") {
+    return [
+      "Përshëndetje AUTO SHABANI,",
+      "Dua të pyes për këto produkte:",
+      "",
+      ...lines,
+      "",
+      "A janë të disponueshme? Faleminderit.",
+    ].join("\n");
+  }
+
+  return [
+    "Hello AUTO SHABANI,",
+    "I would like to enquire about these products:",
+    "",
+    ...lines,
+    "",
+    "Are they available? Thank you.",
+  ].join("\n");
+}
+
 export function whatsappEnquireUrl(message: string): string {
   return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
 }
@@ -28,6 +65,20 @@ export function mailtoEnquireUrl(opts: {
   message: string;
 }): string {
   const subject = encodeURIComponent(`Enquiry: ${opts.name} (${opts.sku})`);
+  const body = encodeURIComponent(opts.message);
+  return `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
+}
+
+export function mailtoCartEnquireUrl(opts: {
+  itemCount: number;
+  message: string;
+  locale: "sq" | "en";
+}): string {
+  const subject = encodeURIComponent(
+    opts.locale === "sq"
+      ? `Porosi / pyetje — ${opts.itemCount} produkte`
+      : `Order enquiry — ${opts.itemCount} products`
+  );
   const body = encodeURIComponent(opts.message);
   return `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
 }

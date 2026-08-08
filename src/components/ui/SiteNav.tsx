@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import CartButton from "@/components/CartButton";
 
 type Props = {
   /** Over a dark hero — white text until scrolled */
@@ -117,6 +118,10 @@ export default function SiteNav({ overDark = false }: Props) {
               onDark ? "border-white/20" : "border-as-mist"
             }`}
           >
+            <CartButton
+              onDark={onDark}
+              className={onDark ? "" : "text-as-secondary hover:text-as-dark"}
+            />
             {(["sq", "en"] as const).map((lang) => (
               <button
                 key={lang}
@@ -140,6 +145,14 @@ export default function SiteNav({ overDark = false }: Props) {
         </nav>
 
         <div className="flex items-center md:hidden">
+          <CartButton
+            onDark={onDark && !open}
+            className={
+              open || solid
+                ? "text-as-secondary hover:text-as-dark"
+                : undefined
+            }
+          />
           {(["sq", "en"] as const).map((lang) => (
             <button
               key={lang}
