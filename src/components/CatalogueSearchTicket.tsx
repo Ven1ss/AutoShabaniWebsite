@@ -29,12 +29,14 @@ export default function CatalogueSearchTicket({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="ticket overflow-hidden border border-steel-light bg-surface-white">
+      <div className="ticket overflow-hidden rounded-control border border-steel-light bg-surface-white shadow-card">
         <div className="flex flex-col sm:flex-row sm:items-stretch">
           <label
             htmlFor={id}
             className={`flex shrink-0 items-center gap-2 border-b sm:border-b-0 sm:border-r border-steel-light/80 bg-surface-alt/80 ${
-              large ? "px-4 py-3 md:px-5 md:py-4" : "px-3 py-2.5"
+              large
+                ? "px-5 py-3 sm:pl-6 md:px-6 md:py-4"
+                : "px-4 py-2.5 sm:pl-5"
             }`}
           >
             <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-signal font-semibold">
@@ -61,7 +63,9 @@ export default function CatalogueSearchTicket({
             <button
               type="submit"
               className={`shrink-0 min-h-12 min-w-[4.5rem] sm:min-w-0 bg-signal hover:bg-signal-deep active:bg-signal-deep text-white font-semibold uppercase tracking-wider transition-colors ${
-                large ? "px-4 sm:px-5 md:px-7 text-sm" : "px-4 text-xs sm:text-sm"
+                large
+                  ? "px-5 sm:px-6 md:px-8 text-sm sm:pr-7 md:pr-9"
+                  : "px-5 text-xs sm:text-sm sm:pr-6"
               }`}
             >
               {t.searchSubmit}
