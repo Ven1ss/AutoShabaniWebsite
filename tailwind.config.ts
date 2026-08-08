@@ -59,33 +59,33 @@ const config: Config = {
         brand: ["Ethnocentric Rg", "var(--font-geist-sans)", "sans-serif"],
       },
       fontSize: {
-        // Type scale — Apple-adjacent
+        // Fluid type scale — tracks viewport continuously
         caption: [
-          "0.75rem",
+          "var(--text-caption)",
           { lineHeight: "1.333", letterSpacing: "0.01em", fontWeight: "400" },
         ],
         body: [
-          "1.0625rem",
+          "var(--text-body)",
           { lineHeight: "1.4706", letterSpacing: "-0.011em", fontWeight: "400" },
         ],
         price: [
-          "1.0625rem",
+          "var(--text-price)",
           { lineHeight: "1.2", letterSpacing: "-0.011em", fontWeight: "600" },
         ],
         button: [
-          "1.0625rem",
+          "var(--text-body)",
           { lineHeight: "1.176", letterSpacing: "-0.022em", fontWeight: "500" },
         ],
         subhead: [
-          "1.3125rem",
+          "clamp(1.125rem, 1rem + 0.7vw, 1.3125rem)",
           { lineHeight: "1.381", letterSpacing: "-0.016em", fontWeight: "400" },
         ],
         section: [
-          "clamp(2rem, 4.2vw, 3rem)",
+          "clamp(1.75rem, 1.2rem + 2.4vw, 3rem)",
           { lineHeight: "1.083", letterSpacing: "-0.025em", fontWeight: "600" },
         ],
         hero: [
-          "clamp(2.75rem, 7.5vw, 5rem)",
+          "clamp(2.25rem, 1.4rem + 5vw, 5rem)",
           { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "600" },
         ],
       },
@@ -95,14 +95,16 @@ const config: Config = {
         shelf: "1280px",
       },
       spacing: {
-        section: "7.5rem", // 120px
-        "section-lg": "10rem", // 160px
-        "section-xl": "11.25rem", // 180px
+        section: "7.5rem",
+        "section-lg": "10rem",
+        "section-xl": "11.25rem",
+        "page-x": "var(--page-pad-x)",
+        "gap-fluid": "var(--gap-md)",
       },
       borderRadius: {
-        control: "980px", // pill
-        card: "1.125rem", // 18px Apple-ish
-        media: "1.5rem",
+        control: "980px",
+        card: "var(--radius-card)",
+        media: "var(--radius-media)",
       },
       transitionDuration: {
         motion: "280ms",

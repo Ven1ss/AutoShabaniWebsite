@@ -81,8 +81,8 @@ export default function AddToCartButton({
       onClick={() => addItem(product)}
       className={`inline-flex items-center justify-center gap-2.5 rounded-control bg-accent text-white font-medium transition-all duration-motion-fast ease-apple hover:bg-accent-deep active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         large
-          ? "min-h-14 w-full px-7 text-button"
-          : "min-h-12 w-full sm:w-auto px-6 text-sm tracking-wider uppercase font-semibold"
+          ? "min-h-[var(--control-h)] w-full px-[clamp(1.25rem,1rem+1vw,1.75rem)] text-button"
+          : "min-h-[var(--control-h)] w-full sm:w-auto px-[clamp(1.1rem,0.9rem+0.8vw,1.5rem)] text-sm tracking-wider uppercase font-semibold"
       } ${className}`}
     >
       <CartIcon className={large ? "h-5 w-5" : "h-4 w-4"} />

@@ -68,10 +68,10 @@ export default function SiteNav({ overDark = false }: Props) {
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="container-as flex min-h-12 items-center justify-between gap-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="container-as flex min-h-[clamp(2.75rem,2.4rem+1vw,3.25rem)] items-center justify-between gap-[clamp(0.5rem,0.3rem+0.8vw,0.75rem)] py-[clamp(0.5rem,0.35rem+0.6vw,0.75rem)] pt-[max(0.5rem,env(safe-area-inset-top))]">
         <Link
           href="/"
-          className={`flex min-w-0 items-center gap-2.5 ${brandCls}`}
+          className={`flex min-w-0 items-center gap-[clamp(0.5rem,0.35rem+0.6vw,0.65rem)] ${brandCls}`}
           onClick={() => setOpen(false)}
         >
           <Image
@@ -79,21 +79,21 @@ export default function SiteNav({ overDark = false }: Props) {
             alt=""
             width={36}
             height={36}
-            className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
+            className="h-[clamp(1.75rem,1.5rem+0.8vw,2.25rem)] w-[clamp(1.75rem,1.5rem+0.8vw,2.25rem)] object-contain"
             priority
           />
-          <span className="truncate font-ethnocentric text-[10px] sm:text-xs tracking-brand uppercase">
+          <span className="truncate font-ethnocentric text-[clamp(0.5625rem,0.5rem+0.25vw,0.75rem)] tracking-brand uppercase">
             {t.brandName}
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-[clamp(1.25rem,0.8rem+1.5vw,2rem)]">
           {items.map((item) =>
             item.route ? (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-sm transition-colors duration-motion-fast ${
+                className={`text-[clamp(0.8125rem,0.75rem+0.2vw,0.875rem)] transition-colors duration-motion-fast ${
                   pathname.startsWith("/katalogu") && item.href === "/katalogu"
                     ? onDark
                       ? "text-white font-medium"
@@ -107,14 +107,14 @@ export default function SiteNav({ overDark = false }: Props) {
               <a
                 key={item.label}
                 href={item.href}
-                className={`text-sm transition-colors duration-motion-fast ${linkBase}`}
+                className={`text-[clamp(0.8125rem,0.75rem+0.2vw,0.875rem)] transition-colors duration-motion-fast ${linkBase}`}
               >
                 {item.label}
               </a>
             )
           )}
           <div
-            className={`flex items-center gap-1 border-l pl-5 ${
+            className={`flex items-center gap-1 border-l pl-[clamp(0.85rem,0.5rem+1vw,1.25rem)] ${
               onDark ? "border-white/20" : "border-as-mist"
             }`}
           >
@@ -144,7 +144,7 @@ export default function SiteNav({ overDark = false }: Props) {
           </div>
         </nav>
 
-        <div className="flex items-center md:hidden">
+        <div className="flex items-center lg:hidden">
           <CartButton
             onDark={onDark && !open}
             className={
@@ -198,7 +198,7 @@ export default function SiteNav({ overDark = false }: Props) {
       </div>
 
       {open ? (
-        <div className="md:hidden border-t border-black/5 bg-as-snow">
+        <div className="lg:hidden border-t border-black/5 bg-as-snow">
           <nav className="container-as flex flex-col py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {items.map((item) =>
               item.route ? (

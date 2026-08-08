@@ -11,7 +11,27 @@
   --as-dark: #1d1d1f;
   --as-black: #000000;
   --as-accent: #c8102e;
-  --section-pad: clamp(4.5rem, 10vw, 10rem);
+
+  /*
+   * Fluid scale — tracks viewport width continuously (not step breakpoints).
+   * 320px → ~0.88, 1280px → 1.0
+   */
+  --fluid-ratio: clamp(0.88, 0.82 + 0.4vw, 1);
+  --page-pad-x: clamp(1rem, 0.55rem + 2.2vw, 2.5rem);
+  --page-pad-y: clamp(1.25rem, 0.75rem + 2vw, 3rem);
+  --section-pad: clamp(3.5rem, 2rem + 6vw, 10rem);
+  --gap-sm: clamp(0.5rem, 0.3rem + 0.8vw, 0.75rem);
+  --gap-md: clamp(0.75rem, 0.4rem + 1.4vw, 1.5rem);
+  --gap-lg: clamp(1.25rem, 0.6rem + 2.5vw, 3.5rem);
+  --radius-card: clamp(0.75rem, 0.55rem + 0.7vw, 1.125rem);
+  --radius-media: clamp(0.875rem, 0.6rem + 1vw, 1.5rem);
+  --text-caption: clamp(0.6875rem, 0.64rem + 0.2vw, 0.75rem);
+  --text-body: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
+  --text-price: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
+  --text-title: clamp(1.35rem, 0.9rem + 2.2vw, 2.75rem);
+  --text-price-lg: clamp(1.35rem, 1rem + 1.6vw, 2rem);
+  --media-pad: clamp(0.75rem, 0.4rem + 1.5vw, 2.5rem);
+  --control-h: clamp(2.5rem, 2.2rem + 0.8vw, 3rem);
   --container-wide: 1120px;
   --container-content: 980px;
 }
@@ -20,6 +40,8 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Gentle rem scale so Tailwind rem utilities shrink with the page */
+  font-size: clamp(14px, 13px + 0.35vw, 16px);
 }
 
 body {
@@ -44,46 +66,21 @@ body {
   padding-bottom: var(--section-pad);
 }
 
-.container-as {
+.container-as,
+.container-as-narrow {
   width: 100%;
-  max-width: var(--container-wide);
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
+  padding-left: var(--page-pad-x);
+  padding-right: var(--page-pad-x);
+}
+
+.container-as {
+  max-width: var(--container-wide);
 }
 
 .container-as-narrow {
-  width: 100%;
   max-width: var(--container-content);
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-}
-
-@media (min-width: 640px) {
-  .container-as,
-  .container-as-narrow {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .container-as,
-  .container-as-narrow {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container-as,
-  .container-as-narrow {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-  }
 }
 
 .surface-light {

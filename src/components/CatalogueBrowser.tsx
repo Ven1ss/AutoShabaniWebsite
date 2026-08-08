@@ -189,7 +189,7 @@ export default function CatalogueBrowser({ products }: Props) {
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[clamp(0.4rem,0.25rem+0.7vw,0.75rem)]">
           {filtered.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} compact />

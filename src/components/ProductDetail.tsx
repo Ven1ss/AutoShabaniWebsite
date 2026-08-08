@@ -54,50 +54,59 @@ export default function ProductDetail({ product }: Props) {
   }, [product.slug]);
 
   return (
-    <article className="overflow-x-hidden pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-16 sm:pb-20 md:pb-28">
-      <div className="container mx-auto w-full max-w-full px-4 sm:px-6 md:px-8 lg:px-12">
+    <article className="overflow-x-hidden pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,7rem)]">
+      <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
         <Link
           href="/katalogu"
-          className="inline-flex min-h-11 items-center gap-2 text-caption uppercase tracking-wider text-as-secondary hover:text-as-dark transition-colors mb-6 sm:mb-10"
+          className="inline-flex min-h-11 items-center gap-2 text-caption uppercase tracking-wider text-as-secondary hover:text-as-dark transition-colors mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]"
         >
           <span aria-hidden>←</span> {t.catalogueBack}
         </Link>
 
         {/*
-          Mobile order: image → buy box → description → rate
-          Desktop: image | buy box; description + rate under image
+          < md: image → buy box → description → rate
+          ≥ md: image | buy box; description + rate under image
         */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-start">
-          {/* Image */}
-          <div className="min-w-0 order-1 lg:col-span-7 lg:col-start-1 lg:row-start-1">
-            <div className="relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card">
-              {imageSrc ? (
-                <Image
-                  src={imageSrc}
-                  alt={name}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="object-contain p-6 sm:p-10 md:p-12"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-as-gray px-4 text-center break-all">
-                  {product.sku || "—"}
-                </div>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-[var(--gap-lg)] items-start">
+          {/* Image — fluid width tracks the column / viewport */}
+          <div className="min-w-0 order-1 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-1">
+            <div
+              className="mx-auto w-full md:mx-0"
+              style={{
+                maxWidth:
+                  "min(100%, clamp(13.5rem, 42vw + 2rem, 36rem))",
+              }}
+            >
+              <div className="relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card">
+                {imageSrc ? (
+                  <Image
+                    src={imageSrc}
+                    alt={name}
+                    fill
+                    priority
+                    sizes="(max-width: 768px) min(100vw, 22rem), (max-width: 1024px) 45vw, 55vw"
+                    className="object-contain"
+                    style={{ padding: "var(--media-pad)" }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-as-gray px-4 text-center break-all">
+                    {product.sku || "—"}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Buy box */}
-          <div className="min-w-0 order-2 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-28">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-3 sm:mb-4">
+          <div className="min-w-0 order-2 md:col-span-6 lg:col-span-5 md:col-start-7 lg:col-start-8 md:row-start-1 md:row-span-3 md:sticky md:top-[clamp(5rem,4rem+2vw,7rem)]">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mb-[clamp(0.75rem,0.5rem+0.8vw,1rem)]">
               {product.brand ? (
                 <span className="text-caption uppercase tracking-[0.14em] text-as-gray">
                   {product.brand}
                 </span>
               ) : null}
               {product.brand && categoryLabel ? (
-                <span className="text-as-mist hidden xs:inline" aria-hidden>
+                <span className="text-as-mist" aria-hidden>
                   ·
                 </span>
               ) : null}
@@ -108,7 +117,10 @@ export default function ProductDetail({ product }: Props) {
               ) : null}
             </div>
 
-            <h1 className="text-[clamp(1.5rem,5vw,2.5rem)] font-semibold tracking-[-0.03em] text-as-dark leading-[1.15] mb-3 break-words">
+            <h1
+              className="font-semibold tracking-[-0.03em] text-as-dark leading-[1.15] mb-3 break-words"
+              style={{ fontSize: "var(--text-title)" }}
+            >
               {name}
             </h1>
 
@@ -118,11 +130,14 @@ export default function ProductDetail({ product }: Props) {
               record={rating}
             />
 
-            <p className="text-[1.5rem] sm:text-[2rem] font-semibold tracking-tight text-accent tabular-nums mb-5 sm:mb-6">
+            <p
+              className="font-semibold tracking-tight text-accent tabular-nums mb-[clamp(1rem,0.6rem+1.2vw,1.5rem)]"
+              style={{ fontSize: "var(--text-price-lg)" }}
+            >
               {price ?? t.cataloguePriceOnRequest}
             </p>
 
-            <dl className="grid gap-2.5 mb-6 sm:mb-8 text-sm border-y border-steel-light py-4">
+            <dl className="grid gap-[clamp(0.5rem,0.35rem+0.5vw,0.75rem)] mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] text-sm border-y border-steel-light py-[clamp(0.85rem,0.6rem+0.8vw,1.15rem)]">
               <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
                 <dt className="text-caption uppercase tracking-wider text-as-gray">
                   {t.catalogueSku}
@@ -141,7 +156,7 @@ export default function ProductDetail({ product }: Props) {
               ) : null}
             </dl>
 
-            <div className="space-y-3 mb-6 sm:mb-8">
+            <div className="space-y-3 mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)]">
               <AddToCartButton product={product} size="lg" />
               <p className="text-sm text-as-gray leading-relaxed">
                 {t.cartAddHint}
@@ -151,15 +166,14 @@ export default function ProductDetail({ product }: Props) {
             <ProductEnquiry product={product} />
           </div>
 
-          {/* Description under image on desktop; after buy box on mobile */}
           {description ? (
-            <section className="min-w-0 order-3 lg:col-span-7 lg:col-start-1 lg:row-start-2">
+            <section className="min-w-0 order-3 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-2">
               <h2 className="text-caption uppercase tracking-[0.16em] text-accent font-medium mb-3">
                 {t.productDescription}
               </h2>
-              <div className="border border-steel-light bg-as-white rounded-card p-4 sm:p-6 overflow-hidden">
+              <div className="border border-steel-light bg-as-white rounded-card p-[clamp(0.85rem,0.55rem+1vw,1.5rem)] overflow-hidden">
                 <p
-                  className={`text-sm sm:text-[0.9375rem] text-as-secondary leading-relaxed whitespace-pre-wrap break-words ${
+                  className={`text-sm text-as-secondary leading-relaxed whitespace-pre-wrap break-words ${
                     descriptionNeedsToggle && !descriptionExpanded
                       ? "line-clamp-6"
                       : ""
@@ -182,7 +196,7 @@ export default function ProductDetail({ product }: Props) {
             </section>
           ) : null}
 
-          <div className="min-w-0 order-4 lg:col-span-7 lg:col-start-1 lg:row-start-3">
+          <div className="min-w-0 order-4 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-3">
             <ProductRating
               productSlug={product.slug}
               record={rating}

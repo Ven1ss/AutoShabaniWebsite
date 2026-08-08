@@ -50,9 +50,12 @@ export default function ProductCard({
             fill
             priority={priority}
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            className={`object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04] ${
-              compact ? "p-3 sm:p-4" : "p-4 sm:p-5"
-            }`}
+            className="object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04]"
+            style={{
+              padding: compact
+                ? "clamp(0.5rem, 0.35rem + 0.6vw, 1rem)"
+                : "clamp(0.65rem, 0.4rem + 0.8vw, 1.25rem)",
+            }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center font-mono text-caption uppercase tracking-wider text-as-gray">
@@ -62,7 +65,13 @@ export default function ProductCard({
       </Link>
 
       <div
-        className={`flex flex-1 flex-col ${compact ? "gap-1 p-3" : "gap-1.5 p-4"}`}
+        className="flex flex-1 flex-col"
+        style={{
+          gap: compact ? "0.25rem" : "0.35rem",
+          padding: compact
+            ? "clamp(0.55rem, 0.4rem + 0.5vw, 0.75rem)"
+            : "clamp(0.7rem, 0.5rem + 0.6vw, 1rem)",
+        }}
       >
         <Link href={`/katalogu/${product.slug}`} className="flex flex-col gap-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">

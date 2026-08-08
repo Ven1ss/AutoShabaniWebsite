@@ -31,9 +31,9 @@ export default function CataloguePageClient({ products }: Props) {
     <>
       <SiteNav />
       <main className="min-h-screen bg-surface">
-        <section className="pt-[max(6.5rem,calc(env(safe-area-inset-top)+5rem))] pb-14 sm:pb-16 md:pb-20">
-          <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-            <p className="mb-6 sm:mb-8 text-base sm:text-lg text-ink leading-relaxed max-w-2xl">
+        <section className="pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,5rem)]">
+          <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
+            <p className="mb-[clamp(1rem,0.6rem+1.5vw,2rem)] text-[length:var(--text-body)] text-ink leading-relaxed max-w-2xl">
               {linkIndex >= 0 ? (
                 <>
                   {before}

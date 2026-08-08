@@ -14,7 +14,7 @@ type Props = {
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  "inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-control text-button transition-all duration-motion-fast ease-apple focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 min-h-[var(--control-h)] px-[clamp(1.1rem,0.9rem+0.8vw,1.5rem)] rounded-control text-button transition-all duration-motion-fast ease-apple focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
 
 function classes(variant: Variant, tone: Tone, fullWidth?: boolean, className?: string) {
   const width = fullWidth ? "w-full" : "";

@@ -37,7 +37,7 @@ export default function FeaturedProducts({ products }: Props) {
           </Link>
         </div>
 
-        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-[clamp(0.65rem,0.4rem+1vw,1.25rem)]">
           {featured.map((product, i) => (
             <li key={product.slug}>
               <ProductCard product={product} priority={i < 2} />
