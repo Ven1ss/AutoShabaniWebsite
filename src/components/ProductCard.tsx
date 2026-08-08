@@ -17,12 +17,18 @@ type Props = {
   product: Product;
   /** Compact for dense grids */
   compact?: boolean;
+  /** Eager-load image for LCP candidates */
+  priority?: boolean;
 };
 
 /**
  * Shared product card — homepage featured + /katalogu use this only.
  */
-export default function ProductCard({ product, compact = false }: Props) {
+export default function ProductCard({
+  product,
+  compact = false,
+  priority = false,
+}: Props) {
   const { t, locale } = useLanguage();
   const name = getLocalized(product.name, locale);
   const categoryLabel = isProductCategory(product.category)
@@ -32,7 +38,7 @@ export default function ProductCard({ product, compact = false }: Props) {
   const imageSrc = resolveProductImageUrl(product.image);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-card border border-steel-light bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover">
+    <article className="group flex h-full flex-col overflow-hidden rounded-card border border-steel-light bg-as-white transition-all duration-motion ease-apple sm:hover:-translate-y-1 sm:hover:shadow-card-hover [content-visibility:auto] [contain-intrinsic-size:auto_340px]">
       <Link
         href={`/katalogu/${product.slug}`}
         className="relative aspect-square overflow-hidden border-b border-steel-light bg-as-snow"
@@ -42,6 +48,7 @@ export default function ProductCard({ product, compact = false }: Props) {
             src={imageSrc}
             alt={name}
             fill
+            priority={priority}
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             className={`object-contain transition-transform duration-motion-slow ease-apple sm:group-hover:scale-[1.04] ${
               compact ? "p-3 sm:p-4" : "p-4 sm:p-5"

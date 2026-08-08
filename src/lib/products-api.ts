@@ -3,8 +3,17 @@ import { createSupabaseClient } from "@/lib/supabase/client";
 import type { ProductPublicRow } from "@/lib/supabase/database.types";
 import { resolveProductImageUrl, type Product } from "@/lib/products";
 
-function mapRow(row: ProductPublicRow): Product {
-  const description = row.description ?? "";
+const LIST_COLUMNS =
+  "id, name, sku, code, brand, category, image_url, selling_price" as const;
+const DETAIL_COLUMNS =
+  "id, name, sku, code, brand, description, category, image_url, selling_price" as const;
+
+type ListRow = Omit<ProductPublicRow, "description"> & {
+  description?: string | null;
+};
+
+function mapRow(row: ListRow, includeDescription = true): Product {
+  const description = includeDescription ? (row.description ?? "") : "";
   return {
     id: row.id,
     slug: row.id,
@@ -23,8 +32,7 @@ function mapRow(row: ProductPublicRow): Product {
 }
 
 /**
- * Fetch active products from the public view only.
- * purchase_price and hidden_references are never selected / returned.
+ * Slim catalogue list — skips description blobs for faster payloads.
  */
 export async function getProducts(): Promise<Product[]> {
   const supabase = createSupabaseClient();
@@ -37,9 +45,7 @@ export async function getProducts(): Promise<Product[]> {
 
   const { data, error } = await supabase
     .from("products_public")
-    .select(
-      "id, name, sku, code, brand, description, category, image_url, selling_price"
-    )
+    .select(LIST_COLUMNS)
     .order("brand", { ascending: true })
     .order("name", { ascending: true });
 
@@ -48,14 +54,14 @@ export async function getProducts(): Promise<Product[]> {
     return [];
   }
 
-  return (data ?? []).map(mapRow);
+  return (data ?? []).map((row) => mapRow(row, false));
 }
 
 /** Cached catalogue list for homepage / katalogu (ISR-friendly). */
 export const getProductsCached = unstable_cache(
   async () => getProducts(),
-  ["products-public-list"],
-  { revalidate: 60 }
+  ["products-public-list-v2"],
+  { revalidate: 120 }
 );
 
 /**
@@ -75,7 +81,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     return [];
   }
 
-  return (data ?? []).map(mapRow);
+  return (data ?? []).map((row) => mapRow(row, true));
 }
 
 /** Fetch a single product by slug from the public view only. */
@@ -85,9 +91,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
   const { data, error } = await supabase
     .from("products_public")
-    .select(
-      "id, name, sku, code, brand, description, category, image_url, selling_price"
-    )
+    .select(DETAIL_COLUMNS)
     .eq("id", slug)
     .maybeSingle();
 
@@ -96,5 +100,16 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
   if (!data) return null;
-  return mapRow(data);
+  return mapRow(data, true);
+}
+
+/** Cached product detail for PDP + metadata. */
+export async function getProductBySlugCached(
+  slug: string
+): Promise<Product | null> {
+  return unstable_cache(
+    async () => getProductBySlug(slug),
+    ["product-by-slug-v1", slug],
+    { revalidate: 120 }
+  )();
 }

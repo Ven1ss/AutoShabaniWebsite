@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import FadeIn from "@/components/ui/FadeIn";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Product } from "@/lib/products";
@@ -23,29 +22,25 @@ export default function FeaturedProducts({ products }: Props) {
   return (
     <section id="featured" className="surface-white section-pad">
       <div className="container-as">
-        <FadeIn>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12 md:mb-16">
-            <SectionHeading
-              eyebrow={t.navCatalogue}
-              title={t.catalogueFeatured}
-              align="left"
-              className="mb-0"
-            />
-            <Link
-              href="/katalogu"
-              className="inline-flex min-h-11 items-center text-body font-medium text-accent hover:text-accent-deep transition-colors self-start sm:self-auto sm:mb-1"
-            >
-              {t.catalogueBrowseAll} →
-            </Link>
-          </div>
-        </FadeIn>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12 md:mb-16">
+          <SectionHeading
+            eyebrow={t.navCatalogue}
+            title={t.catalogueFeatured}
+            align="left"
+            className="mb-0"
+          />
+          <Link
+            href="/katalogu"
+            className="inline-flex min-h-11 items-center text-body font-medium text-accent hover:text-accent-deep transition-colors self-start sm:self-auto sm:mb-1"
+          >
+            {t.catalogueBrowseAll} →
+          </Link>
+        </div>
 
         <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {featured.map((product, i) => (
             <li key={product.slug}>
-              <FadeIn delay={Math.min(i, 7) * 0.03}>
-                <ProductCard product={product} />
-              </FadeIn>
+              <ProductCard product={product} priority={i < 2} />
             </li>
           ))}
         </ul>

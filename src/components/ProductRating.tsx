@@ -192,10 +192,10 @@ export default function ProductRating({
   }
 
   return (
-    <section className="border border-steel-light bg-as-white p-5 sm:p-6 rounded-card space-y-6">
+    <section className="border border-steel-light bg-as-white p-4 sm:p-6 rounded-card space-y-6 overflow-hidden min-w-0">
       <div>
-        <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between mb-4">
+          <div className="min-w-0">
             <p className="text-caption uppercase tracking-[0.16em] text-accent font-medium mb-1">
               {t.productRate}
             </p>
@@ -204,7 +204,7 @@ export default function ProductRating({
             </h2>
           </div>
           {hydrated && record.count > 0 ? (
-            <div className="text-right">
+            <div className="sm:text-right shrink-0">
               <p className="text-2xl font-semibold text-as-dark tabular-nums leading-none">
                 {record.average.toFixed(1)}
               </p>
@@ -286,15 +286,15 @@ export default function ProductRating({
               placeholder={t.productCommentPlaceholder}
               className="w-full resize-none border border-steel-light bg-as-snow/70 px-3 py-2.5 text-sm text-as-gray placeholder:text-as-gray/80 cursor-not-allowed"
             />
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               <button
                 type="button"
                 disabled
-                className="inline-flex min-h-11 items-center justify-center border border-steel-light bg-as-mist/50 px-5 text-sm font-medium text-as-secondary cursor-not-allowed"
+                className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center border border-steel-light bg-as-mist/50 px-5 text-sm font-medium text-as-secondary cursor-not-allowed"
               >
                 {t.productCommentLoginCta}
               </button>
-              <p className="text-sm text-as-gray">
+              <p className="text-sm text-as-gray leading-snug">
                 {t.productCommentLoginRequired}
               </p>
             </div>
@@ -319,13 +319,13 @@ export default function ProductRating({
             {comments.map((comment) => (
               <li
                 key={comment.id}
-                className="border border-steel-light bg-as-snow/50 p-4"
+                className="border border-steel-light bg-as-snow/50 p-3 sm:p-4 min-w-0"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <p className="text-sm font-medium text-as-dark">
+                <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 mb-2">
+                  <p className="text-sm font-medium text-as-dark break-words">
                     {comment.authorName}
                   </p>
-                  <p className="text-caption text-as-gray">
+                  <p className="text-caption text-as-gray shrink-0">
                     {formatCommentDate(comment.createdAt, locale)}
                   </p>
                 </div>
@@ -334,7 +334,7 @@ export default function ProductRating({
                     <Stars value={comment.rating} size="sm" />
                   </div>
                 ) : null}
-                <p className="text-sm text-as-secondary leading-relaxed whitespace-pre-wrap">
+                <p className="text-sm text-as-secondary leading-relaxed whitespace-pre-wrap break-words">
                   {comment.text}
                 </p>
               </li>

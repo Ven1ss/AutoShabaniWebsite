@@ -7,8 +7,8 @@ import HomeContact from "@/components/home/HomeContact";
 import Footer from "@/components/Footer";
 import { getProductsCached } from "@/lib/products-api";
 
-/** Cache product list — inventory updates within ~60s via ISR. */
-export const revalidate = 60;
+/** Cache product list — inventory updates within ~2 minutes via ISR. */
+export const revalidate = 120;
 
 export default async function Home() {
   const products = await getProductsCached();

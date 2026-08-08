@@ -8,9 +8,16 @@ export async function GET(request: Request) {
   const q = searchParams.get("q")?.trim() ?? "";
 
   if (!q) {
-    return NextResponse.json([]);
+    return NextResponse.json([], {
+      headers: { "Cache-Control": "public, max-age=30" },
+    });
   }
 
   const products = await searchProducts(q);
-  return NextResponse.json(products);
+  return NextResponse.json(products, {
+    headers: {
+      // Short private cache helps repeat keystrokes feel instant.
+      "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+    },
+  });
 }
