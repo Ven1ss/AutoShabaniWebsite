@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,7 +33,9 @@ type Props = {
 
 export default function ProductDetail({ product }: Props) {
   const { t, locale } = useLanguage();
+  const zoomTitleId = useId();
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const [imageZoomOpen, setImageZoomOpen] = useState(false);
   const [rating, setRating] = useState<ProductRatingRecord>({
     average: 0,
     count: 0,
@@ -52,6 +54,23 @@ export default function ProductDetail({ product }: Props) {
   useEffect(() => {
     setRating(getProductRating(product.slug));
   }, [product.slug]);
+
+  useEffect(() => {
+    if (!imageZoomOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setImageZoomOpen(false);
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [imageZoomOpen]);
 
   return (
     <article className="overflow-x-hidden pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,7rem)]">
@@ -77,23 +96,46 @@ export default function ProductDetail({ product }: Props) {
                   "min(100%, clamp(13.5rem, 42vw + 2rem, 36rem))",
               }}
             >
-              <div className="relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card">
-                {imageSrc ? (
+              {imageSrc ? (
+                <button
+                  type="button"
+                  onClick={() => setImageZoomOpen(true)}
+                  aria-label={t.productImageZoom}
+                  className="group relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                >
                   <Image
                     src={imageSrc}
                     alt={name}
                     fill
                     priority
                     sizes="(max-width: 768px) min(100vw, 22rem), (max-width: 1024px) 45vw, 55vw"
-                    className="object-contain"
+                    className="object-contain transition-transform duration-motion ease-apple group-hover:scale-[1.03]"
                     style={{ padding: "var(--media-pad)" }}
                   />
-                ) : (
+                  <span className="pointer-events-none absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-steel-light bg-as-white/90 text-as-secondary shadow-card opacity-90 transition-opacity group-hover:opacity-100">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.75}
+                        d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16ZM11 8v6M8 11h6"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              ) : (
+                <div className="relative aspect-square w-full overflow-hidden rounded-media border border-steel-light bg-gradient-to-b from-as-white to-as-snow shadow-card">
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-as-gray px-4 text-center break-all">
                     {product.sku || "—"}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -205,6 +247,64 @@ export default function ProductDetail({ product }: Props) {
           </div>
         </div>
       </div>
+
+      {imageZoomOpen && imageSrc ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={zoomTitleId}
+          className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6"
+        >
+          <button
+            type="button"
+            aria-label={t.productImageZoomClose}
+            className="absolute inset-0 bg-as-dark/70 backdrop-blur-[3px] cursor-zoom-out"
+            onClick={() => setImageZoomOpen(false)}
+          />
+          <div className="relative z-10 flex h-full w-full max-h-[min(92vh,56rem)] max-w-[min(96vw,56rem)] flex-col">
+            <div className="mb-3 flex items-center justify-between gap-3 px-1">
+              <p
+                id={zoomTitleId}
+                className="min-w-0 truncate text-sm font-medium text-white/90"
+              >
+                {name}
+              </p>
+              <button
+                type="button"
+                onClick={() => setImageZoomOpen(false)}
+                className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors"
+                aria-label={t.productImageZoomClose}
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.75}
+                    d="M6 18 18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="relative min-h-0 flex-1 overflow-hidden rounded-media bg-as-white shadow-card-hover">
+              <Image
+                src={imageSrc}
+                alt={name}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                style={{ padding: "clamp(1rem, 2vw, 2.5rem)" }}
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -61,6 +61,8 @@ export const translations = {
     catalogueViewLess: "Shiko më pak",
 
     productDescription: "Përshkrimi",
+    productImageZoom: "Zmadho foton",
+    productImageZoomClose: "Mbyll zmadhimin",
     productRate: "Vlerëso",
     productRateTitle: "Vlerëso këtë produkt",
     productRatePrompt: "Sa yje do t’i jepje?",
@@ -197,6 +199,8 @@ export const translations = {
     catalogueViewLess: "View less",
 
     productDescription: "Description",
+    productImageZoom: "Zoom image",
+    productImageZoomClose: "Close zoom",
     productRate: "Rate",
     productRateTitle: "Rate this product",
     productRatePrompt: "How many stars would you give?",
