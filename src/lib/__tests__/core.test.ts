@@ -8,6 +8,13 @@ import {
   whyNotSellableOnline,
   type Product,
 } from "@/lib/products";
+import {
+  canTransition,
+  formatOrderNumber,
+  isValidOrderNumber,
+  validateEmail,
+  validatePhone,
+} from "@/lib/orders";
 import { fieldMatchesQuery, withinEditDistance } from "@/lib/search-rank";
 
 const sample: Product = {
@@ -87,5 +94,26 @@ describe("search rank", () => {
     expect(withinEditDistance("abro", "abro", 1)).toBe(true);
     expect(withinEditDistance("abro", "abrp", 1)).toBe(true);
     expect(fieldMatchesQuery("EC533", "ec533")).toBe("exact");
+  });
+});
+
+describe("order helpers", () => {
+  it("formats and validates order numbers", () => {
+    expect(formatOrderNumber(2026, 42)).toBe("AS-2026-000042");
+    expect(isValidOrderNumber("AS-2026-000001")).toBe(true);
+    expect(isValidOrderNumber("bad")).toBe(false);
+  });
+
+  it("enforces status transitions", () => {
+    expect(canTransition("pending_payment", "awaiting_pickup")).toBe(true);
+    expect(canTransition("ready", "completed")).toBe(true);
+    expect(canTransition("completed", "preparing")).toBe(false);
+  });
+
+  it("validates phone and email", () => {
+    expect(validatePhone("+383 49 238 509")).toBe(true);
+    expect(validatePhone("12")).toBe(false);
+    expect(validateEmail("a@b.co")).toBe(true);
+    expect(validateEmail("nope")).toBe(false);
   });
 });

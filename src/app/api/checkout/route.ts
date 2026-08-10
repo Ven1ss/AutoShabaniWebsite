@@ -1,28 +1,28 @@
 import { NextResponse } from "next/server";
-import { createSupabaseClient } from "@/lib/supabase/client";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { sendOrderEmail } from "@/lib/email";
 import {
-  buildCartEnquireMessage,
-  whatsappEnquireUrl,
-} from "@/lib/contact";
-
-type Item = {
-  sku: string;
-  name: string;
-  quantity: number;
-  code?: string;
-  slug?: string;
-  sellingPrice?: number | null;
-};
+  createOrder,
+  resolveCheckoutLines,
+  setOrderStripeSession,
+} from "@/lib/order-service";
+import {
+  isPaymentMethod,
+  validateEmail,
+  validatePhone,
+  type PaymentMethod,
+} from "@/lib/orders";
+import { createServiceSupabaseClient } from "@/lib/supabase/server";
 
 type Body = {
   locale?: "sq" | "en";
-  items?: Item[];
-  customer_name?: string;
-  customer_email?: string;
-  customer_phone?: string;
-  /** Prefer Stripe when configured */
-  preferPaid?: boolean;
+  items?: { productId?: string; qty?: number }[];
+  customer?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+  notes?: string;
+  paymentMethod?: PaymentMethod | string;
 };
 
 export async function POST(request: Request) {
@@ -33,98 +33,132 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const items = Array.isArray(body.items) ? body.items : [];
-  if (items.length === 0) {
-    return NextResponse.json({ error: "Cart empty" }, { status: 400 });
+  if (!createServiceSupabaseClient()) {
+    return NextResponse.json(
+      { error: "Ordering is not configured" },
+      { status: 503 }
+    );
   }
 
+  const name = (body.customer?.name ?? "").trim();
+  const phone = (body.customer?.phone ?? "").trim();
+  const email = (body.customer?.email ?? "").trim();
+
+  if (!name || !validatePhone(phone) || !validateEmail(email)) {
+    return NextResponse.json(
+      { error: "Name, phone, and email are required" },
+      { status: 400 }
+    );
+  }
+
+  if (!isPaymentMethod(body.paymentMethod)) {
+    return NextResponse.json(
+      { error: "paymentMethod must be stripe or pickup" },
+      { status: 400 }
+    );
+  }
+
+  const paymentMethod = body.paymentMethod;
   const locale = body.locale === "en" ? "en" : "sq";
-  const message = buildCartEnquireMessage({
+  const rawItems = Array.isArray(body.items) ? body.items : [];
+
+  const resolved = await resolveCheckoutLines(
+    rawItems.map((i) => ({
+      productId: String(i.productId ?? ""),
+      qty: Number(i.qty ?? 0),
+    }))
+  );
+
+  if (!resolved.ok) {
+    return NextResponse.json({ error: resolved.error }, { status: 400 });
+  }
+
+  if (paymentMethod === "stripe" && !process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: "Card payments not configured" },
+      { status: 400 }
+    );
+  }
+
+  const created = await createOrder({
     locale,
-    items: items.map((i) => ({
-      sku: i.sku,
-      name: i.name,
-      quantity: i.quantity,
-      code: i.code,
-    })),
+    customer: { name, phone, email },
+    notes: body.notes ?? null,
+    paymentMethod,
+    lines: resolved.lines,
+    subtotal: resolved.subtotal,
+    decrementStock: paymentMethod === "pickup",
+    initialStatus:
+      paymentMethod === "pickup" ? "awaiting_pickup" : "pending_payment",
+    paymentStatus: "unpaid",
   });
 
-  const subtotal = items.reduce((sum, item) => {
-    const price = item.sellingPrice;
-    if (price == null || Number.isNaN(price)) return sum;
-    return sum + price * item.quantity;
-  }, 0);
-
-  const supabase =
-    (await createServerSupabaseClient()) || createSupabaseClient();
-
-  let orderId: string | null = null;
-  if (supabase) {
-    const { data, error } = await supabase
-      .from("enquiry_orders")
-      .insert({
-        locale,
-        channel: body.preferPaid ? "web" : "whatsapp",
-        message,
-        items: items as never,
-        subtotal: subtotal || null,
-        customer_name: body.customer_name ?? null,
-        customer_email: body.customer_email ?? null,
-        customer_phone: body.customer_phone ?? null,
-        status: "submitted",
-      })
-      .select("id")
-      .maybeSingle();
-    if (!error) orderId = data?.id ?? null;
+  if (!created.ok) {
+    return NextResponse.json({ error: created.error }, { status: 400 });
   }
 
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const order = created.order;
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
     "http://localhost:3000";
 
-  if (body.preferPaid && stripeKey && subtotal > 0) {
-    try {
-      const Stripe = (await import("stripe")).default;
-      const stripe = new Stripe(stripeKey);
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        success_url: `${siteUrl}/porosia/sukses?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl}/katalogu`,
-        customer_email: body.customer_email || undefined,
-        line_items: items
-          .filter((i) => i.sellingPrice != null && i.sellingPrice > 0)
-          .map((i) => ({
-            quantity: i.quantity,
-            price_data: {
-              currency: "eur",
-              unit_amount: Math.round(Number(i.sellingPrice) * 100),
-              product_data: {
-                name: i.name,
-                metadata: { sku: i.sku },
-              },
-            },
-          })),
-        metadata: {
-          enquiry_order_id: orderId ?? "",
-        },
-      });
-
-      return NextResponse.json({
-        ok: true,
-        mode: "stripe",
-        orderId,
-        checkoutUrl: session.url,
-      });
-    } catch (err) {
-      console.error("[checkout stripe]", err);
-    }
+  if (paymentMethod === "pickup") {
+    await sendOrderEmail("created", order);
+    return NextResponse.json({
+      ok: true,
+      mode: "pickup",
+      orderNumber: order.number,
+      orderId: order.id,
+      redirectUrl: `/porosia/sukses?order=${encodeURIComponent(order.number)}`,
+    });
   }
 
-  return NextResponse.json({
-    ok: true,
-    mode: "whatsapp",
-    orderId,
-    whatsappUrl: whatsappEnquireUrl(message),
-  });
+  // Stripe Checkout — amounts come only from server-resolved lines.
+  try {
+    const Stripe = (await import("stripe")).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: email,
+      success_url: `${siteUrl}/porosia/sukses?order=${encodeURIComponent(order.number)}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/porosia?cancelled=1`,
+      line_items: resolved.lines.map((line) => ({
+        quantity: line.qty,
+        price_data: {
+          currency: "eur",
+          unit_amount: Math.round(line.unitPrice * 100),
+          product_data: {
+            name: locale === "en" ? line.nameEn : line.nameSq,
+            metadata: { sku: line.sku, product_id: line.productId },
+          },
+        },
+      })),
+      metadata: {
+        order_id: order.id,
+        order_number: order.number,
+      },
+    });
+
+    if (session.id) {
+      await setOrderStripeSession(order.id, session.id);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      mode: "stripe",
+      orderNumber: order.number,
+      orderId: order.id,
+      checkoutUrl: session.url,
+    });
+  } catch (err) {
+    console.error("[checkout stripe]", err);
+    return NextResponse.json(
+      {
+        error:
+          err instanceof Error ? err.message : "Could not start card checkout",
+      },
+      { status: 502 }
+    );
+  }
 }
