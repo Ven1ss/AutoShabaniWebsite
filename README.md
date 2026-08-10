@@ -97,5 +97,5 @@ supabase/
 ## Notes
 
 - `/design-system` is redirected away in production
-- Product image hosts are limited to Supabase storage (+ Unsplash for demos)
+- Catalogue product images may come from any https host (supplier CDNs); `next/image` allows `hostname: "**"` for that reason
 - Ratings/comments require Supabase Auth (magic link) and migration `001`
