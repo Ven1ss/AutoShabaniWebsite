@@ -202,7 +202,7 @@ export default function CatalogueBrowser({ products }: Props) {
 
   return (
     <div>
-      <div className="mb-3 sm:mb-4">
+      <div className="mb-3 min-w-0 sm:mb-4">
         <CatalogueSearchTicket
           value={query}
           onChange={(v) => startTransition(() => setQuery(v))}
