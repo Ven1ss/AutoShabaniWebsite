@@ -352,7 +352,8 @@ async function hydrate(order: OrderRow | null): Promise<OrderWithItems | null> {
 export async function getOrderById(
   id: string
 ): Promise<OrderWithItems | null> {
-  const supabase = requireServiceClient();
+  const supabase = createServiceSupabaseClient();
+  if (!supabase) return null;
   const { data } = await supabase
     .from("orders")
     .select("*")
@@ -364,7 +365,8 @@ export async function getOrderById(
 export async function getOrderByNumber(
   number: string
 ): Promise<OrderWithItems | null> {
-  const supabase = requireServiceClient();
+  const supabase = createServiceSupabaseClient();
+  if (!supabase) return null;
   const { data } = await supabase
     .from("orders")
     .select("*")
@@ -376,7 +378,8 @@ export async function getOrderByNumber(
 export async function getOrderByStripeSession(
   sessionId: string
 ): Promise<OrderWithItems | null> {
-  const supabase = requireServiceClient();
+  const supabase = createServiceSupabaseClient();
+  if (!supabase) return null;
   const { data } = await supabase
     .from("orders")
     .select("*")

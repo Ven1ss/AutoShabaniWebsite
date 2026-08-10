@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { StockStatus } from "@/lib/supabase/database.types";
+import AdminOrdersPanel from "@/components/admin/AdminOrdersPanel";
 
 type AdminProduct = {
   id: string;
@@ -69,10 +70,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     load();
-    fetch("/api/admin/orders")
+    fetch("/api/admin/enquiries")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data?.orders) setOrders(data.orders);
+        if (data?.enquiries) setOrders(data.enquiries);
       })
       .catch(() => undefined);
   }, [load]);
@@ -188,7 +189,7 @@ export default function AdminDashboard() {
             Admin
           </p>
           <h1 className="text-2xl font-semibold text-as-dark tracking-tight">
-            Products & enquiries
+            Products, orders & enquiries
           </h1>
         </div>
         <Link
@@ -480,6 +481,8 @@ export default function AdminDashboard() {
           </table>
         </div>
       </section>
+
+      <AdminOrdersPanel />
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">

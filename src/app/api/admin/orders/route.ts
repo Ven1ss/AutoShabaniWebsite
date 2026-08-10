@@ -108,6 +108,33 @@ export async function PATCH(request: Request) {
     await restockOrderItems(id);
   }
 
+  if (
+    status === "refunded" &&
+    updated.order.payment_method === "stripe" &&
+    updated.order.stripe_payment_intent_id &&
+    process.env.STRIPE_SECRET_KEY
+  ) {
+    try {
+      const Stripe = (await import("stripe")).default;
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      await stripe.refunds.create({
+        payment_intent: updated.order.stripe_payment_intent_id,
+      });
+    } catch (err) {
+      console.error("[admin refund]", err);
+      return NextResponse.json(
+        {
+          error:
+            err instanceof Error
+              ? `Status updated but Stripe refund failed: ${err.message}`
+              : "Status updated but Stripe refund failed",
+          order: summarizeOrder(updated.order),
+        },
+        { status: 502 }
+      );
+    }
+  }
+
   if (status === "ready") {
     await sendOrderEmail("ready", updated.order);
   } else if (status === "cancelled") {
