@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
-import { useLanguage } from "@/context/LanguageContext";
 import { pushRecentSearch } from "@/lib/recent-searches";
 
 /** Homepage search — jumps straight into /katalogu with the query. */
 export default function HomeSearchStrip() {
-  const { t } = useLanguage();
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -22,9 +20,6 @@ export default function HomeSearchStrip() {
     <section className="relative z-20 -mt-4 sm:-mt-6 px-0">
       <div className="container-as min-w-0">
         <div className="min-w-0 rounded-xl border border-steel-light/80 bg-as-white p-3 sm:p-4 shadow-card">
-          <p className="mb-2 text-sm text-as-secondary px-0.5">
-            {t.catalogueSubtitle}
-          </p>
           <CatalogueSearchTicket
             value={query}
             onChange={setQuery}
