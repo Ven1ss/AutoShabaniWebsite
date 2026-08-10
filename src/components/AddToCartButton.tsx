@@ -3,6 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import type { CartProductInput } from "@/lib/cart";
+import { isSellableOnline } from "@/lib/products";
 
 type Props = {
   product: CartProductInput;
@@ -40,7 +41,13 @@ export default function AddToCartButton({
 }: Props) {
   const { t } = useLanguage();
   const { addItem, items } = useCart();
+  const sellable = isSellableOnline(product);
   const inCart = items.some((item) => item.slug === product.slug);
+
+  if (!sellable) {
+    if (compact) return null;
+    return null;
+  }
 
   if (compact) {
     return (

@@ -1,12 +1,15 @@
 -- Catalogue search: match name / name_en / sku / code / brand / hidden_references
 -- without ever returning purchase_price or hidden_references.
 -- Spaces are ignored in both the query and the stored values.
--- Safe to re-run.
+-- Safe to re-run. Includes Phase A sell_online / stock_qty fields.
 
 create schema if not exists private;
 
 revoke all on schema private from public;
 grant usage on schema private to postgres, anon, authenticated, service_role;
+
+drop function if exists public.search_products(text);
+drop function if exists private.search_products(text);
 
 create or replace function private.search_products(search_query text)
 returns table (
@@ -23,7 +26,10 @@ returns table (
   image_url text,
   selling_price numeric,
   featured boolean,
-  stock_status text
+  stock_status text,
+  sell_online boolean,
+  stock_qty integer,
+  max_qty_per_order integer
 )
 language plpgsql
 stable
@@ -50,7 +56,10 @@ begin
       p.image_url,
       p.selling_price,
       p.featured,
-      p.stock_status
+      p.stock_status,
+      coalesce(p.sell_online, true),
+      p.stock_qty,
+      coalesce(p.max_qty_per_order, 10)
     from public.products p
     order by p.featured desc, p.brand nulls last, p.name;
     return;
@@ -73,7 +82,10 @@ begin
     p.image_url,
     p.selling_price,
     p.featured,
-    p.stock_status
+    p.stock_status,
+    coalesce(p.sell_online, true),
+    p.stock_qty,
+    coalesce(p.max_qty_per_order, 10)
   from public.products p
   where
     regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
@@ -113,7 +125,10 @@ returns table (
   image_url text,
   selling_price numeric,
   featured boolean,
-  stock_status text
+  stock_status text,
+  sell_online boolean,
+  stock_qty integer,
+  max_qty_per_order integer
 )
 language sql
 stable

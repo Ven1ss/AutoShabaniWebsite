@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { buildProductSlug, slugify } from "@/lib/slug";
 import { cartItemCount, clampQty, productToCartItem } from "@/lib/cart";
-import { filterProducts, type Product } from "@/lib/products";
+import {
+  filterProducts,
+  isSellableOnline,
+  maxOrderQty,
+  whyNotSellableOnline,
+  type Product,
+} from "@/lib/products";
 import { fieldMatchesQuery, withinEditDistance } from "@/lib/search-rank";
 
 const sample: Product = {
@@ -17,6 +23,9 @@ const sample: Product = {
   sellingPrice: 4,
   featured: false,
   stockStatus: "in_stock",
+  sellOnline: true,
+  stockQty: null,
+  maxQtyPerOrder: 10,
 };
 
 describe("slugify", () => {
@@ -32,6 +41,7 @@ describe("cart helpers", () => {
   it("clamps quantity", () => {
     expect(clampQty(0)).toBe(1);
     expect(clampQty(200)).toBe(99);
+    expect(clampQty(20, 5)).toBe(5);
   });
 
   it("counts items", () => {
@@ -40,11 +50,34 @@ describe("cart helpers", () => {
   });
 });
 
+describe("sellable online", () => {
+  it("allows priced in-stock products", () => {
+    expect(isSellableOnline(sample)).toBe(true);
+    expect(whyNotSellableOnline(sample)).toBeNull();
+  });
+
+  it("blocks on-request and out-of-stock", () => {
+    expect(
+      isSellableOnline({ ...sample, stockStatus: "on_request" })
+    ).toBe(false);
+    expect(
+      isSellableOnline({ ...sample, stockStatus: "out_of_stock" })
+    ).toBe(false);
+    expect(whyNotSellableOnline({ ...sample, sellingPrice: null })).toBe(
+      "no_price"
+    );
+  });
+
+  it("respects sell_online and stock_qty", () => {
+    expect(isSellableOnline({ ...sample, sellOnline: false })).toBe(false);
+    expect(isSellableOnline({ ...sample, stockQty: 0 })).toBe(false);
+    expect(maxOrderQty({ ...sample, stockQty: 3, maxQtyPerOrder: 10 })).toBe(3);
+  });
+});
+
 describe("filterProducts", () => {
   it("filters by brand", () => {
-    expect(
-      filterProducts([sample], { brand: "ABRO" })
-    ).toHaveLength(1);
+    expect(filterProducts([sample], { brand: "ABRO" })).toHaveLength(1);
     expect(filterProducts([sample], { brand: "BOSCH" })).toHaveLength(0);
   });
 });

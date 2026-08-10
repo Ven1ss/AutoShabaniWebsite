@@ -8,7 +8,7 @@ import {
   mailtoEnquireUrl,
   whatsappEnquireUrl,
 } from "@/lib/contact";
-import { getLocalized, type Product } from "@/lib/products";
+import { getLocalized, isSellableOnline, type Product } from "@/lib/products";
 
 type Props = {
   product: Product;
@@ -18,18 +18,23 @@ export default function ProductEnquiry({ product }: Props) {
   const { t, locale } = useLanguage();
   const name = getLocalized(product.name, locale);
   const message = buildEnquireMessage({ sku: product.sku, name, locale });
+  const sellable = isSellableOnline(product);
 
   return (
     <div className="border-t border-steel-light pt-6 sm:pt-8 space-y-3">
       <p className="text-sm text-as-secondary max-w-md leading-relaxed">
-        {t.catalogueEnquireNote}
+        {sellable ? t.catalogueEnquireNoteSellable : t.catalogueEnquireNote}
       </p>
       <a
         href={whatsappEnquireUrl(message)}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackEvent("whatsapp_click", { place: "pdp" })}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-control bg-accent px-5 text-sm font-semibold text-white hover:bg-accent-deep transition-colors"
+        className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-control px-5 text-sm font-semibold transition-colors ${
+          sellable
+            ? "border border-steel-light bg-as-white text-as-dark hover:border-as-dark/30"
+            : "bg-accent text-white hover:bg-accent-deep"
+        }`}
       >
         {t.cartSendWhatsApp}
       </a>

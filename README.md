@@ -1,6 +1,6 @@
 # AUTO SHABANI — Car spare parts catalogue
 
-Enquiry-based catalogue for **AUTO SHABANI** (Prishtina, Kosovo). Browse parts, build a list, then send it on WhatsApp / call / email — **no online checkout**.
+Enquiry-based catalogue for **AUTO SHABANI** (Prishtina, Kosovo). Browse parts, add **in-stock** items to the cart, and enquire on WhatsApp for everything else. Full online checkout is being rolled out in phases.
 
 ## Tech stack
 
@@ -14,10 +14,11 @@ Enquiry-based catalogue for **AUTO SHABANI** (Prishtina, Kosovo). Browse parts, 
 - Catalogue search (incl. private `hidden_references` via secure RPC)
 - Brand / category filters, sort, SEO slug URLs
 - Product detail with image zoom, related products, ratings
-- Enquiry cart → WhatsApp / phone / email
+- Sellable-online rules (priced + in stock) with cart quantity caps
+- Enquiry cart → WhatsApp / phone / email (checkout foundation next)
 - Albanian + English (cookie + localStorage)
 - Admin CMS (`/admin`) for product CRUD + CSV import
-- Enquiry order logging (foundation for future checkout)
+- Enquiry order logging
 
 ## Getting started
 
@@ -48,6 +49,7 @@ In the Supabase SQL editor, run in order:
 1. `supabase/schema.sql`
 2. `supabase/search_products.sql`
 3. `supabase/migrations/001_improvements.sql` (profiles, ratings, orders, storage, admin RLS)
+4. `supabase/migrations/003_online_ordering_foundation.sql` (sell_online / stock_qty) — then re-run `search_products.sql`
 
 Promote an admin user after first magic-link login:
 

@@ -88,6 +88,16 @@ export async function POST(request: Request) {
       (row.featured || "").toLowerCase()
     ),
     stock_status: (row.stock_status || "on_request") as AdminProductInput["stock_status"],
+    sell_online: row.sell_online
+      ? ["1", "true", "yes"].includes(row.sell_online.toLowerCase())
+      : undefined,
+    stock_qty:
+      row.stock_qty === undefined || row.stock_qty === ""
+        ? null
+        : Number(row.stock_qty),
+    max_qty_per_order: row.max_qty_per_order
+      ? Number(row.max_qty_per_order)
+      : undefined,
     hidden_references: row.hidden_references || "",
   }));
 

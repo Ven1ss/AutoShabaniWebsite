@@ -48,7 +48,9 @@ export const translations = {
     catalogueCall: "Telefono",
     catalogueEmail: "Email",
     catalogueEnquireNote:
-      "Nuk ka blerje online — na kontaktoni për stok, çmim dhe porosi.",
+      "Ky produkt porositet me kërkesë — na kontaktoni për stok dhe çmim.",
+    catalogueEnquireNoteSellable:
+      "Mund ta shtosh në shportë. Për pyetje shtesë, na shkruaj në WhatsApp.",
     catalogueSort: "Rendit",
     catalogueSortRelevance: "Relevanca",
     catalogueSortPriceAsc: "Çmimi ↑",
@@ -79,25 +81,25 @@ export const translations = {
     productNoComments: "Ende pa komente.",
     productCommentThanks: "Komenti u shtua.",
 
-    // Cart (enquiry basket — no online checkout)
+    // Cart
     cartTitle: "Shporta",
     cartOpen: "Hap shportën",
     cartClose: "Mbyll shportën",
     cartEmpty: "Shporta është bosh.",
-    cartEmptyHint: "Shto produkte nga katalogu, pastaj na kontaktoni.",
+    cartEmptyHint: "Shto produkte në stok nga katalogu.",
     cartBrowse: "Shiko katalogun",
     cartAdd: "Shto në shportë",
     cartAdded: "U shtua",
     cartInCart: "Në shportë",
     cartAddHint:
-      "Shto produkte në listë, pastaj dërgo kërkesën me WhatsApp — pa blerje online.",
+      "Produktet në stok mund t’i shtosh në shportë. Porosia përfundimtare vjen në hapin tjetër.",
     cartRemove: "Hiq",
     cartClear: "Pastro shportën",
     cartQuantity: "Sasia",
     cartSubtotal: "Nëntotali",
     cartCheckoutTitle: "Dërgo kërkesën",
     cartCheckoutNote:
-      "Nuk ka blerje online — dërgo listën në WhatsApp, telefon ose email për stok dhe porosi.",
+      "Dërgo listën në WhatsApp, telefon ose email. Pagesa e plotë online vjen së shpejti.",
     cartItems: "produkte",
     cartItem: "produkt",
     cartSendWhatsApp: "Dërgo listën në WhatsApp",
@@ -107,6 +109,9 @@ export const translations = {
     productStockIn: "Në stok",
     productStockRequest: "Me kërkesë",
     productStockOut: "Jo në stok",
+    productNotSellableOut: "Ky produkt nuk është në stok për porosi online.",
+    productNotSellableRequest:
+      "Ky produkt është me kërkesë — pyet në WhatsApp për disponueshmëri.",
     productLoginTitle: "Kyçu",
     productLoginEmail: "Email",
     productLoginSend: "Dërgo linkun",
@@ -235,7 +240,9 @@ export const translations = {
     catalogueCall: "Call",
     catalogueEmail: "Email",
     catalogueEnquireNote:
-      "No online checkout — contact us for stock, pricing, and ordering.",
+      "This product is on request — contact us for stock and pricing.",
+    catalogueEnquireNoteSellable:
+      "You can add this to your cart. For extra questions, message us on WhatsApp.",
     catalogueSort: "Sort",
     catalogueSortRelevance: "Relevance",
     catalogueSortPriceAsc: "Price ↑",
@@ -266,25 +273,25 @@ export const translations = {
     productNoComments: "No comments yet.",
     productCommentThanks: "Comment posted.",
 
-    // Cart (enquiry basket — no online checkout)
+    // Cart
     cartTitle: "Cart",
     cartOpen: "Open cart",
     cartClose: "Close cart",
     cartEmpty: "Your cart is empty.",
-    cartEmptyHint: "Add products from the catalogue, then contact us.",
+    cartEmptyHint: "Add in-stock products from the catalogue.",
     cartBrowse: "Browse catalogue",
     cartAdd: "Add to cart",
     cartAdded: "Added",
     cartInCart: "In cart",
     cartAddHint:
-      "Build a list, then send your enquiry on WhatsApp — no online checkout.",
+      "In-stock products can go in your cart. Full online checkout is next.",
     cartRemove: "Remove",
     cartClear: "Clear cart",
     cartQuantity: "Qty",
     cartSubtotal: "Subtotal",
     cartCheckoutTitle: "Send enquiry",
     cartCheckoutNote:
-      "No online checkout — send this list via WhatsApp, call, or email for stock and ordering.",
+      "Send this list on WhatsApp, call, or email. Full online payment is coming soon.",
     cartItems: "items",
     cartItem: "item",
     cartSendWhatsApp: "Send list on WhatsApp",
@@ -294,6 +301,9 @@ export const translations = {
     productStockIn: "In stock",
     productStockRequest: "On request",
     productStockOut: "Out of stock",
+    productNotSellableOut: "This product is out of stock for online orders.",
+    productNotSellableRequest:
+      "This product is on request — ask on WhatsApp for availability.",
     productLoginTitle: "Sign in",
     productLoginEmail: "Email",
     productLoginSend: "Send magic link",

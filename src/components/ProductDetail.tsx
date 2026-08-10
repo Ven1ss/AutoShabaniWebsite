@@ -19,6 +19,7 @@ import {
   formatPrice,
   getLocalized,
   isProductCategory,
+  isSellableOnline,
   resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
@@ -215,10 +216,20 @@ export default function ProductDetail({ product, related = [] }: Props) {
             </dl>
 
             <div className="space-y-3 mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)]">
-              <AddToCartButton product={product} size="lg" />
-              <p className="text-sm text-as-gray leading-relaxed">
-                {t.cartAddHint}
-              </p>
+              {isSellableOnline(product) ? (
+                <>
+                  <AddToCartButton product={product} size="lg" />
+                  <p className="text-sm text-as-gray leading-relaxed">
+                    {t.cartAddHint}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-as-gray leading-relaxed">
+                  {product.stockStatus === "out_of_stock"
+                    ? t.productNotSellableOut
+                    : t.productNotSellableRequest}
+                </p>
+              )}
             </div>
 
             <ProductEnquiry product={product} />

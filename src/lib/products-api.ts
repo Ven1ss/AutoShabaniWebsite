@@ -7,10 +7,14 @@ import type {
 import { isUuid } from "@/lib/slug";
 import { resolveProductImageUrl, type Product } from "@/lib/products";
 
+const LIST_COLUMNS_V3 =
+  "id, slug, name, name_en, sku, code, brand, category, image_url, selling_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order" as const;
 const LIST_COLUMNS_V2 =
   "id, slug, name, name_en, sku, code, brand, category, image_url, selling_price, featured, stock_status" as const;
 const LIST_COLUMNS_V1 =
   "id, name, sku, code, brand, category, image_url, selling_price" as const;
+const DETAIL_COLUMNS_V3 =
+  "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order" as const;
 const DETAIL_COLUMNS_V2 =
   "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, featured, stock_status" as const;
 const DETAIL_COLUMNS_V1 =
@@ -28,6 +32,7 @@ function mapRow(row: ListRow, includeDescription = true): Product {
   const descriptionEn = includeDescription
     ? (row.description_en ?? row.description ?? "")
     : "";
+  const stockStatus = (row.stock_status as StockStatus) || "on_request";
   return {
     id: row.id,
     slug: row.slug || row.id,
@@ -49,13 +54,19 @@ function mapRow(row: ListRow, includeDescription = true): Product {
         ? null
         : Number(row.selling_price),
     featured: Boolean(row.featured),
-    stockStatus: (row.stock_status as StockStatus) || "on_request",
+    stockStatus,
+    sellOnline: row.sell_online !== false,
+    stockQty:
+      row.stock_qty === null || row.stock_qty === undefined
+        ? null
+        : Number(row.stock_qty),
+    maxQtyPerOrder: Math.max(1, Number(row.max_qty_per_order ?? 10) || 10),
   };
 }
 
 /**
  * Slim catalogue list — skips description blobs for faster payloads.
- * Falls back to legacy columns if migration 001 is not applied yet.
+ * Falls back through column sets if newer migrations are not applied yet.
  */
 export async function getProducts(): Promise<Product[]> {
   const supabase = createSupabaseClient();
@@ -64,6 +75,18 @@ export async function getProducts(): Promise<Product[]> {
       "[products] Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
     );
     return [];
+  }
+
+  const v3 = await supabase
+    .from("products_public")
+    .select(LIST_COLUMNS_V3)
+    .order("brand", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (!v3.error && v3.data) {
+    return v3.data
+      .map((row) => mapRow(row, false))
+      .sort((a, b) => Number(b.featured) - Number(a.featured));
   }
 
   const modern = await supabase
@@ -95,7 +118,7 @@ export async function getProducts(): Promise<Product[]> {
 /** Cached catalogue list for homepage / katalogu (ISR-friendly). */
 export const getProductsCached = unstable_cache(
   async () => getProducts(),
-  ["products-public-list-v3"],
+  ["products-public-list-v4"],
   { revalidate: 120 }
 );
 
@@ -131,6 +154,16 @@ async function fetchDetail(
 ): Promise<Product | null> {
   const supabase = createSupabaseClient();
   if (!supabase) return null;
+
+  const v3 = await supabase
+    .from("products_public")
+    .select(DETAIL_COLUMNS_V3)
+    .eq(column, value)
+    .maybeSingle();
+
+  if (!v3.error && v3.data) {
+    return mapRow(v3.data, true);
+  }
 
   const modern = await supabase
     .from("products_public")
@@ -177,7 +210,7 @@ export async function getProductBySlugCached(
 ): Promise<Product | null> {
   return unstable_cache(
     async () => getProductBySlug(slug),
-    ["product-by-slug-v2", slug],
+    ["product-by-slug-v3", slug],
     { revalidate: 120 }
   )();
 }

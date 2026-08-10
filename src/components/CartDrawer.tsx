@@ -18,6 +18,7 @@ import {
   getLocalized,
   resolveProductImageUrl,
 } from "@/lib/products";
+import { cartItemMaxQty } from "@/lib/cart";
 
 async function saveEnquiryOrder(payload: {
   locale: string;
@@ -151,6 +152,7 @@ export default function CartDrawer() {
                           : item.sellingPrice * item.quantity,
                         locale
                       );
+                      const maxQty = cartItemMaxQty(item);
                       return (
                         <li
                           key={item.slug}
@@ -220,7 +222,8 @@ export default function CartDrawer() {
                                 <button
                                   type="button"
                                   aria-label="+"
-                                  className="min-h-9 min-w-9 text-as-dark hover:bg-as-mist transition-colors"
+                                  disabled={item.quantity >= maxQty}
+                                  className="min-h-9 min-w-9 text-as-dark hover:bg-as-mist transition-colors disabled:opacity-40 disabled:pointer-events-none"
                                   onClick={() =>
                                     setQuantity(item.slug, item.quantity + 1)
                                   }

@@ -34,6 +34,9 @@ const demoProduct: Product = {
   sellingPrice: 24.5,
   featured: true,
   stockStatus: "in_stock",
+  sellOnline: true,
+  stockQty: null,
+  maxQtyPerOrder: 10,
 };
 
 const demoProduct2: Product = {

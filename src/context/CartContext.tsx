@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   cartItemCount,
+  cartItemMaxQty,
   cartSubtotal,
   clampQty,
   productToCartItem,
@@ -19,6 +20,7 @@ import {
   type CartItem,
   type CartProductInput,
 } from "@/lib/cart";
+import { isSellableOnline } from "@/lib/products";
 
 type CartContextValue = {
   items: CartItem[];
@@ -29,7 +31,7 @@ type CartContextValue = {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
-  addItem: (product: CartProductInput, quantity?: number) => void;
+  addItem: (product: CartProductInput, quantity?: number) => boolean;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
@@ -66,20 +68,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const toggleCart = useCallback(() => setIsOpen((v) => !v), []);
 
   const addItem = useCallback(
-    (product: CartProductInput, quantity = 1) => {
-      const qty = clampQty(quantity);
+    (product: CartProductInput, quantity = 1): boolean => {
+      if (!isSellableOnline(product)) return false;
+      const max = cartItemMaxQty({
+        id: product.id,
+        slug: product.slug,
+        sku: product.sku,
+        code: product.code,
+        name: product.name,
+        brand: product.brand,
+        image: product.image,
+        sellingPrice: product.sellingPrice,
+        quantity: 1,
+        stockStatus: product.stockStatus,
+        sellOnline: product.sellOnline,
+        stockQty: product.stockQty,
+        maxQtyPerOrder: product.maxQtyPerOrder,
+      });
+      if (max < 1) return false;
+
+      const qty = clampQty(quantity, max);
       setItems((prev) => {
         const existing = prev.find((item) => item.slug === product.slug);
         if (existing) {
           return prev.map((item) =>
             item.slug === product.slug
-              ? { ...item, quantity: clampQty(item.quantity + qty) }
+              ? {
+                  ...item,
+                  ...productToCartItem(product, 1),
+                  quantity: clampQty(item.quantity + qty, max),
+                }
               : item
           );
         }
         return [...prev, productToCartItem(product, qty)];
       });
       setIsOpen(true);
+      return true;
     },
     []
   );
@@ -91,9 +116,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQuantity = useCallback((slug: string, quantity: number) => {
     setItems((prev) =>
       prev
-        .map((item) =>
-          item.slug === slug ? { ...item, quantity: clampQty(quantity) } : item
-        )
+        .map((item) => {
+          if (item.slug !== slug) return item;
+          const max = cartItemMaxQty(item);
+          return { ...item, quantity: clampQty(quantity, max) };
+        })
         .filter((item) => item.quantity > 0)
     );
   }, []);

@@ -1,10 +1,17 @@
-import type { LocaleText, Product } from "@/lib/products";
+import {
+  isSellableOnline,
+  maxOrderQty,
+  type LocaleText,
+  type Product,
+  type StockStatus,
+} from "@/lib/products";
 
 export const CART_STORAGE_KEY = "auto-shabani-cart";
 export const CART_MAX_QTY = 99;
 
 /** Snapshot stored in cart — survives catalogue refreshes. */
 export type CartItem = {
+  id: string;
   slug: string;
   sku: string;
   code: string;
@@ -13,18 +20,35 @@ export type CartItem = {
   image: string;
   sellingPrice: number | null;
   quantity: number;
+  stockStatus: StockStatus;
+  sellOnline: boolean;
+  stockQty: number | null;
+  maxQtyPerOrder: number;
 };
 
 export type CartProductInput = Pick<
   Product,
-  "slug" | "sku" | "code" | "name" | "brand" | "image" | "sellingPrice"
+  | "id"
+  | "slug"
+  | "sku"
+  | "code"
+  | "name"
+  | "brand"
+  | "image"
+  | "sellingPrice"
+  | "stockStatus"
+  | "sellOnline"
+  | "stockQty"
+  | "maxQtyPerOrder"
 >;
 
 export function productToCartItem(
   product: CartProductInput,
   quantity = 1
 ): CartItem {
+  const max = maxOrderQty(product, CART_MAX_QTY);
   return {
+    id: product.id,
     slug: product.slug,
     sku: product.sku,
     code: product.code,
@@ -32,13 +56,28 @@ export function productToCartItem(
     brand: product.brand,
     image: product.image,
     sellingPrice: product.sellingPrice,
-    quantity: clampQty(quantity),
+    quantity: clampQty(quantity, max),
+    stockStatus: product.stockStatus,
+    sellOnline: product.sellOnline !== false,
+    stockQty: product.stockQty ?? null,
+    maxQtyPerOrder: product.maxQtyPerOrder || 10,
   };
 }
 
-export function clampQty(n: number): number {
+export function clampQty(n: number, max = CART_MAX_QTY): number {
   if (!Number.isFinite(n)) return 1;
-  return Math.min(CART_MAX_QTY, Math.max(1, Math.floor(n)));
+  const ceiling = Math.max(1, max);
+  return Math.min(ceiling, Math.max(1, Math.floor(n)));
+}
+
+export function cartItemMaxQty(item: CartItem): number {
+  return maxOrderQty(
+    {
+      stockQty: item.stockQty,
+      maxQtyPerOrder: item.maxQtyPerOrder,
+    },
+    CART_MAX_QTY
+  );
 }
 
 export function cartItemCount(items: CartItem[]): number {
@@ -54,6 +93,18 @@ export function cartSubtotal(items: CartItem[]): number | null {
     sum += item.sellingPrice * item.quantity;
   }
   return hasPrice ? sum : null;
+}
+
+export function cartHasSellableItems(items: CartItem[]): boolean {
+  return items.some((item) =>
+    isSellableOnline({
+      sellingPrice: item.sellingPrice,
+      stockStatus: item.stockStatus,
+      sellOnline: item.sellOnline,
+      stockQty: item.stockQty,
+      maxQtyPerOrder: item.maxQtyPerOrder,
+    })
+  );
 }
 
 export function readCartFromStorage(): CartItem[] {
@@ -90,7 +141,25 @@ function normalizeStoredItem(value: unknown): CartItem | null {
       ? (row.name as LocaleText)
       : { sq: String(row.name ?? ""), en: String(row.name ?? "") };
 
+  const stockStatus =
+    row.stockStatus === "in_stock" ||
+    row.stockStatus === "out_of_stock" ||
+    row.stockStatus === "on_request"
+      ? row.stockStatus
+      : "on_request";
+
+  const maxQtyPerOrder = Math.max(1, Number(row.maxQtyPerOrder ?? 10) || 10);
+  const stockQty =
+    row.stockQty === null || row.stockQty === undefined
+      ? null
+      : Number(row.stockQty);
+  const max = maxOrderQty(
+    { stockQty, maxQtyPerOrder },
+    CART_MAX_QTY
+  );
+
   return {
+    id: typeof row.id === "string" && row.id ? row.id : row.slug,
     slug: row.slug,
     sku: row.sku,
     code: typeof row.code === "string" ? row.code : "",
@@ -104,6 +173,11 @@ function normalizeStoredItem(value: unknown): CartItem | null {
       row.sellingPrice === null || row.sellingPrice === undefined
         ? null
         : Number(row.sellingPrice),
-    quantity: clampQty(Number(row.quantity ?? 1)),
+    quantity: clampQty(Number(row.quantity ?? 1), Math.max(1, max || 1)),
+    stockStatus,
+    sellOnline: row.sellOnline !== false,
+    stockQty:
+      stockQty === null || Number.isNaN(stockQty) ? null : stockQty,
+    maxQtyPerOrder,
   };
 }

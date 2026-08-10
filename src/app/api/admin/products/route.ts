@@ -8,18 +8,29 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
+  const modern = await supabase
+    .from("products")
+    .select(
+      "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, purchase_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order, hidden_references, updated_at"
+    )
+    .order("updated_at", { ascending: false });
+
+  if (!modern.error) {
+    return NextResponse.json({ products: modern.data ?? [] });
+  }
+
+  const legacy = await supabase
     .from("products")
     .select(
       "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, purchase_price, featured, stock_status, hidden_references, updated_at"
     )
     .order("updated_at", { ascending: false });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (legacy.error) {
+    return NextResponse.json({ error: legacy.error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ products: data ?? [] });
+  return NextResponse.json({ products: legacy.data ?? [] });
 }
 
 export async function POST(request: Request) {

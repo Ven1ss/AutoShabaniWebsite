@@ -26,6 +26,9 @@ export type ProductTableRow = {
   hidden_references: string | null;
   featured: boolean;
   stock_status: StockStatus;
+  sell_online: boolean;
+  stock_qty: number | null;
+  max_qty_per_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -46,6 +49,9 @@ export type ProductPublicRow = {
   selling_price: number | null;
   featured: boolean;
   stock_status: StockStatus;
+  sell_online?: boolean;
+  stock_qty?: number | null;
+  max_qty_per_order?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -113,6 +119,9 @@ export type Database = {
           hidden_references?: string | null;
           featured?: boolean;
           stock_status?: StockStatus;
+          sell_online?: boolean;
+          stock_qty?: number | null;
+          max_qty_per_order?: number;
           created_at?: string;
           updated_at?: string;
         };
