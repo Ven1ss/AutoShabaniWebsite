@@ -1,6 +1,55 @@
 -- Online ordering foundation (Phase A).
--- Safe to re-run. Run after 001_improvements.sql.
+-- Safe to re-run. Self-heals if 001 product columns were never applied.
 
+-- ---------------------------------------------------------------------------
+-- Ensure base product columns from 001 exist (older DBs may lack them)
+-- ---------------------------------------------------------------------------
+alter table public.products
+  add column if not exists slug text,
+  add column if not exists name_en text,
+  add column if not exists description_en text,
+  add column if not exists featured boolean not null default false,
+  add column if not exists stock_status text not null default 'on_request',
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
+update public.products
+set slug = lower(regexp_replace(coalesce(sku, id::text), '[^a-zA-Z0-9]+', '-', 'g'))
+where slug is null or slug = '';
+
+update public.products
+set name_en = coalesce(nullif(name_en, ''), name)
+where name_en is null or name_en = '';
+
+update public.products
+set description_en = coalesce(nullif(description_en, ''), description, '')
+where description_en is null;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'products_slug_key'
+  ) then
+    begin
+      alter table public.products add constraint products_slug_key unique (slug);
+    exception
+      when unique_violation then
+        -- leave constraint off if duplicates exist; fix slugs manually later
+        null;
+    end;
+  end if;
+  if not exists (
+    select 1 from pg_constraint where conname = 'products_stock_status_check'
+  ) then
+    alter table public.products
+      add constraint products_stock_status_check
+      check (stock_status in ('in_stock', 'on_request', 'out_of_stock'));
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- Phase A ordering columns
+-- ---------------------------------------------------------------------------
 alter table public.products
   add column if not exists sell_online boolean not null default true,
   add column if not exists stock_qty integer,
@@ -31,12 +80,16 @@ comment on column public.products.stock_qty is
 comment on column public.products.max_qty_per_order is
   'Hard cap per cart line (also clamped by stock_qty when set).';
 
--- Only explicitly in-stock + sell_online products are cartable; keep on_request as enquire-only.
+-- Only explicitly in-stock + sell_online products are cartable.
 update public.products
 set sell_online = false
 where stock_status is distinct from 'in_stock'
   and sell_online is true;
 
+create index if not exists products_slug_idx on public.products (slug);
+create index if not exists products_featured_idx
+  on public.products (featured)
+  where featured = true;
 create index if not exists products_sell_online_idx
   on public.products (sell_online)
   where sell_online = true;

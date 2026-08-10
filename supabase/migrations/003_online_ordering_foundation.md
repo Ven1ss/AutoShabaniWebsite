@@ -21,6 +21,6 @@ Everything else stays enquire-only (WhatsApp / call / email).
 
 ## Apply
 
-Run `003_online_ordering_foundation.sql` in the Supabase SQL editor after `001_improvements.sql`.
-
-Also update `search_products` (see `search_products.sql`) so RPC results include the new columns.
+1. Run this file in the Supabase SQL editor (it also adds missing `stock_status` / slug columns if `001` was skipped).
+2. Re-run `supabase/search_products.sql` so RPC results include the new columns.
+3. Then run `004_orders.sql` for checkout tables.
