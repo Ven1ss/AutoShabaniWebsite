@@ -212,7 +212,6 @@ export default function AdminDashboard() {
               ["code", "Code"],
               ["brand", "Brand"],
               ["category", "Category"],
-              ["image_url", "Image URL"],
               ["selling_price", "Selling price"],
               ["purchase_price", "Purchase price"],
             ] as const
@@ -231,6 +230,57 @@ export default function AdminDashboard() {
               />
             </label>
           ))}
+          <label className="space-y-1 text-sm sm:col-span-2">
+            <span className="text-caption uppercase tracking-wider text-as-gray">
+              Image URL
+            </span>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                value={form.image_url}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, image_url: e.target.value }))
+                }
+                className="w-full min-h-11 rounded-lg border border-steel-light px-3"
+              />
+              <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center rounded-control border border-steel-light px-4 text-sm">
+                Upload
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setBusy(true);
+                    setError("");
+                    const body = new FormData();
+                    body.set("file", file);
+                    const res = await fetch("/api/admin/upload", {
+                      method: "POST",
+                      body,
+                    });
+                    setBusy(false);
+                    if (!res.ok) {
+                      const data = await res.json().catch(() => ({}));
+                      setError(data.error || "Upload failed");
+                      return;
+                    }
+                    const data = await res.json();
+                    setForm((prev) => ({ ...prev, image_url: data.url }));
+                    setMessage("Image uploaded");
+                  }}
+                />
+              </label>
+            </div>
+            {form.image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={form.image_url}
+                alt=""
+                className="mt-2 h-24 w-24 rounded-md border border-steel-light object-contain bg-as-snow"
+              />
+            ) : null}
+          </label>
           <label className="space-y-1 text-sm sm:col-span-2">
             <span className="text-caption uppercase tracking-wider text-as-gray">
               Description (SQ)

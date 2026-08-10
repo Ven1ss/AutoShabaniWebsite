@@ -38,6 +38,9 @@ export type Product = {
   sellingPrice: number | null;
   featured: boolean;
   stockStatus: StockStatus;
+  /** Optional aggregate rating for cards */
+  ratingAverage?: number;
+  ratingCount?: number;
 };
 
 export function getLocalized(text: LocaleText, locale: "sq" | "en"): string {

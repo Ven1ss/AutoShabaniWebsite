@@ -68,7 +68,7 @@ export default function SiteNav({ overDark = false }: Props) {
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="container-as flex min-h-[clamp(2.75rem,2.4rem+1vw,3.25rem)] items-center justify-between gap-[clamp(0.5rem,0.3rem+0.8vw,0.75rem)] py-[clamp(0.5rem,0.35rem+0.6vw,0.75rem)] pt-[max(0.5rem,env(safe-area-inset-top))]">
+      <div className="container-as flex min-h-[3.25rem] sm:min-h-[clamp(2.75rem,2.4rem+1vw,3.25rem)] items-center justify-between gap-2 sm:gap-[clamp(0.5rem,0.3rem+0.8vw,0.75rem)] py-2 sm:py-[clamp(0.5rem,0.35rem+0.6vw,0.75rem)] pt-[max(0.5rem,env(safe-area-inset-top))]">
         <Link
           href="/"
           className={`flex min-w-0 items-center gap-[clamp(0.5rem,0.35rem+0.6vw,0.65rem)] ${brandCls}`}

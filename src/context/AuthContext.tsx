@@ -25,6 +25,7 @@ type AuthContextValue = {
   loading: boolean;
   /** Send a magic-link email */
   signInWithEmail: (email: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   /** @deprecated use signInWithEmail */
   login: (user: AuthUser) => void;
@@ -119,6 +120,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return error ? { error: error.message } : {};
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    const supabase = createBrowserSupabaseClient();
+    if (!supabase) return { error: "Auth is not configured." };
+
+    const redirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback`
+        : undefined;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+
+    return error ? { error: error.message } : {};
+  }, []);
+
   const logout = useCallback(async () => {
     const supabase = createBrowserSupabaseClient();
     await supabase?.auth.signOut();
@@ -135,10 +153,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoggedIn: user !== null,
       loading,
       signInWithEmail,
+      signInWithGoogle,
       logout,
       login,
     }),
-    [user, loading, signInWithEmail, logout, login]
+    [user, loading, signInWithEmail, signInWithGoogle, logout, login]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

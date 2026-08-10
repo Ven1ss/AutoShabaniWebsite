@@ -14,7 +14,7 @@ export default function HomeHero() {
   return (
     <section
       id="hero"
-      className="relative min-h-[min(72svh,36rem)] flex flex-col justify-end overflow-hidden bg-as-dark text-white"
+      className="relative min-h-[min(58svh,28rem)] sm:min-h-[min(72svh,36rem)] flex flex-col justify-end overflow-hidden bg-as-dark text-white"
     >
       <Image
         src="/hero-car.png"

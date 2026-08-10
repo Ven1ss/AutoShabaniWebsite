@@ -9,11 +9,15 @@ import {
   filterProducts,
   isProductCategory,
   sortProducts,
-  uniqueBrands,
-  uniqueCategories,
   type Product,
   type ProductSort,
 } from "@/lib/products";
+import {
+  clearRecentSearches,
+  pushRecentSearch,
+  readRecentSearches,
+} from "@/lib/recent-searches";
+import { fieldMatchesQuery } from "@/lib/search-rank";
 
 type Props = {
   products: Product[];
@@ -38,6 +42,42 @@ function ChevronIcon() {
   );
 }
 
+function countBy(
+  list: Product[],
+  key: "brand" | "category"
+): { value: string; count: number }[] {
+  const map = new Map<string, number>();
+  for (const p of list) {
+    const v = p[key];
+    if (!v) continue;
+    map.set(v, (map.get(v) ?? 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+}
+
+function localFuzzySearch(products: Product[], query: string, locale: "sq" | "en") {
+  const q = query.trim();
+  if (!q) return products;
+  const scored = products
+    .map((p) => {
+      const fields = [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq];
+      let score = 0;
+      for (const field of fields) {
+        const m = fieldMatchesQuery(field, q);
+        if (m === "exact") score += 40;
+        else if (m === "includes") score += 20;
+        else if (m === "fuzzy") score += 8;
+      }
+      if (p.featured) score += 2;
+      return { p, score };
+    })
+    .filter((row) => row.score > 0)
+    .sort((a, b) => b.score - a.score);
+  return scored.map((row) => row.p);
+}
+
 export default function CatalogueBrowser({ products }: Props) {
   const { t, locale } = useLanguage();
   const router = useRouter();
@@ -46,12 +86,16 @@ export default function CatalogueBrowser({ products }: Props) {
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [brand, setBrand] = useState(searchParams.get("brand") ?? "all");
-  const [category, setCategory] = useState(searchParams.get("category") ?? "all");
+  const [category, setCategory] = useState(
+    searchParams.get("category") ?? "all"
+  );
   const [sort, setSort] = useState<ProductSort>("relevance");
   const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
+  const [recent, setRecent] = useState<string[]>([]);
 
-  const brands = useMemo(() => uniqueBrands(products), [products]);
-  const categories = useMemo(() => uniqueCategories(products), [products]);
+  useEffect(() => {
+    setRecent(readRecentSearches());
+  }, []);
 
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
@@ -82,7 +126,7 @@ export default function CatalogueBrowser({ products }: Props) {
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("[catalogue] Remote search failed:", error);
-        setRemoteMatches(null);
+        setRemoteMatches(localFuzzySearch(products, q, locale));
       }
     }, 200);
 
@@ -90,7 +134,7 @@ export default function CatalogueBrowser({ products }: Props) {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, products, locale]);
 
   function syncUrl(next: { q?: string; brand?: string; category?: string }) {
     const params = new URLSearchParams();
@@ -104,6 +148,15 @@ export default function CatalogueBrowser({ products }: Props) {
     router.replace(qs ? `/katalogu?${qs}` : "/katalogu", { scroll: false });
   }
 
+  function submitSearch(v: string) {
+    const q = v.trim();
+    startTransition(() => {
+      setQuery(q);
+      syncUrl({ q });
+      if (q) setRecent(pushRecentSearch(q));
+    });
+  }
+
   function clearFilters() {
     startTransition(() => {
       setBrand("all");
@@ -113,12 +166,25 @@ export default function CatalogueBrowser({ products }: Props) {
     });
   }
 
+  const searchBase = useMemo(() => {
+    if (remoteMatches) return remoteMatches;
+    if (query.trim()) return localFuzzySearch(products, query, locale);
+    return products;
+  }, [products, remoteMatches, query, locale]);
+
+  const brandFacets = useMemo(
+    () => countBy(filterProducts(searchBase, { category, locale }), "brand"),
+    [searchBase, category, locale]
+  );
+  const categoryFacets = useMemo(
+    () => countBy(filterProducts(searchBase, { brand, locale }), "category"),
+    [searchBase, brand, locale]
+  );
+
   const filtered = useMemo(() => {
-    const base = remoteMatches
-      ? filterProducts(remoteMatches, { brand, category, locale })
-      : filterProducts(products, { query, brand, category, locale });
+    const base = filterProducts(searchBase, { brand, category, locale });
     return sortProducts(base, sort, locale);
-  }, [products, remoteMatches, query, brand, category, locale, sort]);
+  }, [searchBase, brand, category, locale, sort]);
 
   const hasActiveFilters =
     brand !== "all" || category !== "all" || sort !== "relevance";
@@ -131,29 +197,129 @@ export default function CatalogueBrowser({ products }: Props) {
         : category;
 
   const selectClass =
-    "peer w-full min-h-11 appearance-none rounded-md border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-as-dark/30 focus:shadow-[0_0_0_3px_rgba(29,29,31,0.06)]";
-
+    "peer w-full min-h-12 sm:min-h-11 appearance-none rounded-md border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-as-dark/30 focus:shadow-[0_0_0_3px_rgba(29,29,31,0.06)]";
   const labelClass = "text-sm text-as-secondary";
 
   return (
     <div>
-      <div className="mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]">
+      <div className="mb-3 sm:mb-4">
         <CatalogueSearchTicket
           value={query}
-          onChange={(v) => {
-            startTransition(() => setQuery(v));
-          }}
-          onSubmit={(v) => {
-            startTransition(() => {
-              setQuery(v);
-              syncUrl({ q: v });
-            });
-          }}
+          onChange={(v) => startTransition(() => setQuery(v))}
+          onSubmit={submitSearch}
           size="bar"
         />
       </div>
 
-      <div className="mb-[clamp(1rem,0.6rem+1.2vw,2rem)] overflow-hidden rounded-xl border border-steel-light bg-as-white">
+      {recent.length > 0 ? (
+        <div className="mb-4 -mx-1 overflow-x-auto">
+          <div className="flex min-w-min items-center gap-2 px-1 pb-1">
+            <span className="shrink-0 text-caption text-as-gray">
+              {t.recentSearches}
+            </span>
+            {recent.map((term) => (
+              <button
+                key={term}
+                type="button"
+                onClick={() => submitSearch(term)}
+                className="shrink-0 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
+              >
+                {term}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                clearRecentSearches();
+                setRecent([]);
+              }}
+              className="shrink-0 text-caption text-as-gray underline"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {brandFacets.length > 0 ? (
+        <div className="mb-3 -mx-1 overflow-x-auto">
+          <div className="flex min-w-min gap-2 px-1 pb-1">
+            <button
+              type="button"
+              onClick={() => {
+                startTransition(() => {
+                  setBrand("all");
+                  syncUrl({ brand: "all" });
+                });
+              }}
+              className={`shrink-0 rounded-md px-3 py-2 text-caption ${
+                brand === "all"
+                  ? "bg-as-dark text-white"
+                  : "border border-steel-light bg-as-white text-as-dark"
+              }`}
+            >
+              {t.facetAll}
+            </button>
+            {brandFacets.slice(0, 12).map((facet) => (
+              <button
+                key={facet.value}
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    setBrand(facet.value);
+                    syncUrl({ brand: facet.value });
+                  });
+                }}
+                className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
+                  brand === facet.value
+                    ? "bg-as-dark text-white"
+                    : "border border-steel-light bg-as-white text-as-dark"
+                }`}
+              >
+                {facet.value} ({facet.count})
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {categoryFacets.length > 0 ? (
+        <div className="mb-5 -mx-1 overflow-x-auto">
+          <div className="flex min-w-min gap-2 px-1 pb-1">
+            {categoryFacets.slice(0, 12).map((facet) => {
+              const label = isProductCategory(facet.value)
+                ? t[`cat_${facet.value}`]
+                : facet.value;
+              return (
+                <button
+                  key={facet.value}
+                  type="button"
+                  onClick={() => {
+                    startTransition(() => {
+                      setCategory(
+                        category === facet.value ? "all" : facet.value
+                      );
+                      syncUrl({
+                        category:
+                          category === facet.value ? "all" : facet.value,
+                      });
+                    });
+                  }}
+                  className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
+                    category === facet.value
+                      ? "bg-as-dark text-white"
+                      : "border border-steel-light bg-as-white text-as-dark"
+                  }`}
+                >
+                  {label} ({facet.count})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mb-5 sm:mb-6 overflow-hidden rounded-xl border border-steel-light bg-as-white">
         <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-steel-light">
           <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
             <span className={labelClass}>{t.catalogueBrand}</span>
@@ -171,9 +337,9 @@ export default function CatalogueBrowser({ products }: Props) {
                 aria-label={t.catalogueBrand}
               >
                 <option value="all">{t.catalogueAll}</option>
-                {brands.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
+                {brandFacets.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.value} ({b.count})
                   </option>
                 ))}
               </select>
@@ -197,9 +363,12 @@ export default function CatalogueBrowser({ products }: Props) {
                 aria-label={t.catalogueCategory}
               >
                 <option value="all">{t.catalogueAll}</option>
-                {categories.map((key) => (
-                  <option key={key} value={key}>
-                    {isProductCategory(key) ? t[`cat_${key}`] : key}
+                {categoryFacets.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {isProductCategory(c.value)
+                      ? t[`cat_${c.value}`]
+                      : c.value}{" "}
+                    ({c.count})
                   </option>
                 ))}
               </select>
@@ -245,12 +414,10 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ brand: "all" });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-as-dark/30 transition-colors"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
               >
                 <span className="truncate">{brand}</span>
-                <span aria-hidden className="text-as-gray">
-                  ×
-                </span>
+                <span aria-hidden>×</span>
               </button>
             ) : null}
             {category !== "all" ? (
@@ -262,12 +429,10 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ category: "all" });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1 text-caption text-as-dark hover:border-as-dark/30 transition-colors"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
               >
                 <span className="truncate">{categoryLabel}</span>
-                <span aria-hidden className="text-as-gray">
-                  ×
-                </span>
+                <span aria-hidden>×</span>
               </button>
             ) : null}
           </div>
@@ -276,7 +441,7 @@ export default function CatalogueBrowser({ products }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="shrink-0 text-sm font-medium text-as-dark underline underline-offset-2 decoration-as-mist hover:decoration-as-dark transition-colors"
+              className="shrink-0 min-h-10 text-sm font-medium text-as-dark underline underline-offset-2"
             >
               {t.catalogueClearFilters}
             </button>
@@ -289,7 +454,7 @@ export default function CatalogueBrowser({ products }: Props) {
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
+        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
           {filtered.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} compact />

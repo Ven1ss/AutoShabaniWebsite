@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import AddToCartButton from "@/components/AddToCartButton";
 import ProductCard from "@/components/ProductCard";
 import ProductEnquiry from "@/components/ProductEnquiry";
+import MobileStickyEnquire from "@/components/MobileStickyEnquire";
 import {
   fetchProductRating,
   type ProductRatingRecord,
@@ -335,6 +336,8 @@ export default function ProductDetail({ product, related = [] }: Props) {
           </div>
         </div>
       ) : null}
+      <div className="h-16 md:hidden" aria-hidden />
+      <MobileStickyEnquire product={product} />
     </article>
   );
 }

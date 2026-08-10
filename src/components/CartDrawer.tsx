@@ -286,6 +286,44 @@ export default function CartDrawer() {
                       >
                         {t.cartSendWhatsApp}
                       </a>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          trackEvent("checkout_click", { items: itemCount });
+                          try {
+                            const res = await fetch("/api/checkout", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                locale,
+                                preferPaid: true,
+                                items: items.map((item) => ({
+                                  sku: item.sku,
+                                  name: getLocalized(item.name, locale),
+                                  quantity: item.quantity,
+                                  code: item.code,
+                                  slug: item.slug,
+                                  sellingPrice: item.sellingPrice,
+                                })),
+                              }),
+                            });
+                            const data = await res.json();
+                            if (data.checkoutUrl) {
+                              window.location.href = data.checkoutUrl;
+                              return;
+                            }
+                            if (data.whatsappUrl) {
+                              window.open(data.whatsappUrl, "_blank");
+                            }
+                          } catch {
+                            window.open(whatsappHref, "_blank");
+                          }
+                        }}
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-control border border-as-dark/15 text-as-dark text-sm font-semibold px-5 hover:border-as-dark/40 transition-colors"
+                      >
+                        {t.cartPayOnline}
+                      </button>
+                      <p className="text-caption text-as-gray">{t.cartPayNote}</p>
                       <div className="grid grid-cols-2 gap-2.5">
                         <a
                           href={`tel:${CONTACT.phoneTel[0]}`}
@@ -298,7 +336,7 @@ export default function CartDrawer() {
                               subtotal,
                             })
                           }
-                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold uppercase px-4 transition-colors"
+                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold px-4 transition-colors"
                         >
                           {t.catalogueCall}
                         </a>
@@ -313,7 +351,7 @@ export default function CartDrawer() {
                               subtotal,
                             })
                           }
-                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold uppercase px-4 transition-colors"
+                          className="inline-flex min-h-12 items-center justify-center rounded-control border border-ink/15 hover:border-ink/40 text-ink text-sm font-semibold px-4 transition-colors"
                         >
                           {t.catalogueEmail}
                         </a>
