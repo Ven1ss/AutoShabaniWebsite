@@ -72,9 +72,7 @@ type ProductCheckoutRow = {
   image_url: string | null;
   selling_price: number | null;
   stock_status: StockStatus;
-  sell_online: boolean;
   stock_qty: number | null;
-  max_qty_per_order: number;
 };
 
 function requireServiceClient() {
@@ -111,7 +109,7 @@ export async function resolveCheckoutLines(
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, sku, name, name_en, brand, image_url, selling_price, stock_status, sell_online, stock_qty, max_qty_per_order"
+      "id, slug, sku, name, name_en, brand, image_url, selling_price, stock_status, stock_qty"
     )
     .in("id", ids);
 
@@ -138,9 +136,7 @@ export async function resolveCheckoutLines(
     const sellable = isSellableOnline({
       sellingPrice: product.selling_price,
       stockStatus: product.stock_status,
-      sellOnline: product.sell_online,
       stockQty: product.stock_qty,
-      maxQtyPerOrder: product.max_qty_per_order,
     });
 
     if (!sellable || product.selling_price == null) {
@@ -154,7 +150,6 @@ export async function resolveCheckoutLines(
     const requested = merged.get(id) ?? 0;
     const max = maxOrderQty({
       stockQty: product.stock_qty,
-      maxQtyPerOrder: product.max_qty_per_order,
     });
     if (max < 1) {
       return {

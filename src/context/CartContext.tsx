@@ -81,9 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         sellingPrice: product.sellingPrice,
         quantity: 1,
         stockStatus: product.stockStatus,
-        sellOnline: product.sellOnline,
         stockQty: product.stockQty,
-        maxQtyPerOrder: product.maxQtyPerOrder,
       });
       if (max < 1) return false;
 

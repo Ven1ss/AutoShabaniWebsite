@@ -24,9 +24,7 @@ export default function CheckoutForm() {
         isSellableOnline({
           sellingPrice: item.sellingPrice,
           stockStatus: item.stockStatus,
-          sellOnline: item.sellOnline,
           stockQty: item.stockQty,
-          maxQtyPerOrder: item.maxQtyPerOrder,
         })
       ),
     [items]

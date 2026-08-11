@@ -1,26 +1,28 @@
-# Phase A — Online ordering foundation
+# Online ordering foundation (Phase A)
 
-Adds catalogue fields that decide what customers may put in the cart:
+Adds optional catalogue fields. Later simplified by **`005_simplify_product_fields.sql`** (removes `sell_online` / `max_qty_per_order`).
 
-| Column | Meaning |
-|--------|---------|
-| `sell_online` | Opt-out switch (default `true` for `in_stock`, forced `false` for other statuses on migrate) |
-| `stock_qty` | Optional on-hand count (`NULL` = not tracked) |
-| `max_qty_per_order` | Per-line quantity cap (default 10) |
+## Sellable rule (current app)
 
-## Sellable rule (app)
-
-A product is **sellable online** only when:
+A product can go in the cart when:
 
 1. `selling_price > 0`
 2. `stock_status = 'in_stock'`
-3. `sell_online = true`
-4. `stock_qty` is null or `> 0`
+3. `stock_qty` is null or `> 0`
 
-Everything else stays enquire-only (WhatsApp / call / email).
+## Optional fields when adding a product
+
+| Field | Meaning |
+|--------|---------|
+| `featured` | Homepage highlight (default off) |
+| `stock_status` | `in_stock` / `on_request` / `out_of_stock` (default `on_request`) |
+| `stock_qty` | Optional count; leave empty if untracked |
+
+Automatic: `created_at`, `updated_at` — do not set manually.
 
 ## Apply
 
-1. Run this file in the Supabase SQL editor (it also adds missing `stock_status` / slug columns if `001` was skipped).
-2. Re-run `supabase/search_products.sql` so RPC results include the new columns.
-3. Then run `004_orders.sql` for checkout tables.
+1. Run `003_online_ordering_foundation.sql` (adds stock columns if missing).
+2. Re-run `search_products.sql`.
+3. Run `004_orders.sql` for checkout.
+4. Run `005_simplify_product_fields.sql`, then re-run `search_products.sql`.

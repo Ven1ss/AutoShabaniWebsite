@@ -8,13 +8,13 @@ import { isUuid } from "@/lib/slug";
 import { resolveProductImageUrl, type Product } from "@/lib/products";
 
 const LIST_COLUMNS_V3 =
-  "id, slug, name, name_en, sku, code, brand, category, image_url, selling_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order" as const;
+  "id, slug, name, name_en, sku, code, brand, category, image_url, selling_price, featured, stock_status, stock_qty" as const;
 const LIST_COLUMNS_V2 =
   "id, slug, name, name_en, sku, code, brand, category, image_url, selling_price, featured, stock_status" as const;
 const LIST_COLUMNS_V1 =
   "id, name, sku, code, brand, category, image_url, selling_price" as const;
 const DETAIL_COLUMNS_V3 =
-  "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order" as const;
+  "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, featured, stock_status, stock_qty" as const;
 const DETAIL_COLUMNS_V2 =
   "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, featured, stock_status" as const;
 const DETAIL_COLUMNS_V1 =
@@ -55,12 +55,10 @@ function mapRow(row: ListRow, includeDescription = true): Product {
         : Number(row.selling_price),
     featured: Boolean(row.featured),
     stockStatus,
-    sellOnline: row.sell_online !== false,
     stockQty:
       row.stock_qty === null || row.stock_qty === undefined
         ? null
         : Number(row.stock_qty),
-    maxQtyPerOrder: Math.max(1, Number(row.max_qty_per_order ?? 10) || 10),
   };
 }
 
@@ -118,7 +116,7 @@ export async function getProducts(): Promise<Product[]> {
 /** Cached catalogue list for homepage / katalogu (ISR-friendly). */
 export const getProductsCached = unstable_cache(
   async () => getProducts(),
-  ["products-public-list-v4"],
+  ["products-public-list-v5"],
   { revalidate: 120 }
 );
 
@@ -210,7 +208,7 @@ export async function getProductBySlugCached(
 ): Promise<Product | null> {
   return unstable_cache(
     async () => getProductBySlug(slug),
-    ["product-by-slug-v3", slug],
+    ["product-by-slug-v4", slug],
     { revalidate: 120 }
   )();
 }

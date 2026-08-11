@@ -13,7 +13,7 @@ Catalogue + **online ordering** for **AUTO SHABANI** (Prishtina, Kosovo). In-sto
 ## Features
 
 - Catalogue search, filters, SEO URLs, PDP zoom + ratings
-- Sellable-online rules (`in_stock` + price + `sell_online`)
+- Sellable-online rules (`in_stock` + price)
 - Checkout at `/porosia` (pickup or card)
 - Stripe webhook → paid status + stock decrement
 - Order success + lookup (`/porosia/sukses`, `/porosia/kerko`)
@@ -45,6 +45,7 @@ Fill `.env.local`, then `npm run dev`.
 3. `supabase/migrations/001_improvements.sql`
 4. `supabase/migrations/003_online_ordering_foundation.sql` then re-run `search_products.sql`
 5. `supabase/migrations/004_orders.sql`
+6. `supabase/migrations/005_simplify_product_fields.sql` then re-run `search_products.sql`
 
 Promote an admin:
 

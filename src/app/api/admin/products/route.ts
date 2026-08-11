@@ -11,7 +11,7 @@ export async function GET() {
   const modern = await supabase
     .from("products")
     .select(
-      "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, purchase_price, featured, stock_status, sell_online, stock_qty, max_qty_per_order, hidden_references, updated_at"
+      "id, slug, name, name_en, sku, code, brand, description, description_en, category, image_url, selling_price, purchase_price, featured, stock_status, stock_qty, hidden_references, updated_at"
     )
     .order("updated_at", { ascending: false });
 

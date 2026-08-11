@@ -17,9 +17,7 @@ export type AdminProductInput = {
   purchase_price?: number;
   featured?: boolean;
   stock_status?: StockStatus;
-  sell_online?: boolean;
   stock_qty?: number | null;
-  max_qty_per_order?: number;
   hidden_references?: string;
   slug?: string;
 };
@@ -69,20 +67,12 @@ export function normalizeAdminProduct(input: AdminProductInput) {
         : Number(input.purchase_price),
     featured: Boolean(input.featured),
     stock_status: (input.stock_status || "on_request") as StockStatus,
-    sell_online:
-      input.sell_online === undefined
-        ? (input.stock_status || "on_request") === "in_stock"
-        : Boolean(input.sell_online),
     stock_qty:
       input.stock_qty === undefined ||
       input.stock_qty === null ||
       Number.isNaN(Number(input.stock_qty))
         ? null
         : Math.max(0, Math.floor(Number(input.stock_qty))),
-    max_qty_per_order: Math.min(
-      99,
-      Math.max(1, Math.floor(Number(input.max_qty_per_order ?? 10) || 10))
-    ),
     hidden_references: input.hidden_references?.trim() || "",
   };
 }

@@ -38,12 +38,8 @@ export type Product = {
   sellingPrice: number | null;
   featured: boolean;
   stockStatus: StockStatus;
-  /** When false, product cannot be added to the online cart. Defaults true. */
-  sellOnline: boolean;
   /** Optional on-hand quantity. null = not tracked. */
   stockQty: number | null;
-  /** Per-line quantity cap for the cart. */
-  maxQtyPerOrder: number;
   /** Optional aggregate rating for cards */
   ratingAverage?: number;
   ratingCount?: number;
@@ -52,30 +48,27 @@ export type Product = {
 /** Fields needed to decide if a product can be purchased / carted online. */
 export type SellableProductFields = Pick<
   Product,
-  "sellingPrice" | "stockStatus" | "sellOnline" | "stockQty" | "maxQtyPerOrder"
+  "sellingPrice" | "stockStatus" | "stockQty"
 >;
 
 /**
- * Phase A sellable rule:
- * priced + in_stock + sell_online + (qty null or > 0).
+ * Sellable when priced + in stock + (qty untracked or > 0).
  */
 export function isSellableOnline(product: SellableProductFields): boolean {
   if (product.sellingPrice == null || !(product.sellingPrice > 0)) return false;
   if (product.stockStatus !== "in_stock") return false;
-  if (product.sellOnline === false) return false;
   if (product.stockQty != null && product.stockQty <= 0) return false;
   return true;
 }
 
+const DEFAULT_MAX_QTY_PER_ORDER = 10;
+
 /** Max quantity allowed for one cart line. */
 export function maxOrderQty(
-  product: Pick<SellableProductFields, "stockQty" | "maxQtyPerOrder">,
+  product: Pick<SellableProductFields, "stockQty">,
   absoluteMax = 99
 ): number {
-  const caps = [
-    absoluteMax,
-    Math.max(1, product.maxQtyPerOrder || 10),
-  ];
+  const caps = [absoluteMax, DEFAULT_MAX_QTY_PER_ORDER];
   if (product.stockQty != null) caps.push(Math.max(0, product.stockQty));
   const max = Math.min(...caps);
   return Math.max(0, Math.floor(max));
@@ -83,13 +76,12 @@ export function maxOrderQty(
 
 export function whyNotSellableOnline(
   product: SellableProductFields
-): "no_price" | "out_of_stock" | "on_request" | "disabled" | "no_qty" | null {
+): "no_price" | "out_of_stock" | "on_request" | "no_qty" | null {
   if (product.sellingPrice == null || !(product.sellingPrice > 0)) {
     return "no_price";
   }
   if (product.stockStatus === "out_of_stock") return "out_of_stock";
   if (product.stockQty != null && product.stockQty <= 0) return "no_qty";
-  if (product.sellOnline === false) return "disabled";
   if (product.stockStatus !== "in_stock") return "on_request";
   return null;
 }

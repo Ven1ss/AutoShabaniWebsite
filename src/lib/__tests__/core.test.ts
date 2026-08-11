@@ -30,9 +30,7 @@ const sample: Product = {
   sellingPrice: 4,
   featured: false,
   stockStatus: "in_stock",
-  sellOnline: true,
   stockQty: null,
-  maxQtyPerOrder: 10,
 };
 
 describe("slugify", () => {
@@ -75,10 +73,9 @@ describe("sellable online", () => {
     );
   });
 
-  it("respects sell_online and stock_qty", () => {
-    expect(isSellableOnline({ ...sample, sellOnline: false })).toBe(false);
+  it("respects stock_qty", () => {
     expect(isSellableOnline({ ...sample, stockQty: 0 })).toBe(false);
-    expect(maxOrderQty({ ...sample, stockQty: 3, maxQtyPerOrder: 10 })).toBe(3);
+    expect(maxOrderQty({ ...sample, stockQty: 3 })).toBe(3);
   });
 });
 

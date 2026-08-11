@@ -21,9 +21,7 @@ export type CartItem = {
   sellingPrice: number | null;
   quantity: number;
   stockStatus: StockStatus;
-  sellOnline: boolean;
   stockQty: number | null;
-  maxQtyPerOrder: number;
 };
 
 export type CartProductInput = Pick<
@@ -37,9 +35,7 @@ export type CartProductInput = Pick<
   | "image"
   | "sellingPrice"
   | "stockStatus"
-  | "sellOnline"
   | "stockQty"
-  | "maxQtyPerOrder"
 >;
 
 export function productToCartItem(
@@ -58,9 +54,7 @@ export function productToCartItem(
     sellingPrice: product.sellingPrice,
     quantity: clampQty(quantity, max),
     stockStatus: product.stockStatus,
-    sellOnline: product.sellOnline !== false,
     stockQty: product.stockQty ?? null,
-    maxQtyPerOrder: product.maxQtyPerOrder || 10,
   };
 }
 
@@ -71,13 +65,7 @@ export function clampQty(n: number, max = CART_MAX_QTY): number {
 }
 
 export function cartItemMaxQty(item: CartItem): number {
-  return maxOrderQty(
-    {
-      stockQty: item.stockQty,
-      maxQtyPerOrder: item.maxQtyPerOrder,
-    },
-    CART_MAX_QTY
-  );
+  return maxOrderQty({ stockQty: item.stockQty }, CART_MAX_QTY);
 }
 
 export function cartItemCount(items: CartItem[]): number {
@@ -100,9 +88,7 @@ export function cartHasSellableItems(items: CartItem[]): boolean {
     isSellableOnline({
       sellingPrice: item.sellingPrice,
       stockStatus: item.stockStatus,
-      sellOnline: item.sellOnline,
       stockQty: item.stockQty,
-      maxQtyPerOrder: item.maxQtyPerOrder,
     })
   );
 }
@@ -148,13 +134,12 @@ function normalizeStoredItem(value: unknown): CartItem | null {
       ? row.stockStatus
       : "on_request";
 
-  const maxQtyPerOrder = Math.max(1, Number(row.maxQtyPerOrder ?? 10) || 10);
   const stockQty =
     row.stockQty === null || row.stockQty === undefined
       ? null
       : Number(row.stockQty);
   const max = maxOrderQty(
-    { stockQty, maxQtyPerOrder },
+    { stockQty: stockQty === null || Number.isNaN(stockQty) ? null : stockQty },
     CART_MAX_QTY
   );
 
@@ -175,9 +160,6 @@ function normalizeStoredItem(value: unknown): CartItem | null {
         : Number(row.sellingPrice),
     quantity: clampQty(Number(row.quantity ?? 1), Math.max(1, max || 1)),
     stockStatus,
-    sellOnline: row.sellOnline !== false,
-    stockQty:
-      stockQty === null || Number.isNaN(stockQty) ? null : stockQty,
-    maxQtyPerOrder,
+    stockQty: stockQty === null || Number.isNaN(stockQty) ? null : stockQty,
   };
 }

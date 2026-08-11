@@ -34,10 +34,7 @@ create table public.products (
   featured boolean not null default false,
   stock_status text not null default 'on_request'
     check (stock_status in ('in_stock', 'on_request', 'out_of_stock')),
-  sell_online boolean not null default true,
   stock_qty integer check (stock_qty is null or stock_qty >= 0),
-  max_qty_per_order integer not null default 10
-    check (max_qty_per_order >= 1 and max_qty_per_order <= 99),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -86,9 +83,7 @@ grant select (
   selling_price,
   featured,
   stock_status,
-  sell_online,
   stock_qty,
-  max_qty_per_order,
   created_at,
   updated_at
 ) on table public.products to anon, authenticated;
@@ -111,9 +106,7 @@ select
   selling_price,
   featured,
   stock_status,
-  sell_online,
   stock_qty,
-  max_qty_per_order,
   created_at,
   updated_at
 from public.products;

@@ -21,9 +21,7 @@ type AdminProduct = {
   purchase_price: number | null;
   featured: boolean;
   stock_status: StockStatus;
-  sell_online?: boolean;
   stock_qty?: number | null;
-  max_qty_per_order?: number | null;
   hidden_references: string | null;
 };
 
@@ -42,9 +40,7 @@ const emptyForm = {
   purchase_price: "0",
   featured: false,
   stock_status: "on_request" as StockStatus,
-  sell_online: true,
   stock_qty: "",
-  max_qty_per_order: "10",
   hidden_references: "",
 };
 
@@ -94,12 +90,10 @@ export default function AdminDashboard() {
       purchase_price: String(product.purchase_price ?? 0),
       featured: product.featured,
       stock_status: product.stock_status,
-      sell_online: product.sell_online !== false,
       stock_qty:
         product.stock_qty === null || product.stock_qty === undefined
           ? ""
           : String(product.stock_qty),
-      max_qty_per_order: String(product.max_qty_per_order ?? 10),
       hidden_references: product.hidden_references ?? "",
     });
     setMessage("");
@@ -127,9 +121,7 @@ export default function AdminDashboard() {
       purchase_price: Number(form.purchase_price),
       featured: form.featured,
       stock_status: form.stock_status,
-      sell_online: form.sell_online,
       stock_qty: form.stock_qty.trim() === "" ? null : Number(form.stock_qty),
-      max_qty_per_order: Number(form.max_qty_per_order) || 10,
       hidden_references: form.hidden_references,
     };
 
@@ -328,7 +320,7 @@ export default function AdminDashboard() {
           </label>
           <label className="space-y-1 text-sm">
             <span className="text-caption uppercase tracking-wider text-as-gray">
-              Stock
+              Stock status (optional)
             </span>
             <select
               value={form.stock_status}
@@ -336,14 +328,12 @@ export default function AdminDashboard() {
                 setForm((prev) => ({
                   ...prev,
                   stock_status: e.target.value as StockStatus,
-                  sell_online:
-                    e.target.value === "in_stock" ? prev.sell_online : false,
                 }))
               }
               className="w-full min-h-11 rounded-lg border border-steel-light px-3"
             >
-              <option value="in_stock">In stock</option>
-              <option value="on_request">On request</option>
+              <option value="on_request">On request (default)</option>
+              <option value="in_stock">In stock — can order online</option>
               <option value="out_of_stock">Out of stock</option>
             </select>
           </label>
@@ -362,24 +352,6 @@ export default function AdminDashboard() {
               className="w-full min-h-11 rounded-lg border border-steel-light px-3"
             />
           </label>
-          <label className="space-y-1 text-sm">
-            <span className="text-caption uppercase tracking-wider text-as-gray">
-              Max qty / order
-            </span>
-            <input
-              type="number"
-              min={1}
-              max={99}
-              value={form.max_qty_per_order}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  max_qty_per_order: e.target.value,
-                }))
-              }
-              className="w-full min-h-11 rounded-lg border border-steel-light px-3"
-            />
-          </label>
           <label className="flex items-center gap-2 text-sm mt-6">
             <input
               type="checkbox"
@@ -388,18 +360,7 @@ export default function AdminDashboard() {
                 setForm((prev) => ({ ...prev, featured: e.target.checked }))
               }
             />
-            Featured on homepage
-          </label>
-          <label className="flex items-center gap-2 text-sm mt-6">
-            <input
-              type="checkbox"
-              checked={form.sell_online}
-              disabled={form.stock_status !== "in_stock"}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, sell_online: e.target.checked }))
-              }
-            />
-            Sell online (cart)
+            Featured on homepage (optional)
           </label>
           <div className="sm:col-span-2">
             <button
@@ -418,8 +379,8 @@ export default function AdminDashboard() {
         <p className="text-sm text-as-secondary">
           Columns: name, sku, category, code, brand, description, name_en,
           description_en, image_url, selling_price, purchase_price, featured,
-          stock_status, sell_online, stock_qty, max_qty_per_order,
-          hidden_references
+          stock_status, stock_qty, hidden_references
+          (created_at is automatic — do not include it)
         </p>
         <input
           type="file"

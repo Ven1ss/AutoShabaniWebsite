@@ -1,7 +1,7 @@
 -- Catalogue search: match name / name_en / sku / code / brand / hidden_references
 -- without ever returning purchase_price or hidden_references.
 -- Spaces are ignored in both the query and the stored values.
--- Safe to re-run. Includes Phase A sell_online / stock_qty fields.
+-- Safe to re-run.
 
 create schema if not exists private;
 
@@ -27,9 +27,7 @@ returns table (
   selling_price numeric,
   featured boolean,
   stock_status text,
-  sell_online boolean,
-  stock_qty integer,
-  max_qty_per_order integer
+  stock_qty integer
 )
 language plpgsql
 stable
@@ -57,9 +55,7 @@ begin
       p.selling_price,
       p.featured,
       p.stock_status,
-      coalesce(p.sell_online, true),
-      p.stock_qty,
-      coalesce(p.max_qty_per_order, 10)
+      p.stock_qty
     from public.products p
     order by p.featured desc, p.brand nulls last, p.name;
     return;
@@ -83,9 +79,7 @@ begin
     p.selling_price,
     p.featured,
     p.stock_status,
-    coalesce(p.sell_online, true),
-    p.stock_qty,
-    coalesce(p.max_qty_per_order, 10)
+    p.stock_qty
   from public.products p
   where
     regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
@@ -126,9 +120,7 @@ returns table (
   selling_price numeric,
   featured boolean,
   stock_status text,
-  sell_online boolean,
-  stock_qty integer,
-  max_qty_per_order integer
+  stock_qty integer
 )
 language sql
 stable
