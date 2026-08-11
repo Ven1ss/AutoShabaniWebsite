@@ -2,6 +2,9 @@
 -- Removes sell_online and max_qty_per_order (app uses stock_status + price only).
 -- Safe to re-run.
 
+-- Drop dependent view BEFORE dropping columns it references.
+drop view if exists public.products_public;
+
 alter table public.products
   drop constraint if exists products_max_qty_per_order_check;
 
@@ -12,7 +15,6 @@ alter table public.products
   drop column if exists max_qty_per_order;
 
 -- Recreate public view without removed columns
-drop view if exists public.products_public;
 create view public.products_public
 with (security_invoker = true)
 as
