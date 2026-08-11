@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
@@ -85,6 +91,9 @@ export default function CatalogueBrowser({ products }: Props) {
   const [, startTransition] = useTransition();
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  // Keep the input value synchronous; defer heavy filtering so typing
+  // (especially mid-string edits) does not reset the caret.
+  const deferredQuery = useDeferredValue(query);
   const [brand, setBrand] = useState(searchParams.get("brand") ?? "all");
   const [category, setCategory] = useState(
     searchParams.get("category") ?? "all"
@@ -107,11 +116,15 @@ export default function CatalogueBrowser({ products }: Props) {
   }, [searchParams]);
 
   useEffect(() => {
-    const q = query.trim();
+    const q = deferredQuery.trim();
     if (!q) {
       setRemoteMatches(null);
       return;
     }
+
+    // Drop stale remote hits so local fuzzy (for the current query) shows
+    // until the new request finishes.
+    setRemoteMatches(null);
 
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
@@ -134,7 +147,7 @@ export default function CatalogueBrowser({ products }: Props) {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [query, products, locale]);
+  }, [deferredQuery, products, locale]);
 
   function syncUrl(next: { q?: string; brand?: string; category?: string }) {
     const params = new URLSearchParams();
@@ -168,9 +181,11 @@ export default function CatalogueBrowser({ products }: Props) {
 
   const searchBase = useMemo(() => {
     if (remoteMatches) return remoteMatches;
-    if (query.trim()) return localFuzzySearch(products, query, locale);
+    if (deferredQuery.trim()) {
+      return localFuzzySearch(products, deferredQuery, locale);
+    }
     return products;
-  }, [products, remoteMatches, query, locale]);
+  }, [products, remoteMatches, deferredQuery, locale]);
 
   const brandFacets = useMemo(
     () => countBy(filterProducts(searchBase, { category, locale }), "brand"),
@@ -205,7 +220,7 @@ export default function CatalogueBrowser({ products }: Props) {
       <div className="mb-3 min-w-0 sm:mb-4">
         <CatalogueSearchTicket
           value={query}
-          onChange={(v) => startTransition(() => setQuery(v))}
+          onChange={setQuery}
           onSubmit={submitSearch}
           size="bar"
         />
