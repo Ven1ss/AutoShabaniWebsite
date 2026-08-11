@@ -4,8 +4,11 @@ import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import AddToCartButton from "@/components/AddToCartButton";
+import BackToTopButton from "@/components/BackToTopButton";
+import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
 import ProductCard from "@/components/ProductCard";
 import ProductEnquiry from "@/components/ProductEnquiry";
 import MobileStickyEnquire from "@/components/MobileStickyEnquire";
@@ -23,6 +26,7 @@ import {
   resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
+import { pushRecentSearch } from "@/lib/recent-searches";
 
 const ProductRating = dynamic(() => import("@/components/ProductRating"), {
   loading: () => (
@@ -39,7 +43,9 @@ type Props = {
 
 export default function ProductDetail({ product, related = [] }: Props) {
   const { t, locale } = useLanguage();
+  const router = useRouter();
   const zoomTitleId = useId();
+  const [searchQuery, setSearchQuery] = useState("");
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [imageZoomOpen, setImageZoomOpen] = useState(false);
   const [rating, setRating] = useState<ProductRatingRecord>({
@@ -84,15 +90,30 @@ export default function ProductDetail({ product, related = [] }: Props) {
     };
   }, [imageZoomOpen]);
 
+  function goSearch(value: string) {
+    const q = value.trim();
+    if (q) pushRecentSearch(q);
+    router.push(q ? `/katalogu?q=${encodeURIComponent(q)}` : "/katalogu");
+  }
+
   return (
     <article className="overflow-x-hidden pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,7rem)]">
       <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
         <Link
           href="/katalogu"
-          className="inline-flex min-h-11 items-center gap-2 text-sm text-as-secondary hover:text-as-dark transition-colors mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)]"
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-as-secondary hover:text-as-dark transition-colors mb-3 sm:mb-4"
         >
           <span aria-hidden>←</span> {t.catalogueBack}
         </Link>
+
+        <div className="mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)] min-w-0">
+          <CatalogueSearchTicket
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={goSearch}
+            size="bar"
+          />
+        </div>
 
         {/*
           < md: image → buy box → description → rate
@@ -349,6 +370,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
       ) : null}
       <div className="h-16 md:hidden" aria-hidden />
       <MobileStickyEnquire product={product} />
+      <BackToTopButton aboveMobileSticky />
     </article>
   );
 }

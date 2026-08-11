@@ -4,11 +4,13 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import BackToTopButton from "@/components/BackToTopButton";
 import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
 import ProductCard from "@/components/ProductCard";
 import {
@@ -25,9 +27,20 @@ import {
 } from "@/lib/recent-searches";
 import { fieldMatchesQuery } from "@/lib/search-rank";
 
+const PAGE_SIZE = 50;
+
 type Props = {
   products: Product[];
 };
+
+function fillTemplate(
+  template: string,
+  values: Record<string, string | number>
+) {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) =>
+    String(values[key] ?? "")
+  );
+}
 
 function ChevronIcon() {
   return (
@@ -93,6 +106,8 @@ export default function CatalogueBrowser({ products }: Props) {
   const urlQ = searchParams.get("q") ?? "";
   const urlBrand = searchParams.get("brand") ?? "all";
   const urlCategory = searchParams.get("category") ?? "all";
+  const urlPageRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
+  const urlPage = Number.isFinite(urlPageRaw) && urlPageRaw > 0 ? urlPageRaw : 1;
 
   const [query, setQuery] = useState(urlQ);
   // Keep the input value synchronous; defer heavy filtering so typing
@@ -101,12 +116,14 @@ export default function CatalogueBrowser({ products }: Props) {
   const [brand, setBrand] = useState(urlBrand);
   const [category, setCategory] = useState(urlCategory);
   const [sort, setSort] = useState<ProductSort>("relevance");
+  const [page, setPage] = useState(urlPage);
   const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
   const [recent, setRecent] = useState<string[]>([]);
   // Bumped on submit / URL sync so the search field can adopt an external
   // query without re-binding on every keystroke.
   const [searchSyncNonce, setSearchSyncNonce] = useState(0);
   const searchSyncKey = `${urlQ}#${searchSyncNonce}`;
+  const resultsTopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setRecent(readRecentSearches());
@@ -126,6 +143,10 @@ export default function CatalogueBrowser({ products }: Props) {
   useEffect(() => {
     setCategory(urlCategory);
   }, [urlCategory]);
+
+  useEffect(() => {
+    setPage(urlPage);
+  }, [urlPage]);
 
   useEffect(() => {
     const q = deferredQuery.trim();
@@ -161,14 +182,21 @@ export default function CatalogueBrowser({ products }: Props) {
     };
   }, [deferredQuery, products, locale]);
 
-  function syncUrl(next: { q?: string; brand?: string; category?: string }) {
+  function syncUrl(next: {
+    q?: string;
+    brand?: string;
+    category?: string;
+    page?: number;
+  }) {
     const params = new URLSearchParams();
     const q = (next.q ?? query).trim();
     const b = next.brand ?? brand;
     const c = next.category ?? category;
+    const p = next.page ?? page;
     if (q) params.set("q", q);
     if (b && b !== "all") params.set("brand", b);
     if (c && c !== "all") params.set("category", c);
+    if (p > 1) params.set("page", String(p));
     const qs = params.toString();
     router.replace(qs ? `/katalogu?${qs}` : "/katalogu", { scroll: false });
   }
@@ -176,9 +204,10 @@ export default function CatalogueBrowser({ products }: Props) {
   function submitSearch(v: string) {
     const q = v.trim();
     setQuery(q);
+    setPage(1);
     setSearchSyncNonce((n) => n + 1);
     startTransition(() => {
-      syncUrl({ q });
+      syncUrl({ q, page: 1 });
       if (q) setRecent(pushRecentSearch(q));
     });
   }
@@ -188,8 +217,18 @@ export default function CatalogueBrowser({ products }: Props) {
       setBrand("all");
       setCategory("all");
       setSort("relevance");
-      syncUrl({ brand: "all", category: "all" });
+      setPage(1);
+      syncUrl({ brand: "all", category: "all", page: 1 });
     });
+  }
+
+  function goToPage(nextPage: number) {
+    const clamped = Math.max(1, nextPage);
+    setPage(clamped);
+    startTransition(() => {
+      syncUrl({ page: clamped });
+    });
+    resultsTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const searchBase = useMemo(() => {
@@ -213,6 +252,17 @@ export default function CatalogueBrowser({ products }: Props) {
     const base = filterProducts(searchBase, { brand, category, locale });
     return sortProducts(base, sort, locale);
   }, [searchBase, brand, category, locale, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+  const showingFrom = filtered.length === 0 ? 0 : pageStart + 1;
+  const showingTo = Math.min(pageStart + PAGE_SIZE, filtered.length);
+
+  useEffect(() => {
+    if (page !== currentPage) setPage(currentPage);
+  }, [page, currentPage]);
 
   const hasActiveFilters =
     brand !== "all" || category !== "all" || sort !== "relevance";
@@ -278,7 +328,8 @@ export default function CatalogueBrowser({ products }: Props) {
               onClick={() => {
                 startTransition(() => {
                   setBrand("all");
-                  syncUrl({ brand: "all" });
+                  setPage(1);
+                  syncUrl({ brand: "all", page: 1 });
                 });
               }}
               className={`shrink-0 rounded-md px-3 py-2 text-caption ${
@@ -296,7 +347,8 @@ export default function CatalogueBrowser({ products }: Props) {
                 onClick={() => {
                   startTransition(() => {
                     setBrand(facet.value);
-                    syncUrl({ brand: facet.value });
+                    setPage(1);
+                    syncUrl({ brand: facet.value, page: 1 });
                   });
                 }}
                 className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
@@ -325,13 +377,11 @@ export default function CatalogueBrowser({ products }: Props) {
                   type="button"
                   onClick={() => {
                     startTransition(() => {
-                      setCategory(
-                        category === facet.value ? "all" : facet.value
-                      );
-                      syncUrl({
-                        category:
-                          category === facet.value ? "all" : facet.value,
-                      });
+                      const next =
+                        category === facet.value ? "all" : facet.value;
+                      setCategory(next);
+                      setPage(1);
+                      syncUrl({ category: next, page: 1 });
                     });
                   }}
                   className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
@@ -359,7 +409,8 @@ export default function CatalogueBrowser({ products }: Props) {
                   const value = e.target.value;
                   startTransition(() => {
                     setBrand(value);
-                    syncUrl({ brand: value });
+                    setPage(1);
+                    syncUrl({ brand: value, page: 1 });
                   });
                 }}
                 className={selectClass}
@@ -385,7 +436,8 @@ export default function CatalogueBrowser({ products }: Props) {
                   const value = e.target.value;
                   startTransition(() => {
                     setCategory(value);
-                    syncUrl({ category: value });
+                    setPage(1);
+                    syncUrl({ category: value, page: 1 });
                   });
                 }}
                 className={selectClass}
@@ -411,7 +463,11 @@ export default function CatalogueBrowser({ products }: Props) {
               <select
                 value={sort}
                 onChange={(e) =>
-                  startTransition(() => setSort(e.target.value as ProductSort))
+                  startTransition(() => {
+                    setSort(e.target.value as ProductSort);
+                    setPage(1);
+                    syncUrl({ page: 1 });
+                  })
                 }
                 className={selectClass}
                 aria-label={t.catalogueSort}
@@ -426,13 +482,27 @@ export default function CatalogueBrowser({ products }: Props) {
           </label>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-steel-light bg-as-snow/70 px-3 py-2.5 sm:px-4">
+        <div
+          ref={resultsTopRef}
+          className="flex flex-wrap items-center justify-between gap-2 border-t border-steel-light bg-as-snow/70 px-3 py-2.5 sm:px-4"
+        >
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p className="text-sm text-as-secondary tabular-nums">
               <span className="font-semibold text-as-dark">
                 {filtered.length}
               </span>{" "}
               {t.catalogueResults}
+              {filtered.length > 0 ? (
+                <span className="text-as-gray">
+                  {" "}
+                  ·{" "}
+                  {fillTemplate(t.catalogueShowing, {
+                    from: showingFrom,
+                    to: showingTo,
+                    total: filtered.length,
+                  })}
+                </span>
+              ) : null}
             </p>
             {brand !== "all" ? (
               <button
@@ -440,7 +510,8 @@ export default function CatalogueBrowser({ products }: Props) {
                 onClick={() => {
                   startTransition(() => {
                     setBrand("all");
-                    syncUrl({ brand: "all" });
+                    setPage(1);
+                    syncUrl({ brand: "all", page: 1 });
                   });
                 }}
                 className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
@@ -455,7 +526,8 @@ export default function CatalogueBrowser({ products }: Props) {
                 onClick={() => {
                   startTransition(() => {
                     setCategory("all");
-                    syncUrl({ category: "all" });
+                    setPage(1);
+                    syncUrl({ category: "all", page: 1 });
                   });
                 }}
                 className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
@@ -483,14 +555,51 @@ export default function CatalogueBrowser({ products }: Props) {
           {t.catalogueEmpty}
         </p>
       ) : (
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
-          {filtered.map((product) => (
-            <li key={product.slug}>
-              <ProductCard product={product} compact />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
+            {pageItems.map((product) => (
+              <li key={product.slug}>
+                <ProductCard product={product} compact />
+              </li>
+            ))}
+          </ul>
+
+          {totalPages > 1 ? (
+            <nav
+              className="mt-6 flex flex-wrap items-center justify-center gap-3"
+              aria-label={fillTemplate(t.cataloguePageOf, {
+                current: currentPage,
+                total: totalPages,
+              })}
+            >
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className="inline-flex min-h-11 items-center rounded-md border border-steel-light bg-as-white px-4 text-sm font-medium text-as-dark disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t.cataloguePrevPage}
+              </button>
+              <p className="text-sm tabular-nums text-as-secondary">
+                {fillTemplate(t.cataloguePageOf, {
+                  current: currentPage,
+                  total: totalPages,
+                })}
+              </p>
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className="inline-flex min-h-11 items-center rounded-md border border-steel-light bg-as-white px-4 text-sm font-medium text-as-dark disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t.catalogueNextPage}
+              </button>
+            </nav>
+          ) : null}
+        </>
       )}
+
+      <BackToTopButton />
     </div>
   );
 }

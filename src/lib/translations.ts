@@ -61,6 +61,11 @@ export const translations = {
     catalogueFeatured: "Disa nga produktet tona",
     catalogueViewMore: "Shiko më shumë",
     catalogueViewLess: "Shiko më pak",
+    cataloguePrevPage: "Faqja e mëparshme",
+    catalogueNextPage: "Faqja tjetër",
+    cataloguePageOf: "Faqja {current} nga {total}",
+    catalogueShowing: "Duke shfaqur {from}–{to} nga {total}",
+    backToTop: "Kthehu lart",
 
     productDescription: "Përshkrimi",
     productImageZoom: "Zmadho foton",
@@ -296,6 +301,11 @@ export const translations = {
     catalogueFeatured: "Some of our parts",
     catalogueViewMore: "View more",
     catalogueViewLess: "View less",
+    cataloguePrevPage: "Previous page",
+    catalogueNextPage: "Next page",
+    cataloguePageOf: "Page {current} of {total}",
+    catalogueShowing: "Showing {from}–{to} of {total}",
+    backToTop: "Back to top",
 
     productDescription: "Description",
     productImageZoom: "Zoom image",
