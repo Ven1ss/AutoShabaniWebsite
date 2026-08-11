@@ -90,30 +90,42 @@ export default function CatalogueBrowser({ products }: Props) {
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const urlQ = searchParams.get("q") ?? "";
+  const urlBrand = searchParams.get("brand") ?? "all";
+  const urlCategory = searchParams.get("category") ?? "all";
+
+  const [query, setQuery] = useState(urlQ);
   // Keep the input value synchronous; defer heavy filtering so typing
   // (especially mid-string edits) does not reset the caret.
   const deferredQuery = useDeferredValue(query);
-  const [brand, setBrand] = useState(searchParams.get("brand") ?? "all");
-  const [category, setCategory] = useState(
-    searchParams.get("category") ?? "all"
-  );
+  const [brand, setBrand] = useState(urlBrand);
+  const [category, setCategory] = useState(urlCategory);
   const [sort, setSort] = useState<ProductSort>("relevance");
   const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
   const [recent, setRecent] = useState<string[]>([]);
+  // Bumped on submit / URL sync so the search field can adopt an external
+  // query without re-binding on every keystroke.
+  const [searchSyncNonce, setSearchSyncNonce] = useState(0);
+  const searchSyncKey = `${urlQ}#${searchSyncNonce}`;
 
   useEffect(() => {
     setRecent(readRecentSearches());
   }, []);
 
+  // Sync each URL param independently so changing brand/category does not
+  // wipe an in-progress (unsubmitted) search draft or reset the caret.
   useEffect(() => {
-    const q = searchParams.get("q") ?? "";
-    const b = searchParams.get("brand") ?? "all";
-    const c = searchParams.get("category") ?? "all";
-    setQuery(q);
-    setBrand(b);
-    setCategory(c);
-  }, [searchParams]);
+    setQuery(urlQ);
+    setSearchSyncNonce((n) => n + 1);
+  }, [urlQ]);
+
+  useEffect(() => {
+    setBrand(urlBrand);
+  }, [urlBrand]);
+
+  useEffect(() => {
+    setCategory(urlCategory);
+  }, [urlCategory]);
 
   useEffect(() => {
     const q = deferredQuery.trim();
@@ -163,8 +175,9 @@ export default function CatalogueBrowser({ products }: Props) {
 
   function submitSearch(v: string) {
     const q = v.trim();
+    setQuery(q);
+    setSearchSyncNonce((n) => n + 1);
     startTransition(() => {
-      setQuery(q);
       syncUrl({ q });
       if (q) setRecent(pushRecentSearch(q));
     });
@@ -220,6 +233,7 @@ export default function CatalogueBrowser({ products }: Props) {
       <div className="mb-3 min-w-0 sm:mb-4">
         <CatalogueSearchTicket
           value={query}
+          syncKey={searchSyncKey}
           onChange={setQuery}
           onSubmit={submitSearch}
           size="bar"
