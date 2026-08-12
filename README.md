@@ -46,6 +46,7 @@ Fill `.env.local`, then `npm run dev`.
 4. `supabase/migrations/003_online_ordering_foundation.sql` then re-run `search_products.sql`
 5. `supabase/migrations/004_orders.sql`
 6. `supabase/migrations/005_simplify_product_fields.sql` then re-run `search_products.sql`
+7. `supabase/migrations/006_allow_duplicate_skus.sql` (SKU no longer unique)
 
 Promote an admin:
 

@@ -21,7 +21,7 @@ create table public.products (
   slug text not null unique,
   name text not null,
   name_en text,
-  sku text not null unique,
+  sku text not null,
   code text unique,
   brand text,
   description text default '',
@@ -42,6 +42,7 @@ create table public.products (
 create index products_brand_idx on public.products (brand);
 create index products_category_idx on public.products (category);
 create index products_code_idx on public.products (code);
+create index products_sku_idx on public.products (sku);
 create index products_slug_idx on public.products (slug);
 create index products_featured_idx on public.products (featured) where featured = true;
 

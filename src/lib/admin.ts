@@ -45,19 +45,31 @@ export async function requireAdmin() {
 }
 
 export function normalizeAdminProduct(input: AdminProductInput) {
-  const slug =
-    input.slug?.trim() ||
-    buildProductSlug({ name: input.name, sku: input.sku, id: input.id });
+  const baseSlug = buildProductSlug({
+    name: input.name,
+    sku: input.sku,
+    id: input.id,
+  });
 
-  return {
-    slug,
+  // New rows need a unique slug even when SKU (and name) repeat.
+  // Updates omit slug unless the caller passes one explicitly, so editing
+  // a duplicate-SKU product does not collide with another row's slug.
+  const explicitSlug = input.slug?.trim();
+  const slug =
+    explicitSlug ||
+    (input.id
+      ? undefined
+      : `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 100));
+
+  const fields = {
     name: input.name.trim(),
     name_en: input.name_en?.trim() || input.name.trim(),
     sku: input.sku.trim(),
     code: input.code?.trim() || null,
     brand: input.brand?.trim() || null,
     description: input.description?.trim() || "",
-    description_en: input.description_en?.trim() || input.description?.trim() || "",
+    description_en:
+      input.description_en?.trim() || input.description?.trim() || "",
     category: input.category.trim(),
     image_url: input.image_url?.trim() || null,
     selling_price: Number(input.selling_price) || 0,
@@ -75,4 +87,6 @@ export function normalizeAdminProduct(input: AdminProductInput) {
         : Math.max(0, Math.floor(Number(input.stock_qty))),
     hidden_references: input.hidden_references?.trim() || "",
   };
+
+  return slug ? { ...fields, slug } : fields;
 }

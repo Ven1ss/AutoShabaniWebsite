@@ -48,6 +48,13 @@ export async function POST(request: Request) {
   }
 
   const row = normalizeAdminProduct(body);
+  if (!("slug" in row) || !row.slug) {
+    return NextResponse.json(
+      { error: "Failed to build product slug" },
+      { status: 500 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("products")
     .insert(row)

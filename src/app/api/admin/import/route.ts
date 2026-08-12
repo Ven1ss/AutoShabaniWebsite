@@ -103,10 +103,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const payload = valid.map((p) => normalizeAdminProduct(p));
+  const payload: ReturnType<typeof normalizeAdminProduct>[] = [];
+  for (const p of valid) {
+    const row = normalizeAdminProduct(p);
+    if (!("slug" in row) || !row.slug) {
+      return NextResponse.json(
+        { error: "Failed to build product slug" },
+        { status: 500 }
+      );
+    }
+    payload.push(row);
+  }
+
   const { data, error } = await supabase
     .from("products")
-    .upsert(payload, { onConflict: "sku" })
+    .insert(payload)
     .select("id");
 
   if (error) {
