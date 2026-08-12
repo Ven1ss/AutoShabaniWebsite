@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { normalizeAdminProduct, requireAdmin } from "@/lib/admin";
+import {
+  normalizeAdminProductCreate,
+  normalizeAdminProductUpdate,
+  requireAdmin,
+} from "@/lib/admin";
 import type { AdminProductInput } from "@/lib/admin";
 
 export async function GET() {
@@ -47,14 +51,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const row = normalizeAdminProduct(body);
-  if (!("slug" in row) || !row.slug) {
-    return NextResponse.json(
-      { error: "Failed to build product slug" },
-      { status: 500 }
-    );
-  }
-
+  const row = normalizeAdminProductCreate(body);
   const { data, error } = await supabase
     .from("products")
     .insert(row)
@@ -79,7 +76,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "id required" }, { status: 400 });
   }
 
-  const row = normalizeAdminProduct(body);
+  const row = normalizeAdminProductUpdate(body);
   const { data, error } = await supabase
     .from("products")
     .update(row)

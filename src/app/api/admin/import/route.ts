@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { normalizeAdminProduct, requireAdmin } from "@/lib/admin";
+import {
+  normalizeAdminProductCreate,
+  requireAdmin,
+} from "@/lib/admin";
 import type { AdminProductInput } from "@/lib/admin";
 
 function parseCsv(text: string): Record<string, string>[] {
@@ -103,18 +106,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const payload: ReturnType<typeof normalizeAdminProduct>[] = [];
-  for (const p of valid) {
-    const row = normalizeAdminProduct(p);
-    if (!("slug" in row) || !row.slug) {
-      return NextResponse.json(
-        { error: "Failed to build product slug" },
-        { status: 500 }
-      );
-    }
-    payload.push(row);
-  }
-
+  const payload = valid.map((p) => normalizeAdminProductCreate(p));
   const { data, error } = await supabase
     .from("products")
     .insert(payload)

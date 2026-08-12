@@ -44,24 +44,30 @@ export async function requireAdmin() {
   };
 }
 
-export function normalizeAdminProduct(input: AdminProductInput) {
-  const baseSlug = buildProductSlug({
-    name: input.name,
-    sku: input.sku,
-    id: input.id,
-  });
+export type NormalizedAdminProductFields = {
+  name: string;
+  name_en: string;
+  sku: string;
+  code: string | null;
+  brand: string | null;
+  description: string;
+  description_en: string;
+  category: string;
+  image_url: string | null;
+  selling_price: number;
+  purchase_price: number;
+  featured: boolean;
+  stock_status: StockStatus;
+  stock_qty: number | null;
+  hidden_references: string;
+};
 
-  // New rows need a unique slug even when SKU (and name) repeat.
-  // Updates omit slug unless the caller passes one explicitly, so editing
-  // a duplicate-SKU product does not collide with another row's slug.
-  const explicitSlug = input.slug?.trim();
-  const slug =
-    explicitSlug ||
-    (input.id
-      ? undefined
-      : `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 100));
+export type NormalizedAdminProductCreate = NormalizedAdminProductFields & {
+  slug: string;
+};
 
-  const fields = {
+function adminProductFields(input: AdminProductInput): NormalizedAdminProductFields {
+  return {
     name: input.name.trim(),
     name_en: input.name_en?.trim() || input.name.trim(),
     sku: input.sku.trim(),
@@ -87,6 +93,40 @@ export function normalizeAdminProduct(input: AdminProductInput) {
         : Math.max(0, Math.floor(Number(input.stock_qty))),
     hidden_references: input.hidden_references?.trim() || "",
   };
+}
 
+/** New products — always includes a unique slug (SKU may repeat). */
+export function normalizeAdminProductCreate(
+  input: AdminProductInput
+): NormalizedAdminProductCreate {
+  const fields = adminProductFields(input);
+  const baseSlug = buildProductSlug({
+    name: input.name,
+    sku: input.sku,
+    id: input.id,
+  });
+  const slug =
+    input.slug?.trim() ||
+    `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 100);
+
+  return { ...fields, slug };
+}
+
+/**
+ * Updates — omit slug unless explicitly provided so duplicate-SKU edits
+ * do not collide with another row's slug.
+ */
+export function normalizeAdminProductUpdate(
+  input: AdminProductInput
+): NormalizedAdminProductFields & { slug?: string } {
+  const fields = adminProductFields(input);
+  const slug = input.slug?.trim();
   return slug ? { ...fields, slug } : fields;
+}
+
+/** @deprecated Prefer normalizeAdminProductCreate / Update */
+export function normalizeAdminProduct(input: AdminProductInput) {
+  return input.id
+    ? normalizeAdminProductUpdate(input)
+    : normalizeAdminProductCreate(input);
 }
