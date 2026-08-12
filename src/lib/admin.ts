@@ -123,10 +123,3 @@ export function normalizeAdminProductUpdate(
   const slug = input.slug?.trim();
   return slug ? { ...fields, slug } : fields;
 }
-
-/** @deprecated Prefer normalizeAdminProductCreate / Update */
-export function normalizeAdminProduct(input: AdminProductInput) {
-  return input.id
-    ? normalizeAdminProductUpdate(input)
-    : normalizeAdminProductCreate(input);
-}
