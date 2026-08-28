@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import Analytics from "@/components/Analytics";
 import Providers from "@/components/Providers";
 import { getServerLocale } from "@/lib/locale";
@@ -112,6 +113,7 @@ export default async function RootLayout({
           <div id="main-content">{children}</div>
         </Providers>
         <Analytics />
+        <VercelAnalytics />
       </body>
     </html>
   );
