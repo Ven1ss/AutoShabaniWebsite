@@ -56,28 +56,17 @@ export function LanguageProvider({
     if (typeof document !== "undefined") document.documentElement.lang = locale;
   }, [locale]);
 
+  // First paint (SSR + hydrate) uses initial/default locale; after mount, stored locale.
+  // Never branch the React tree on `mounted` — that caused hydration mismatches.
+  const paintLocale = mounted ? locale : (initialLocale ?? defaultLocale);
   const value = useMemo<LanguageContextValue>(
     () => ({
-      locale,
+      locale: paintLocale,
       setLocale,
-      t: translations[locale],
+      t: translations[paintLocale],
     }),
-    [locale, setLocale]
+    [paintLocale, setLocale]
   );
-
-  if (!mounted) {
-    return (
-      <LanguageContext.Provider
-        value={{
-          ...value,
-          locale: initialLocale ?? defaultLocale,
-          t: translations[initialLocale ?? defaultLocale],
-        }}
-      >
-        {children}
-      </LanguageContext.Provider>
-    );
-  }
 
   return (
     <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

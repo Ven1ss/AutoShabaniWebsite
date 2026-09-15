@@ -211,3 +211,15 @@ export function matchBrandSlug(brand: string, slug: string): boolean {
 export function matchCategorySlug(category: string, slug: string): boolean {
   return slugifyBrand(category) === slugifyBrand(decodeURIComponent(slug));
 }
+
+/** Fisher–Yates sample — safe to call on the server only (not during client render). */
+export function pickRandomProducts(products: Product[], count: number): Product[] {
+  if (count <= 0 || products.length === 0) return [];
+  const pool = [...products];
+  const n = Math.min(count, pool.length);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, n);
+}

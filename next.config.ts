@@ -70,15 +70,10 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
+      // Do NOT set long-lived Cache-Control on /_next/static here.
+      // In `next dev`, chunk URLs like /_next/static/chunks/app/page.js are
+      // unhashed — immutable caching desyncs the client bundle from SSR and
+      // surfaces as hydration mismatches / Runtime Error [object Event].
       {
         source: "/katalogu",
         headers: [

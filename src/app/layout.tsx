@@ -81,15 +81,6 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link
-          rel="preconnect"
-          href="https://fonts.cdnfonts.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.cdnfonts.com/css/ethnocentric"
-        />
         {supabaseOrigin ? (
           <>
             <link

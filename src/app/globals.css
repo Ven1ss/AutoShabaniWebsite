@@ -57,6 +57,16 @@ body {
   color: #1d1d1f;
 }
 
+/* Self-hosted brand face — avoids CDN stylesheet load errors ([object Event]). */
+@font-face {
+  font-family: "Ethnocentric Rg";
+  src: url("https://fonts.cdnfonts.com/s/6220/ethnocentric%20rg.woff")
+    format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 .font-ethnocentric {
   font-family: "Ethnocentric Rg", var(--font-geist-sans), system-ui, sans-serif;
 }

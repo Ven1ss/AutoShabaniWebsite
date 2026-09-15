@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import SiteNav from "@/components/ui/SiteNav";
 import HomeHero from "@/components/home/HomeHero";
 import HomeSearchStrip from "@/components/home/HomeSearchStrip";
@@ -9,10 +10,13 @@ import HomeContact from "@/components/home/HomeContact";
 import Footer from "@/components/Footer";
 import { getProductsCached } from "@/lib/products-api";
 import { getRatingStatsMapCached } from "@/lib/rating-stats";
+import { pickRandomProducts } from "@/lib/products";
 
-export const revalidate = 120;
+const FEATURED_COUNT = 8;
 
 export default async function Home() {
+  // Fresh featured pick on every visit; product list itself stays cached.
+  noStore();
   const [products, ratings] = await Promise.all([
     getProductsCached(),
     getRatingStatsMapCached(),
@@ -23,6 +27,7 @@ export default async function Home() {
     ratingAverage: ratings[p.id]?.average,
     ratingCount: ratings[p.id]?.count,
   }));
+  const featured = pickRandomProducts(withRatings, FEATURED_COUNT);
 
   return (
     <>
@@ -31,7 +36,7 @@ export default async function Home() {
         <HomeHero />
         <HomeSearchStrip />
         <HomeTrustBar />
-        <FeaturedProducts products={withRatings} />
+        <FeaturedProducts products={featured} />
         <BrandLogoStrip />
         <WhyUs />
         <HomeContact />

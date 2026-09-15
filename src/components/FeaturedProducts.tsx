@@ -7,16 +7,15 @@ import { useLanguage } from "@/context/LanguageContext";
 import type { Product } from "@/lib/products";
 
 type Props = {
+  /** Already selected (e.g. random sample from the server). */
   products: Product[];
 };
 
-/** Featured strip — curated `featured` products, else first items. */
+/** Featured strip — same ProductCard as /katalogu. */
 export default function FeaturedProducts({ products }: Props) {
   const { t } = useLanguage();
-  const curated = products.filter((p) => p.featured);
-  const featured = (curated.length > 0 ? curated : products).slice(0, 8);
 
-  if (featured.length === 0) return null;
+  if (products.length === 0) return null;
 
   return (
     <section id="featured" className="bg-as-white section-pad">
@@ -35,8 +34,8 @@ export default function FeaturedProducts({ products }: Props) {
           </Link>
         </div>
 
-        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-[clamp(0.65rem,0.4rem+1vw,1.25rem)]">
-          {featured.map((product, i) => (
+        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-[var(--gap-md)]">
+          {products.map((product, i) => (
             <li key={product.slug}>
               <ProductCard product={product} priority={i < 2} />
             </li>
