@@ -26,6 +26,8 @@ import {
   resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
+import { buildProductImageAlt, inferGtin } from "@/lib/seo";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { pushRecentSearch } from "@/lib/recent-searches";
 
 const ProductRating = dynamic(() => import("@/components/ProductRating"), {
@@ -60,6 +62,8 @@ export default function ProductDetail({ product, related = [] }: Props) {
     : product.category;
   const price = formatPrice(product.sellingPrice, locale);
   const imageSrc = resolveProductImageUrl(product.image);
+  const imageAlt = buildProductImageAlt(product);
+  const gtin = inferGtin(product);
   const descriptionNeedsToggle =
     description.trim().length > DESCRIPTION_COLLAPSE_CHARS;
   const stockLabel =
@@ -99,12 +103,16 @@ export default function ProductDetail({ product, related = [] }: Props) {
   return (
     <article className="overflow-x-hidden pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.25rem))] pb-[clamp(3rem,2rem+4vw,7rem)]">
       <div className="mx-auto w-full max-w-wide px-[var(--page-pad-x)]">
-        <Link
-          href="/katalogu"
-          className="inline-flex min-h-11 items-center gap-2 text-sm text-as-secondary hover:text-as-dark transition-colors mb-3 sm:mb-4"
-        >
-          <span aria-hidden>←</span> {t.catalogueBack}
-        </Link>
+        <Breadcrumbs
+          items={[
+            { href: "/", label: t.breadcrumbHome },
+            { href: "/katalogu", label: t.navCatalogue },
+            ...(product.brand
+              ? [{ href: brandPath(product.brand), label: product.brand }]
+              : []),
+            { label: name },
+          ]}
+        />
 
         <div className="mb-[clamp(1rem,0.6rem+1.5vw,2.5rem)] min-w-0">
           <CatalogueSearchTicket
@@ -138,7 +146,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
                 >
                   <Image
                     src={imageSrc}
-                    alt={name}
+                    alt={imageAlt}
                     fill
                     priority
                     sizes="(max-width: 768px) min(100vw, 22rem), (max-width: 1024px) 45vw, 55vw"
@@ -222,6 +230,32 @@ export default function ProductDetail({ product, related = [] }: Props) {
             </div>
 
             <dl className="grid gap-[clamp(0.5rem,0.35rem+0.5vw,0.75rem)] mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] text-sm border-y border-steel-light py-[clamp(0.85rem,0.6rem+0.8vw,1.15rem)]">
+              {product.brand ? (
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
+                  <dt className="text-sm text-as-gray">{t.catalogueBrand}</dt>
+                  <dd className="text-as-dark break-all">
+                    <Link
+                      href={brandPath(product.brand)}
+                      className="hover:text-accent transition-colors"
+                    >
+                      {product.brand}
+                    </Link>
+                  </dd>
+                </div>
+              ) : null}
+              {categoryLabel ? (
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
+                  <dt className="text-sm text-as-gray">{t.catalogueCategory}</dt>
+                  <dd className="text-as-dark break-all">
+                    <Link
+                      href={categoryPath(product.category)}
+                      className="hover:text-accent transition-colors"
+                    >
+                      {categoryLabel}
+                    </Link>
+                  </dd>
+                </div>
+              ) : null}
               <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
                 <dt className="text-sm text-as-gray">{t.catalogueSku}</dt>
                 <dd className="font-mono text-as-dark break-all">{product.sku}</dd>
@@ -232,6 +266,12 @@ export default function ProductDetail({ product, related = [] }: Props) {
                   <dd className="font-mono text-as-dark break-all">
                     {product.code}
                   </dd>
+                </div>
+              ) : null}
+              {gtin ? (
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
+                  <dt className="text-sm text-as-gray">{t.catalogueEan}</dt>
+                  <dd className="font-mono text-as-dark break-all">{gtin.value}</dd>
                 </div>
               ) : null}
             </dl>
@@ -357,7 +397,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
             <div className="relative min-h-0 flex-1 overflow-hidden rounded-media bg-as-white shadow-card-hover">
               <Image
                 src={imageSrc}
-                alt={name}
+                alt={imageAlt}
                 fill
                 sizes="100vw"
                 className="object-contain"

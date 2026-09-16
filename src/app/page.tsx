@@ -8,6 +8,7 @@ import WhyUs from "@/components/home/WhyUs";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import HomeContact from "@/components/home/HomeContact";
 import Footer from "@/components/Footer";
+import OrganizationJsonLd from "@/components/OrganizationJsonLd";
 import { getProductsCached } from "@/lib/products-api";
 import { getRatingStatsMapCached } from "@/lib/rating-stats";
 import { pickRandomProducts } from "@/lib/products";
@@ -31,6 +32,7 @@ export default async function Home() {
 
   return (
     <>
+      <OrganizationJsonLd />
       <SiteNav overDark />
       <main>
         <HomeHero />

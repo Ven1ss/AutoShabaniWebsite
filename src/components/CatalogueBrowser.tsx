@@ -79,6 +79,7 @@ function countBy(
 function localFuzzySearch(products: Product[], query: string, locale: "sq" | "en") {
   const q = query.trim();
   if (!q) return products;
+  // fieldMatchesQuery strips spaces (same as search_products RPC).
   const scored = products
     .map((p) => {
       const fields = [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq];

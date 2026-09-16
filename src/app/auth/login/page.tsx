@@ -1,7 +1,13 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import SiteNav from "@/components/ui/SiteNav";
 import Footer from "@/components/Footer";
 import LoginForm from "./LoginForm";
+
+export const metadata: Metadata = {
+  title: "Kyçu",
+  robots: { index: false, follow: false },
+};
 
 export default function LoginPage() {
   return (

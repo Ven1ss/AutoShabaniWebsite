@@ -1,42 +1,59 @@
 import type { Product } from "@/lib/products";
+import {
+  inferGtin,
+  productCanonicalUrl,
+  schemaAvailability,
+} from "@/lib/seo";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://autoshabani.com";
+function compact<T extends Record<string, unknown>>(obj: T): T {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined || value === null || value === "") continue;
+    out[key] = value;
+  }
+  return out as T;
+}
 
 export default function ProductJsonLd({ product }: { product: Product }) {
-  const data = {
+  const url = productCanonicalUrl(product.slug);
+  const gtin = inferGtin(product);
+  const name = product.name.sq || product.name.en;
+  const description =
+    product.description.sq || product.description.en || name;
+
+  const offer = compact({
+    "@type": "Offer",
+    url,
+    priceCurrency: "EUR",
+    price:
+      product.sellingPrice !== null
+        ? product.sellingPrice.toFixed(2)
+        : undefined,
+    availability: schemaAvailability(product.stockStatus),
+    seller: {
+      "@type": "Organization",
+      name: "AUTO SHABANI",
+    },
+  });
+
+  const data = compact({
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.name.sq,
-    description: product.description.sq || product.name.sq,
-    sku: product.sku,
+    name,
+    description,
+    sku: product.sku || undefined,
     mpn: product.code || undefined,
     brand: product.brand
       ? { "@type": "Brand", name: product.brand }
       : undefined,
     image: product.image ? [product.image] : undefined,
-    url: `${siteUrl}/katalogu/${product.slug}`,
-    offers: {
-      "@type": "Offer",
-      url: `${siteUrl}/katalogu/${product.slug}`,
-      priceCurrency: "EUR",
-      price:
-        product.sellingPrice !== null
-          ? product.sellingPrice.toFixed(2)
-          : undefined,
-      availability:
-        product.stockStatus === "in_stock"
-          ? "https://schema.org/InStock"
-          : product.stockStatus === "out_of_stock"
-            ? "https://schema.org/OutOfStock"
-            : "https://schema.org/PreOrder",
-      seller: {
-        "@type": "Organization",
-        name: "AUTO SHABANI",
-      },
-    },
-  };
+    url,
+    offers: offer,
+  });
+
+  if (gtin) {
+    (data as Record<string, unknown>)[gtin.kind] = gtin.value;
+  }
 
   return (
     <script

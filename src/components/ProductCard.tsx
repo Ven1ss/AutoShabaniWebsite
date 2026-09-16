@@ -10,6 +10,7 @@ import {
   resolveProductImageUrl,
   type Product,
 } from "@/lib/products";
+import { buildProductImageAlt } from "@/lib/seo";
 
 type Props = {
   product: Product;
@@ -56,7 +57,7 @@ export default function ProductCard({
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={name}
+            alt={buildProductImageAlt(product)}
             fill
             priority={priority}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"

@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/ui/SiteNav";
 import Footer from "@/components/Footer";
+
+export const metadata: Metadata = {
+  title: "Faqja nuk u gjet",
+  robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
   return (

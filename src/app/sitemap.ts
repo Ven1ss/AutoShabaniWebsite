@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 import { getAllProductSlugs, getProductsCached } from "@/lib/products-api";
 import { slugifyBrand } from "@/lib/products";
+import { SITE_URL } from "@/lib/seo";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://autoshabani.com";
+/** Google's URL cap per sitemap; split into an index if we ever approach this. */
+const SITEMAP_URL_LIMIT = 45_000;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [slugs, products] = await Promise.all([
@@ -18,37 +18,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: siteUrl, changeFrequency: "weekly", priority: 1 },
+    { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
     {
-      url: `${siteUrl}/katalogu`,
+      url: `${SITE_URL}/katalogu`,
       changeFrequency: "daily",
       priority: 0.9,
     },
   ];
 
-  const productRoutes: MetadataRoute.Sitemap = slugs.map((item) => ({
-    url: `${siteUrl}/katalogu/${item.slug}`,
-    lastModified: item.updatedAt ? new Date(item.updatedAt) : undefined,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const seenSlugs = new Set<string>();
+  const productRoutes: MetadataRoute.Sitemap = [];
+  for (const item of slugs) {
+    if (!item.slug || seenSlugs.has(item.slug)) continue;
+    seenSlugs.add(item.slug);
+    productRoutes.push({
+      url: `${SITE_URL}/katalogu/${item.slug}`,
+      lastModified: item.updatedAt ? new Date(item.updatedAt) : undefined,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
 
   const brandRoutes: MetadataRoute.Sitemap = brands.map((brand) => ({
-    url: `${siteUrl}/katalogu/marka/${encodeURIComponent(slugifyBrand(brand))}`,
+    url: `${SITE_URL}/katalogu/marka/${encodeURIComponent(slugifyBrand(brand))}`,
     changeFrequency: "weekly",
     priority: 0.6,
   }));
 
   const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${siteUrl}/katalogu/kategoria/${encodeURIComponent(slugifyBrand(category))}`,
+    url: `${SITE_URL}/katalogu/kategoria/${encodeURIComponent(slugifyBrand(category))}`,
     changeFrequency: "weekly",
     priority: 0.6,
   }));
 
-  return [
+  const entries = [
     ...staticRoutes,
     ...productRoutes,
     ...brandRoutes,
     ...categoryRoutes,
   ];
+
+  if (entries.length > SITEMAP_URL_LIMIT) {
+    console.warn(
+      `[sitemap] ${entries.length} URLs exceeds ${SITEMAP_URL_LIMIT}; split into a sitemap index.`
+    );
+  }
+
+  return entries;
 }

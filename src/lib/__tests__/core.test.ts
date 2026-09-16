@@ -16,6 +16,12 @@ import {
   validatePhone,
 } from "@/lib/orders";
 import { fieldMatchesQuery, withinEditDistance } from "@/lib/search-rank";
+import {
+  buildProductImageAlt,
+  buildProductTitle,
+  catalogueHasIndexableParams,
+  inferGtin,
+} from "@/lib/seo";
 
 const sample: Product = {
   id: "1",
@@ -91,6 +97,45 @@ describe("search rank", () => {
     expect(withinEditDistance("abro", "abro", 1)).toBe(true);
     expect(withinEditDistance("abro", "abrp", 1)).toBe(true);
     expect(fieldMatchesQuery("EC533", "ec533")).toBe("exact");
+  });
+
+  it("ignores spaces like the search RPC", () => {
+    expect(fieldMatchesQuery("G1571", "G 1571")).toBe("exact");
+    expect(fieldMatchesQuery("G1571", "g1571")).toBe("exact");
+    expect(fieldMatchesQuery("5906534009081", "590 6534 009081")).toBe("exact");
+  });
+});
+
+describe("product SEO helpers", () => {
+  const k2: Product = {
+    ...sample,
+    slug: "k2-sigma-g1571",
+    sku: "5906534009081",
+    code: "G1571",
+    name: { sq: "SIGMA", en: "SIGMA" },
+    brand: "K2",
+    description: { sq: "", en: "" },
+  };
+
+  it("infers gtin13 from a 13-digit SKU", () => {
+    expect(inferGtin(k2)).toEqual({ kind: "gtin13", value: "5906534009081" });
+    expect(inferGtin(sample)).toBeNull();
+  });
+
+  it("builds a title from brand, name, code and distinct GTIN", () => {
+    expect(buildProductTitle(k2)).toBe(
+      "K2 SIGMA G1571 5906534009081 | AUTO SHABANI"
+    );
+  });
+
+  it("builds image alt without stuffing", () => {
+    expect(buildProductImageAlt(k2)).toBe("K2 SIGMA G1571");
+  });
+
+  it("flags faceted catalogue params for noindex", () => {
+    expect(catalogueHasIndexableParams({})).toBe(false);
+    expect(catalogueHasIndexableParams({ q: "G1571" })).toBe(true);
+    expect(catalogueHasIndexableParams({ utm_source: "google" })).toBe(true);
   });
 });
 

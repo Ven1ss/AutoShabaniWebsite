@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/ui/SiteNav";
 import Footer from "@/components/Footer";
@@ -13,6 +14,11 @@ import { translations } from "@/lib/translations";
 
 type Props = {
   searchParams?: Promise<{ order?: string; session_id?: string }>;
+};
+
+export const metadata: Metadata = {
+  title: "Porosia u pranua",
+  robots: { index: false, follow: false },
 };
 
 export default async function OrderSuccessPage({ searchParams }: Props) {
