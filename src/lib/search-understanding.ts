@@ -180,16 +180,15 @@ export function productMatchesType(
   if (includesAny(full, exclude)) return false;
 
   const evidence = TYPE_EVIDENCE[typeId] ?? typeTerms(typeId);
-  // Prefer name/category; allow description for types often described there
-  const hay = typeId === "air_freshener" || typeId === "antifreeze" ? full : name;
-  const hayC = typeId === "air_freshener" || typeId === "antifreeze" ? fullC : nameC;
 
+  // Require type cue in NAME or CATEGORY. Descriptions alone are too noisy
+  // (interior cleaners often mention "aromë" without being air fresheners).
   return evidence.some((term) => {
     const t = normalizeText(term);
     const tc = compact(term);
     return (
-      (t.length >= 3 && hay.includes(t)) ||
-      (tc.length >= 4 && hayC.includes(tc))
+      (t.length >= 3 && name.includes(t)) ||
+      (tc.length >= 4 && nameC.includes(tc))
     );
   });
 }

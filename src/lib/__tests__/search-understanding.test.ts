@@ -153,4 +153,26 @@ describe("attribute evidence", () => {
     expect(productMatchesType(strawberryRoko, "antifreeze")).toBe(false);
     expect(productMatchesType(brakePaint, "brake_pads")).toBe(false);
   });
+
+  it("does not treat interior plastic cleaners as air fresheners", () => {
+    const protectant = product({
+      id: "prot1",
+      sku: "POLO1",
+      name: {
+        sq: "Pastrues për plastika K2 POLO PROTECTANT | 750ml MIX",
+        en: "Plastic cleaner",
+      },
+      brand: "K2",
+      category: "Aksesore per veture",
+      description: {
+        sq: "Freskon brendësinë e makinës me aromë që zgjat.",
+        en: "Freshens the car interior with lasting scent.",
+      },
+    });
+    expect(productMatchesType(protectant, "air_freshener")).toBe(false);
+    const parsed = parseCustomerQuery("arom dredhez");
+    expect(
+      evaluateProduct(protectant, parsed, 200, ["fuzzy"], "sq").confidence
+    ).toBe("none");
+  });
 });

@@ -372,35 +372,49 @@ export async function runAiChatTurn(opts: {
     ...queries,
   ].slice(0, 10);
 
+  function consider(
+    full: AiCatalogueProduct,
+    baseScore: number,
+    baseReasons: MatchReason[]
+  ) {
+    const ev = evaluateProduct(full, parsed, baseScore, baseReasons, locale);
+    if (ev.confidence === "none") return;
+    // When attributes are required, only confirmed (verified) matches
+    if (parsed.attributes.length > 0 && ev.confidence !== "confirmed") {
+      return;
+    }
+    const prev = rankedMap.get(full.id);
+    if (!prev || ev.score > prev.score) {
+      rankedMap.set(full.id, {
+        product: full,
+        score: ev.score,
+        reasons: ev.reasons,
+        confidence: ev.confidence === "partial" ? "partial" : "confirmed",
+      });
+    }
+  }
+
   for (const q of scoreQueries) {
     const cleaned = significantQueryText(q) || q;
     for (const hit of rankProductsForQuery(candidates, cleaned, locale)) {
       const full =
         candidates.find((c) => c.id === hit.product.id) ??
         ({ ...hit.product, hiddenReferences: "" } as AiCatalogueProduct);
+      consider(full, hit.score, hit.reasons);
+    }
+  }
 
-      const ev = evaluateProduct(
-        full,
-        parsed,
-        hit.score,
-        hit.reasons,
-        locale
-      );
-      if (ev.confidence === "none") continue;
-      // When attributes are required, only confirmed (verified) matches
-      if (parsed.attributes.length > 0 && ev.confidence !== "confirmed") {
-        continue;
-      }
-
-      const prev = rankedMap.get(full.id);
-      if (!prev || ev.score > prev.score) {
-        rankedMap.set(full.id, {
-          product: full,
-          score: ev.score,
-          reasons: ev.reasons,
-          confidence: ev.confidence === "partial" ? "partial" : "confirmed",
-        });
-      }
+  // Functional / type-known queries often share no lexical tokens with product
+  // names (e.g. "liquid that prevents freezing"). Scan catalogue by type.
+  if (parsed.typeId && rankedMap.size === 0) {
+    for (const full of candidates) {
+      consider(full, 120, ["category"]);
+    }
+  } else if (parsed.typeId && parsed.attributes.length > 0) {
+    // Also ensure attribute-confirmed products aren't missed by weak RPC recall
+    for (const full of candidates) {
+      if (rankedMap.has(full.id)) continue;
+      consider(full, 100, ["description"]);
     }
   }
 
