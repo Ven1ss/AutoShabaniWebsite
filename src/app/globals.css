@@ -78,38 +78,22 @@ body {
   padding-bottom: var(--section-pad);
 }
 
-/* Smart stock lookup — parts-counter panel (unique to Auto Shabani) */
-.stock-lookup {
-  position: relative;
-  border: 1px solid rgba(29, 29, 31, 0.08);
+/* Google-like homepage search */
+.google-search {
+  border: 1px solid rgba(29, 29, 31, 0.1);
+  border-radius: 1.5rem;
+  overflow: hidden;
 }
-.stock-lookup__rail {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--as-accent);
+.google-search:focus-within {
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.12);
+  border-color: rgba(29, 29, 31, 0.18);
 }
-.stock-lookup__hit {
-  opacity: 0;
-  animation: stock-hit-in 0.35s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+.google-search--ai {
+  border-color: rgba(200, 16, 46, 0.35);
+  box-shadow: 0 1px 8px rgba(200, 16, 46, 0.12);
 }
-@keyframes stock-hit-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .stock-lookup__hit {
-    animation: none;
-    opacity: 1;
-  }
+.google-ai-panel {
+  border-radius: 1rem;
 }
 
 .container-as,

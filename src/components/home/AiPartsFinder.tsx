@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FormEvent,
   KeyboardEvent,
@@ -13,6 +14,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { whatsappEnquireUrl } from "@/lib/contact";
 import { trackEvent } from "@/lib/analytics";
+import { pushRecentSearch } from "@/lib/recent-searches";
 import type { ChatProductCard } from "@/lib/ai-chat";
 
 type UiMessage = {
@@ -23,56 +25,74 @@ type UiMessage = {
   clarifying?: boolean;
 };
 
-const STARTERS_SQ = [
-  "Kam nevojë për vaj 5W-30",
-  "A keni LIQUI MOLY?",
-  "Po kërkoj antifriz G13",
-];
-const STARTERS_EN = [
-  "I need 5W-30 oil",
-  "Do you have LIQUI MOLY?",
-  "Looking for G13 coolant",
-];
+type SearchMode = "normal" | "ai";
 
-function SendIcon({ className }: { className?: string }) {
+function SearchIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
-        d="M5 12h14M13 6l6 6-6 6"
+        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M16.5 16.5 21 21"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
 }
 
+function AiSparkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 3.2 13.2 8.4 18.4 9.6 13.2 10.8 12 16 10.8 10.8 5.6 9.6 10.8 8.4 12 3.2Z" />
+      <path d="M18.2 14.2 18.8 16.6 21.2 17.2 18.8 17.8 18.2 20.2 17.6 17.8 15.2 17.2 17.6 16.6 18.2 14.2Z" />
+    </svg>
+  );
+}
+
 /**
- * In-site spare-parts chat assistant — ChatGPT-like conversation,
- * grounded exclusively in Auto Shabani Supabase catalogue.
+ * Google-like homepage search with two explicit modes:
+ * - Normal → /katalogu?q= (existing catalogue search)
+ * - AI → conversational product results (must be toggled on)
  */
 export default function AiPartsFinder() {
   const { t, locale } = useLanguage();
+  const router = useRouter();
   const inputId = useId();
   const listRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [mode, setMode] = useState<SearchMode>("normal");
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<UiMessage[]>([]);
-
-  const starters = locale === "en" ? STARTERS_EN : STARTERS_SQ;
+  const [aiOpen, setAiOpen] = useState(false);
 
   useEffect(() => {
+    if (!aiOpen) return;
     listRef.current?.scrollTo({
       top: listRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages, loading]);
+  }, [messages, loading, aiOpen]);
 
-  async function send(text: string) {
+  function runNormalSearch(q: string) {
+    const query = q.trim();
+    if (query) pushRecentSearch(query);
+    trackEvent("search_normal", { q: query.slice(0, 80), locale });
+    router.push(query ? `/katalogu?q=${encodeURIComponent(query)}` : "/katalogu");
+  }
+
+  async function runAiSearch(text: string) {
     const content = text.trim();
     if (!content || loading) return;
+
+    setAiOpen(true);
+    setMode("ai");
 
     const userMsg: UiMessage = {
       id: `u-${Date.now()}`,
@@ -131,14 +151,30 @@ export default function AiPartsFinder() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    void send(draft);
+    if (mode === "ai") {
+      void runAiSearch(draft);
+    } else {
+      runNormalSearch(draft);
+    }
   }
 
-  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
       e.preventDefault();
-      void send(draft);
+      if (mode === "ai") void runAiSearch(draft);
+      else runNormalSearch(draft);
     }
+  }
+
+  function enableAi() {
+    setMode("ai");
+    setAiOpen(true);
+    inputRef.current?.focus();
+  }
+
+  function enableNormal() {
+    setMode("normal");
+    // Keep chat history if already open, but don't auto-run AI
   }
 
   function resetChat() {
@@ -156,75 +192,121 @@ export default function AiPartsFinder() {
   return (
     <section className="relative z-20 -mt-6 sm:-mt-8">
       <div className="container-as min-w-0">
-        <div className="stock-lookup overflow-hidden bg-as-white text-as-dark shadow-card">
-          <div className="stock-lookup__rail" aria-hidden />
+        <div className="mx-auto max-w-3xl">
+          {/* Google-like search shell */}
+          <form
+            onSubmit={onSubmit}
+            className={`google-search bg-as-white shadow-card transition-shadow ${
+              mode === "ai" ? "google-search--ai" : ""
+            }`}
+          >
+            <label htmlFor={inputId} className="sr-only">
+              {mode === "ai" ? t.aiSearchPlaceholder : t.searchPlaceholder}
+            </label>
+            <div className="flex items-center gap-2 px-3 sm:px-4">
+              <SearchIcon className="h-5 w-5 shrink-0 text-as-gray" />
+              <input
+                ref={inputRef}
+                id={inputId}
+                type="search"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder={
+                  mode === "ai" ? t.aiSearchPlaceholder : t.searchPlaceholder
+                }
+                autoComplete="off"
+                className="min-w-0 flex-1 bg-transparent py-3.5 text-as-dark text-body outline-none placeholder:text-as-gray"
+              />
+              <button
+                type="button"
+                onClick={() => (mode === "ai" ? enableNormal() : enableAi())}
+                aria-pressed={mode === "ai"}
+                title={t.aiSearchToggleHint}
+                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  mode === "ai"
+                    ? "bg-accent text-white"
+                    : "bg-as-snow text-as-secondary hover:bg-as-mist hover:text-as-dark"
+                }`}
+              >
+                <AiSparkIcon className="h-4 w-4" />
+                <span className="sr-only">{t.aiSearchToggle}</span>
+              </button>
+            </div>
 
-          <div className="relative grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
-            <header className="border-b border-as-mist p-5 sm:p-6 lg:border-b-0 lg:border-r lg:p-7">
-              <p className="text-caption font-medium uppercase tracking-[0.14em] text-accent">
-                {t.aiFindEyebrow}
-              </p>
-              <h2 className="mt-2 text-section text-as-dark max-w-[18ch]">
-                {t.aiFindTitle}
-              </h2>
-              <p className="mt-3 text-body text-as-secondary max-w-md">
-                {t.aiFindSubtitle}
-              </p>
-              <ul className="mt-5 space-y-2 text-xs text-as-secondary">
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {t.aiFindBullet1}
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {t.aiFindBullet2}
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {t.aiFindBullet3}
-                </li>
-              </ul>
-            </header>
+            <div className="flex flex-wrap items-center justify-center gap-2 border-t border-as-mist px-3 py-2.5 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("normal");
+                  runNormalSearch(draft);
+                }}
+                className="rounded-sm bg-as-snow px-4 py-2 text-sm text-as-dark hover:bg-as-mist transition-colors"
+              >
+                {t.searchSubmit}
+              </button>
+              <button
+                type="button"
+                disabled={loading || !draft.trim()}
+                onClick={() => {
+                  setMode("ai");
+                  void runAiSearch(draft);
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-sm px-4 py-2 text-sm transition-colors disabled:opacity-50 ${
+                  mode === "ai"
+                    ? "bg-accent text-white hover:bg-accent-deep"
+                    : "bg-as-snow text-as-dark hover:bg-as-mist"
+                }`}
+              >
+                <AiSparkIcon className="h-3.5 w-3.5" />
+                {loading && mode === "ai"
+                  ? t.aiFindSearching
+                  : t.aiSearchSubmit}
+              </button>
+            </div>
+          </form>
 
-            <div className="flex min-h-[22rem] flex-col sm:min-h-[26rem]">
-              <div className="flex items-center justify-between gap-3 border-b border-as-mist px-4 py-3 sm:px-5">
+          <p className="mt-2 text-center text-[0.7rem] text-as-gray">
+            {mode === "ai" ? t.aiSearchModeHint : t.normalSearchModeHint}
+          </p>
+
+          {/* AI chat — only after deliberate AI search */}
+          {aiOpen ? (
+            <div className="google-ai-panel mt-4 overflow-hidden border border-as-mist bg-as-white shadow-card">
+              <div className="flex items-center justify-between gap-3 border-b border-as-mist px-4 py-2.5">
                 <p className="text-caption font-medium text-as-secondary">
                   {t.aiFindLive}
                 </p>
-                {messages.length > 0 ? (
+                <div className="flex items-center gap-3">
+                  {messages.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={resetChat}
+                      className="text-xs font-medium text-as-secondary underline underline-offset-2 hover:text-as-dark"
+                    >
+                      {t.aiFindNewChat}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
-                    onClick={resetChat}
+                    onClick={() => {
+                      setAiOpen(false);
+                      setMode("normal");
+                    }}
                     className="text-xs font-medium text-as-secondary underline underline-offset-2 hover:text-as-dark"
                   >
-                    {t.aiFindNewChat}
+                    {t.aiFindClose}
                   </button>
-                ) : null}
+                </div>
               </div>
 
               <div
                 ref={listRef}
-                className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5"
+                className="max-h-[min(70vh,36rem)] space-y-4 overflow-y-auto px-4 py-4"
                 aria-live="polite"
               >
-                {messages.length === 0 ? (
-                  <div className="space-y-4">
-                    <p className="text-sm text-as-secondary">
-                      {t.aiFindWelcome}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {starters.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => void send(s)}
-                          className="rounded-sm border border-as-mist bg-as-snow px-3 py-2 text-left text-xs font-medium text-as-dark hover:border-as-dark/20 transition-colors"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                {messages.length === 0 && !loading ? (
+                  <p className="text-sm text-as-secondary">{t.aiFindWelcome}</p>
                 ) : null}
 
                 {messages.map((m) => (
@@ -233,27 +315,29 @@ export default function AiPartsFinder() {
                     className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[95%] sm:max-w-[90%] ${
+                      className={`max-w-full sm:max-w-[95%] ${
                         m.role === "user"
-                          ? "bg-as-dark text-white px-3.5 py-2.5 rounded-2xl rounded-br-sm"
+                          ? "rounded-2xl rounded-br-sm bg-as-dark px-3.5 py-2.5 text-white"
                           : "w-full"
                       }`}
                     >
                       <p
                         className={`text-sm leading-relaxed whitespace-pre-wrap ${
-                          m.role === "user" ? "text-white" : "text-as-dark"
+                          m.role === "user" ? "text-white" : "text-as-secondary"
                         }`}
                       >
                         {m.content}
                       </p>
 
-                      {m.role === "assistant" && m.products && m.products.length > 0 ? (
-                        <ul className="mt-3 divide-y divide-as-mist border border-as-mist bg-as-snow">
+                      {m.role === "assistant" &&
+                      m.products &&
+                      m.products.length > 0 ? (
+                        <ul className="mt-3 divide-y divide-as-mist border border-as-mist">
                           {m.products.map((item) => (
                             <li key={item.id}>
                               <Link
                                 href={item.url}
-                                className="group flex items-center gap-3 p-3 sm:gap-4"
+                                className="group flex items-center gap-3 bg-as-snow/60 p-3 hover:bg-as-snow sm:gap-4"
                               >
                                 <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-as-white">
                                   <Image
@@ -270,11 +354,13 @@ export default function AiPartsFinder() {
                                       {item.brand}
                                     </p>
                                   ) : null}
-                                  <p className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+                                  <p className="text-sm font-medium leading-snug line-clamp-2 text-as-dark group-hover:text-accent transition-colors">
                                     {item.title}
                                   </p>
                                   <p className="mt-0.5 font-mono text-[0.7rem] text-as-gray">
-                                    {[item.sku, item.code].filter(Boolean).join(" · ")}
+                                    {[item.sku, item.category]
+                                      .filter(Boolean)
+                                      .join(" · ")}
                                   </p>
                                 </div>
                                 <p className="shrink-0 text-sm font-semibold text-accent tabular-nums">
@@ -309,49 +395,45 @@ export default function AiPartsFinder() {
 
                 {loading ? (
                   <div className="space-y-2" aria-busy="true">
-                    <div className="h-3 w-40 animate-pulse bg-as-mist rounded-sm" />
-                    <div className="h-3 w-64 animate-pulse bg-as-mist rounded-sm" />
+                    <div className="h-3 w-32 animate-pulse rounded-sm bg-as-mist" />
+                    <div className="h-16 w-full animate-pulse bg-as-snow" />
                     <div className="h-16 w-full animate-pulse bg-as-snow" />
                   </div>
                 ) : null}
               </div>
 
-              <form
-                onSubmit={onSubmit}
-                className="border-t border-as-mist bg-as-white p-3 sm:p-4"
-              >
-                <label htmlFor={inputId} className="sr-only">
-                  {t.aiFindPlaceholder}
-                </label>
-                <div className="flex items-end gap-2">
-                  <textarea
-                    ref={inputRef}
-                    id={inputId}
-                    rows={1}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    placeholder={t.aiFindPlaceholder}
-                    disabled={loading}
-                    className="min-h-[2.75rem] max-h-28 flex-1 resize-y rounded-control border border-as-mist bg-as-snow px-3.5 py-2.5 text-sm text-as-dark outline-none placeholder:text-as-gray focus:border-as-dark/25 focus:bg-as-white disabled:opacity-60"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading || !draft.trim()}
-                    className="inline-flex h-[2.75rem] items-center justify-center gap-2 rounded-control bg-as-dark px-4 text-sm font-medium text-white hover:bg-as-black disabled:opacity-50 transition-colors"
-                  >
-                    <SendIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {loading ? t.aiFindSearching : t.aiFindSubmit}
-                    </span>
-                  </button>
+              {messages.length > 0 ? (
+                <div className="border-t border-as-mist px-4 py-3">
+                  <p className="mb-2 text-[0.7rem] text-as-gray">
+                    {t.aiRefineHint}
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="search"
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void runAiSearch(draft);
+                        }
+                      }}
+                      placeholder={t.aiRefinePlaceholder}
+                      className="min-w-0 flex-1 rounded-control border border-as-mist bg-as-snow px-3 py-2.5 text-sm outline-none focus:border-as-dark/25 focus:bg-as-white"
+                    />
+                    <button
+                      type="button"
+                      disabled={loading || !draft.trim()}
+                      onClick={() => void runAiSearch(draft)}
+                      className="rounded-control bg-as-dark px-4 py-2.5 text-sm font-medium text-white hover:bg-as-black disabled:opacity-50"
+                    >
+                      {t.aiFindSubmit}
+                    </button>
+                  </div>
                 </div>
-                <p className="mt-2 text-[0.7rem] text-as-gray">
-                  {t.aiFindDisclaimer}
-                </p>
-              </form>
+              ) : null}
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </section>

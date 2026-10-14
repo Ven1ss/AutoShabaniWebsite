@@ -45,8 +45,18 @@ export const BUILTIN_SYNONYM_GROUPS: SynonymGroup[] = [
   ["buji ndezjeje", "glow plug"],
   ["fllanxhë", "flanxhe", "gasket"],
   ["llambë", "llamba", "bulb", "lamp"],
-  ["vaj motori", "motor oil", "engine oil"],
-  ["antifriz", "coolant", "antifreeze"],
+  ["vaj motori", "vaj motor", "motor oil", "engine oil"],
+  [
+    "antifriz",
+    "coolant",
+    "antifreeze",
+    "engine coolant",
+    "radiator coolant",
+    "leng ftohje",
+    "lëng ftohje",
+    "ftohje motori",
+  ],
+  ["aroma", "arome", "air freshener", "car perfume", "parfum makine"],
 ];
 
 function loadExtraGroups(): SynonymGroup[] {

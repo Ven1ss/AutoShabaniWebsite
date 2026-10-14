@@ -40,33 +40,22 @@ export const translations = {
     searchFitmentNote:
       "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin ose na pyet.",
 
-    // In-site parts assistant (homepage)
-    aiFindEyebrow: "Asistenti i pjesëve",
-    aiFindTitle: "Pyet si në bisedë — gjej nga stoku ynë",
-    aiFindSubtitle:
-      "Shkruaj me fjalët e tua: emër, kod OE/SKU, markë, ose përshkrim. Asistenti lexon katalogun real në Supabase dhe të tregon vetëm produkte që ekzistojnë.",
-    aiFindBullet1: "Kupton gabime shkrimi, sinonime dhe kode të pjesshme",
-    aiFindBullet2: "Kërkon edhe referenca të brendshme (të fshehura nga klienti)",
-    aiFindBullet3: "Nuk shpik produkte, çmime apo përshtatje me veturën",
-    aiFindPlaceholder: "P.sh. kam nevojë për vaj 5W-30 ose kodin…",
+    // Dual search (homepage) — normal + AI
+    normalSearchModeHint: "Kërkim normal në katalog — shpejt dhe i thjeshtë.",
+    aiSearchModeHint: "Kërkim me AI — kupton kërkesën dhe tregon produktet direkte.",
+    aiSearchToggle: "Aktivizo kërkimin me AI",
+    aiSearchToggleHint: "Kliko për të aktivizuar ose çaktivizuar kërkimin me AI",
+    aiSearchSubmit: "Kërko me AI",
+    aiSearchPlaceholder: "P.sh. Antifriz për makinë, vaj 5W-30, kod OE…",
+    aiRefineHint: "Përmirëso kërkesën në të njëjtën bisedë:",
+    aiRefinePlaceholder: "P.sh. vetëm K2, ose më të lira…",
     aiFindSubmit: "Dërgo",
     aiFindSearching: "Duke kërkuar…",
     aiFindClose: "Mbyll",
     aiFindNewChat: "Bisedë e re",
-    aiFindTry: "Provo shpejt",
-    aiFindLive: "Biseda me katalogun",
-    aiFindWelcome:
-      "Përshëndetje — më thuaj çfarë po kërkon. Mund të fillosh me një nga këto:",
-    aiFindFound: "Ja çfarë përputhet me kërkesën:",
-    aiFindEmpty: "Nuk e kemi të listuar kështu në katalog.",
-    aiFindEmptyHint:
-      "Dërgo kodin, markën e veturës ose një foto — e kontrollojmë në dyqan.",
+    aiFindLive: "Rezultatet me AI",
+    aiFindWelcome: "Shkruaj kërkesën dhe kliko «Kërko me AI» — produktet shfaqen menjëherë.",
     aiFindAskWhatsApp: "Dërgo në WhatsApp",
-    aiFindFitmentNote:
-      "Përputhja me veturën verifikohet me kod. Nëse ke dyshim, shkruaj në",
-    aiFindSeeAll: "Hap rezultatet në katalog",
-    aiFindDisclaimer:
-      "Përgjigjet bazohen vetëm në produktet e katalogut AUTO SHABANI.",
     aiFindError: "Kërkimi dështoi — provo përsëri.",
 
     // Catalogue
@@ -328,33 +317,22 @@ export const translations = {
     searchFitmentNote:
       "Vehicle fitment is not auto-confirmed — verify the code or ask us.",
 
-    // In-site parts assistant (homepage)
-    aiFindEyebrow: "Parts assistant",
-    aiFindTitle: "Ask in plain language — search our stock",
-    aiFindSubtitle:
-      "Write in your own words: name, OE/SKU code, brand, or a description. The assistant reads our real Supabase catalogue and only shows products that exist.",
-    aiFindBullet1: "Handles typos, synonyms, and partial codes",
-    aiFindBullet2: "Also searches internal cross-references (hidden from customers)",
-    aiFindBullet3: "Never invents products, prices, or vehicle fitment",
-    aiFindPlaceholder: "e.g. I need 5W-30 oil or a code…",
+    // Dual search (homepage) — normal + AI
+    normalSearchModeHint: "Normal catalogue search — fast and simple.",
+    aiSearchModeHint: "AI search — understands intent and shows products directly.",
+    aiSearchToggle: "Enable AI search",
+    aiSearchToggleHint: "Click to turn AI search on or off",
+    aiSearchSubmit: "Search with AI",
+    aiSearchPlaceholder: "e.g. Antifreeze for car, 5W-30 oil, OE code…",
+    aiRefineHint: "Refine in the same conversation:",
+    aiRefinePlaceholder: "e.g. only K2, or cheaper options…",
     aiFindSubmit: "Send",
     aiFindSearching: "Searching…",
     aiFindClose: "Close",
     aiFindNewChat: "New chat",
-    aiFindTry: "Quick tries",
-    aiFindLive: "Catalogue chat",
-    aiFindWelcome:
-      "Hi — tell me what you need. You can start with one of these:",
-    aiFindFound: "Here’s what matches your request:",
-    aiFindEmpty: "Nothing listed that way in the catalogue.",
-    aiFindEmptyHint:
-      "Send the code, vehicle make, or a photo — we’ll check in the shop.",
+    aiFindLive: "AI results",
+    aiFindWelcome: "Type your request and click “Search with AI” — products appear immediately.",
     aiFindAskWhatsApp: "Message on WhatsApp",
-    aiFindFitmentNote:
-      "Vehicle fitment is confirmed by code. If you’re unsure, message us on",
-    aiFindSeeAll: "Open results in the catalogue",
-    aiFindDisclaimer:
-      "Answers are based only on AUTO SHABANI catalogue products.",
     aiFindError: "Search failed — try again.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",

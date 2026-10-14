@@ -9,6 +9,11 @@ import { gatherAiCandidates, toPublicProduct } from "@/lib/ai-catalogue";
 import { rankProductsForQuery } from "@/lib/search-engine";
 import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
 import {
+  detectProductIntent,
+  intentSearchQueries,
+  passesStrictRelevance,
+} from "@/lib/search-intent";
+import {
   aiSearchEnabled,
   composeFindIntroWithAi,
   expandQueryWithAi,
@@ -85,7 +90,11 @@ export async function runAiFind(
 
   let aiUsed = false;
   let expandedHint: string[] = [];
-  const queries = expandQueryWithSynonyms(q);
+  const intent = detectProductIntent(q);
+  const queries = [
+    ...intentSearchQueries(q, intent),
+    ...expandQueryWithSynonyms(q),
+  ];
 
   if (aiSearchEnabled()) {
     const expansion = await expandQueryWithAi(q);
@@ -101,24 +110,21 @@ export async function runAiFind(
   const candidates = await gatherAiCandidates(queries);
   const ranked = rankProductsForQuery(candidates, q, locale);
 
-  /**
-   * Stricter gate than catalogue browse: only surface confident hits.
-   * Weak / empty → WhatsApp handoff in the UI.
-   */
-  const MIN_AI_SCORE = 140;
   const confident = ranked.filter((h) => {
-    if (h.score < MIN_AI_SCORE) return false;
-    return h.reasons.some((r) =>
-      ["sku", "code", "hidden_ref", "identifier", "name", "brand"].includes(r)
-    );
+    const full =
+      candidates.find((c) => c.id === h.product.id) ??
+      ({ ...h.product, hiddenReferences: "" } as (typeof candidates)[number]);
+    return passesStrictRelevance(h.score, h.reasons, full, intent, locale, {
+      minScore: intent ? 90 : 140,
+    });
   });
 
-  const items = confident
-    .slice(0, limit)
-    .map((h) => {
-      const full = candidates.find((c) => c.id === h.product.id);
-      return toItem(full ? toPublicProduct(full) : h.product, locale);
-    });
+  // Category intents: return every relevant match (capped)
+  const take = intent ? Math.max(limit, 48) : limit;
+  const items = confident.slice(0, take).map((h) => {
+    const full = candidates.find((c) => c.id === h.product.id);
+    return toItem(full ? toPublicProduct(full) : h.product, locale);
+  });
 
   let intro = fallbackIntro(q, items.length, locale);
   if (items.length > 0 && aiSearchEnabled()) {

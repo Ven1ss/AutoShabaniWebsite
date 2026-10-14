@@ -190,40 +190,65 @@ function scoreAgainstQuery(
     }
   }
 
-  // Token fuzzy / includes (typos)
+  // Token includes / fuzzy (typos). Prefer exact token includes over edit-distance.
+  let strongTokenHit = false;
   for (const token of tokens) {
     if (token.length < 3) continue;
     const t = token;
     const candidates = [nameN, nameAltN, brandN, catN, descN].filter(Boolean);
+    let tokenHit = false;
     for (const field of candidates) {
       if (field.includes(t)) {
-        score += Math.floor(WEIGHTS.fuzzyToken * 0.6);
+        score += Math.floor(WEIGHTS.fuzzyToken * 0.85);
         reasons.add("fuzzy");
+        strongTokenHit = true;
+        tokenHit = true;
         break;
       }
-      const words = field.split(" ").filter((w) => w.length >= 3);
+    }
+    if (tokenHit) continue;
+
+    // Edit-distance only for longer tokens (avoid "makin" ≈ random short words)
+    if (t.length < 5) continue;
+    for (const field of candidates) {
+      const words = field.split(" ").filter((w) => w.length >= 4);
       for (const w of words) {
-        const maxDist = t.length >= 6 ? 2 : 1;
-        if (withinEditDistance(w.slice(0, t.length + 2), t, maxDist)) {
-          score += WEIGHTS.fuzzyToken;
+        const maxDist = t.length >= 7 ? 2 : 1;
+        if (withinEditDistance(w.slice(0, t.length + 1), t, maxDist)) {
+          score += Math.floor(WEIGHTS.fuzzyToken * 0.55);
           reasons.add("fuzzy");
+          tokenHit = true;
           break;
         }
-        // Prefix typo: "golv" ≈ "golf"
         if (
-          t.length >= 4 &&
-          w.length >= 4 &&
+          t.length >= 5 &&
+          w.length >= 5 &&
           editDistance(t, w.slice(0, t.length)) <= 1
         ) {
-          score += WEIGHTS.fuzzyToken;
+          score += Math.floor(WEIGHTS.fuzzyToken * 0.55);
           reasons.add("fuzzy");
+          tokenHit = true;
           break;
         }
       }
+      if (tokenHit) break;
     }
   }
 
-  if (fromSynonym && score > 0) {
+  // Synonym boost only when the product actually matched a meaningful field
+  // for this variant — never boost fuzzy-only noise from filler tokens.
+  if (
+    fromSynonym &&
+    score > 0 &&
+    (strongTokenHit ||
+      reasons.has("name") ||
+      reasons.has("brand") ||
+      reasons.has("category") ||
+      reasons.has("description") ||
+      reasons.has("sku") ||
+      reasons.has("code") ||
+      reasons.has("hidden_ref"))
+  ) {
     score += WEIGHTS.synonymBoost;
     reasons.add("synonym");
   }

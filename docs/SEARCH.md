@@ -43,10 +43,16 @@ There are **no dedicated OE/barcode/fitment columns** today. OE/cross-refs live 
   - With `rich=1`: `{ products, hits[{ id, slug, score, reasons }], meta }`
 - `GET /api/products/suggest?q=&locale=` — autocomplete suggestions
 - `POST /api/ai/find` — single-shot stock lookup (legacy / chips)
-- `POST /api/ai/chat` — **conversational parts assistant**
+- `POST /api/ai/chat` — **conversational AI search** (homepage “Search with AI”)
   - Body: `{ messages:[{ role, content }], locale? }`
-  - Response: `{ reply, products:[{ id, title, brand, sku, code, category, description, price, url, image, slug }], meta }`
-  - Clarifying questions when ambiguous; WhatsApp handoff in UI when empty
+  - Response: `{ reply, products:[…], meta:{ intent, resultCount, clarifying, grounded, aiUsed } }`
+  - Intent-aware relevance (e.g. antifreeze ≠ air fresheners); category queries return all relevant matches
+  - Product cards are primary; reply is one short line
+  - Clarifying questions only when genuinely empty/ambiguous
+
+Homepage dual search:
+- **Normal** → `/katalogu?q=` via existing catalogue search (no AI)
+- **AI** → explicit spark/AI control → `/api/ai/chat` conversation with product cards
 
 Rate-limited per IP.
 

@@ -15,9 +15,14 @@ import {
   toPublicProduct,
   type AiCatalogueProduct,
 } from "@/lib/ai-catalogue";
-import { rankProductsForQuery } from "@/lib/search-engine";
+import { rankProductsForQuery, type MatchReason } from "@/lib/search-engine";
 import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
 import { significantQueryText } from "@/lib/search-normalize";
+import {
+  detectProductIntent,
+  intentSearchQueries,
+  passesStrictRelevance,
+} from "@/lib/search-intent";
 import {
   aiSearchEnabled,
   expandQueryWithAi,
@@ -53,13 +58,16 @@ export type ChatTurnResponse = {
     clarifying: boolean;
     resultCount: number;
     grounded: boolean;
+    intent?: string | null;
   };
 };
 
 const CHAT_TIMEOUT_MS = 12_000;
 const MAX_HISTORY = 8;
-const MAX_CONTEXT_PRODUCTS = 12;
-const MAX_RETURN_PRODUCTS = 6;
+/** Enough context for the model; UI may show more via ranked list. */
+const MAX_CONTEXT_PRODUCTS = 40;
+/** Category / general queries should surface every relevant match. */
+const MAX_RETURN_PRODUCTS = 48;
 
 function toCard(product: Product, locale: Locale): ChatProductCard {
   const desc = getLocalized(product.description, locale).trim();
@@ -81,7 +89,6 @@ function toCard(product: Product, locale: Locale): ChatProductCard {
   };
 }
 
-/** Public catalogue context for the model — no hidden_references / purchase_price. */
 function toModelContext(product: AiCatalogueProduct, locale: Locale) {
   return {
     id: product.id,
@@ -90,41 +97,30 @@ function toModelContext(product: AiCatalogueProduct, locale: Locale) {
     sku: product.sku,
     code: product.code,
     category: product.category,
-    description: getLocalized(product.description, locale).slice(0, 220),
+    description: getLocalized(product.description, locale).slice(0, 160),
     sellingPrice:
       product.sellingPrice != null && product.sellingPrice > 0
         ? product.sellingPrice
         : null,
-    // Signal only — never the raw hidden_references string
     hasInternalCrossRefs: Boolean(product.hiddenReferences?.trim()),
   };
 }
 
-function fallbackReply(
-  locale: Locale,
-  count: number,
-  clarifying: boolean
-): string {
+function fallbackReply(locale: Locale, count: number): string {
   if (locale === "en") {
-    if (clarifying) {
-      return "I found a few possible matches. Can you share a brand, OE/SKU code, or a clearer part name?";
-    }
     if (count === 0) {
-      return "I couldn’t find a confident match in our catalogue. Share the OE/SKU code, brand, or a photo on WhatsApp and we’ll check in the shop.";
+      return "No confident matches in our catalogue. Share an OE/SKU code, brand, or photo on WhatsApp.";
     }
     return count === 1
-      ? "Here’s the closest match from our catalogue:"
-      : "Here are the closest matches from our catalogue:";
-  }
-  if (clarifying) {
-    return "Gjeta disa mundësi. A mund të thuash markën, kodin OE/SKU, ose emrin më qartë?";
+      ? "Matching product:"
+      : `${count} matching products:`;
   }
   if (count === 0) {
-    return "Nuk gjeta një përputhje të sigurt në katalog. Dërgo kodin OE/SKU, markën ose një foto në WhatsApp — e kontrollojmë në dyqan.";
+    return "Nuk gjeta përputhje të sigurt në katalog. Dërgo kodin OE/SKU, markën ose një foto në WhatsApp.";
   }
   return count === 1
-    ? "Ja përputhja më e afërt nga katalogu ynë:"
-    : "Ja përputhjet më të afërta nga katalogu ynë:";
+    ? "Produkti që përputhet:"
+    : `${count} produkte që përputhen:`;
 }
 
 async function openAiChatJson(
@@ -147,7 +143,7 @@ async function openAiChatJson(
       },
       body: JSON.stringify({
         model,
-        temperature: 0.2,
+        temperature: 0.1,
         response_format: { type: "json_object" },
         messages,
       }),
@@ -172,14 +168,16 @@ async function openAiChatJson(
   }
 }
 
-/**
- * Interpret the latest user turn into search queries (AI when available).
- */
 async function buildSearchQueries(
   userText: string,
   _locale: Locale
 ): Promise<{ queries: string[]; aiUsed: boolean }> {
-  const base = expandQueryWithSynonyms(userText);
+  const intent = detectProductIntent(userText);
+  const base = [
+    ...intentSearchQueries(userText, intent),
+    ...expandQueryWithSynonyms(userText),
+  ];
+  const out = new Set<string>(base.filter(Boolean));
   let aiUsed = false;
 
   if (aiSearchEnabled()) {
@@ -187,20 +185,20 @@ async function buildSearchQueries(
     if (expansion?.expandedTerms?.length) {
       aiUsed = true;
       for (const term of expansion.expandedTerms) {
-        if (!base.includes(term)) base.push(term);
+        out.add(term);
       }
-      if (expansion.brand && !base.includes(expansion.brand)) {
-        base.push(expansion.brand);
-      }
-      if (expansion.productType && !base.includes(expansion.productType)) {
-        base.push(expansion.productType);
-      }
+      if (expansion.brand) out.add(expansion.brand);
+      if (expansion.productType) out.add(expansion.productType);
     }
   }
 
-  return { queries: base.slice(0, 6), aiUsed };
+  return { queries: [...out].slice(0, 10), aiUsed };
 }
 
+/**
+ * Optional short reply. Product list is authoritative — model may only
+ * reorder ids from the grounded set, never invent.
+ */
 async function composeGroundedReply(opts: {
   locale: Locale;
   history: ChatMessage[];
@@ -228,15 +226,14 @@ async function composeGroundedReply(opts: {
     {
       role: "system",
       content:
-        `You are AUTO SHABANI's in-site spare-parts assistant (${lang}). ` +
-        "You help customers find real products from the provided catalogue JSON only. " +
+        `You are AUTO SHABANI's spare-parts search assistant (${lang}). ` +
+        "Customers already see product cards — keep reply to ONE short line. " +
         "Rules:\n" +
         "- NEVER invent products, prices, SKUs, OE numbers, stock, or vehicle fitment.\n" +
-        "- ONLY recommend product ids that appear in catalogue.\n" +
-        "- Prefer the best relevance order.\n" +
-        "- If ambiguous, ask ONE short clarifying question and still list likely matches if any.\n" +
-        "- Do not reveal internal cross-reference strings; hasInternalCrossRefs is a private signal.\n" +
-        "- Keep reply concise (2-4 sentences), helpful, parts-counter tone.\n" +
+        "- ONLY use product ids from catalogue.\n" +
+        "- Prefer relevance order; for category requests include all relevant ids.\n" +
+        "- clarifying=true ONLY if the request is truly ambiguous AND catalogue is empty/weak.\n" +
+        "- Do not mention hidden references.\n" +
         "Return JSON: { reply: string, productIds: string[], clarifying: boolean }",
     },
     {
@@ -259,15 +256,21 @@ async function composeGroundedReply(opts: {
     : [];
 
   return {
-    reply: parsed.reply.trim().slice(0, 800),
+    reply: parsed.reply.trim().slice(0, 160),
     productIds,
-    clarifying: Boolean(parsed.clarifying),
+    clarifying: Boolean(parsed.clarifying) && productIds.length === 0,
     aiUsed: true,
   };
 }
 
+type Ranked = {
+  product: AiCatalogueProduct;
+  score: number;
+  reasons: MatchReason[];
+};
+
 /**
- * One assistant turn: retrieve from Supabase → ground reply → public cards only.
+ * One assistant turn: retrieve from Supabase → strict relevance → public cards.
  */
 export async function runAiChatTurn(opts: {
   messages: ChatMessage[];
@@ -289,18 +292,20 @@ export async function runAiChatTurn(opts: {
     return {
       reply:
         locale === "en"
-          ? "Tell me the part name, brand, or OE/SKU code and I’ll check our catalogue."
-          : "Thuaj emrin e pjesës, markën ose kodin OE/SKU — e kontrolloj në katalog.",
+          ? "Type a part name, brand, or OE/SKU code."
+          : "Shkruaj emrin e pjesës, markën ose kodin OE/SKU.",
       products: [],
       meta: {
         aiUsed: false,
         clarifying: true,
         resultCount: 0,
         grounded: true,
+        intent: null,
       },
     };
   }
 
+  const intent = detectProductIntent(userText);
   const { queries, aiUsed: intentAi } = await buildSearchQueries(
     userText,
     locale
@@ -311,12 +316,8 @@ export async function runAiChatTurn(opts: {
     queries.length ? queries : [focusQuery]
   );
 
-  // Rank across primary query + expansions (ignore chat filler words)
-  const rankedMap = new Map<
-    string,
-    { product: AiCatalogueProduct; score: number }
-  >();
-  for (const q of [focusQuery, userText, ...queries].slice(0, 5)) {
+  const rankedMap = new Map<string, Ranked>();
+  for (const q of [focusQuery, ...queries].slice(0, 8)) {
     const cleaned = significantQueryText(q) || q;
     for (const hit of rankProductsForQuery(candidates, cleaned, locale)) {
       const full =
@@ -324,18 +325,29 @@ export async function runAiChatTurn(opts: {
         ({ ...hit.product, hiddenReferences: "" } as AiCatalogueProduct);
       const prev = rankedMap.get(full.id);
       if (!prev || hit.score > prev.score) {
-        rankedMap.set(full.id, { product: full, score: hit.score });
+        rankedMap.set(full.id, {
+          product: full,
+          score: hit.score,
+          reasons: hit.reasons,
+        });
+      } else if (prev) {
+        prev.reasons = [...new Set([...prev.reasons, ...hit.reasons])];
       }
     }
   }
 
   let ranked = [...rankedMap.values()].sort((a, b) => b.score - a.score);
 
-  // Soft floor for chat — keep likely matches; empty if nothing scored
-  const MIN_CHAT_SCORE = 70;
-  ranked = ranked.filter((r) => r.score >= MIN_CHAT_SCORE);
+  ranked = ranked.filter((r) =>
+    passesStrictRelevance(r.score, r.reasons, r.product, intent, locale, {
+      minScore: intent ? 90 : 120,
+    })
+  );
 
-  const top = ranked.slice(0, MAX_CONTEXT_PRODUCTS).map((r) => r.product);
+  // Category intent: keep every relevant match (sorted)
+  const top = ranked
+    .slice(0, intent ? MAX_RETURN_PRODUCTS : Math.min(12, MAX_RETURN_PRODUCTS))
+    .map((r) => r.product);
 
   const composed = await composeGroundedReply({
     locale,
@@ -349,24 +361,30 @@ export async function runAiChatTurn(opts: {
   let clarifying = false;
   let aiUsed = intentAi;
 
-  if (composed) {
+  if (composed && composed.productIds.length > 0) {
     aiUsed = true;
     clarifying = composed.clarifying;
-    reply = composed.reply;
-    selected = composed.productIds
-      .map((id) => top.find((p) => p.id === id))
+    // Prefer model order but never drop intent-relevant products it omitted
+    const byId = new Map(top.map((p) => [p.id, p]));
+    const picked = composed.productIds
+      .map((id) => byId.get(id))
       .filter((p): p is AiCatalogueProduct => Boolean(p));
-    if (selected.length === 0) {
-      selected = top.slice(0, MAX_RETURN_PRODUCTS);
+    if (intent) {
+      const seen = new Set(picked.map((p) => p.id));
+      selected = [...picked, ...top.filter((p) => !seen.has(p.id))];
+    } else {
+      selected = picked.length ? picked : top;
     }
+    reply = composed.reply || fallbackReply(locale, selected.length);
   } else {
-    selected = top.slice(0, MAX_RETURN_PRODUCTS);
+    selected = top;
     clarifying = selected.length === 0;
-    reply = fallbackReply(locale, selected.length, false);
+    reply = composed?.reply || fallbackReply(locale, selected.length);
+    if (composed) aiUsed = true;
   }
 
-  // Absolute ground: only real DB products, public fields only
   const products = selected
+    .slice(0, MAX_RETURN_PRODUCTS)
     .map((p) => toPublicProduct(p))
     .map((p) => toCard(p, locale));
 
@@ -378,6 +396,7 @@ export async function runAiChatTurn(opts: {
       clarifying,
       resultCount: products.length,
       grounded: true,
+      intent: intent?.id ?? null,
     },
   };
 }
