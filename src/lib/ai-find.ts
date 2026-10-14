@@ -94,12 +94,26 @@ export async function runAiFind(
 
   const search = await runProductSearch(q, {
     locale,
-    limit,
+    limit: Math.max(limit * 2, 16),
     useAi: true,
   });
   aiUsed = aiUsed || search.meta.aiUsed;
 
-  const items = search.products.slice(0, limit).map((p) => toItem(p, locale));
+  /**
+   * Stricter gate than catalogue browse: only surface confident hits so the
+   * AI panel never looks like it “guessed” antifreeze for “filtri vajit”.
+   * Weak / empty → WhatsApp handoff (same as Autodekor Buli).
+   */
+  const MIN_AI_SCORE = 140;
+  const confident = search.hits.filter((h) => {
+    if (h.score < MIN_AI_SCORE) return false;
+    // Require a concrete catalogue field hit — not fuzzy-only noise.
+    return h.reasons.some((r) =>
+      ["sku", "code", "identifier", "name", "brand"].includes(r)
+    );
+  });
+
+  const items = confident.slice(0, limit).map((h) => toItem(h.product, locale));
 
   let intro = fallbackIntro(q, items.length, locale);
   if (items.length > 0 && aiSearchEnabled()) {

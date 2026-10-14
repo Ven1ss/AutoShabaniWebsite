@@ -22,18 +22,18 @@ type FindPayload = {
 };
 
 const PLACEHOLDERS_SQ = [
-  "Filtri i vajit Golf 7",
-  "Feroda para Audi A4",
   "Vaj motori 5W-30",
+  "LIQUI MOLY aditiv",
+  "Antifriz G13",
 ];
 const PLACEHOLDERS_EN = [
-  "Oil filter Golf 7",
-  "Front brake pads Audi A4",
   "Engine oil 5W-30",
+  "LIQUI MOLY additive",
+  "Antifreeze G13",
 ];
 
-const CHIPS_SQ = ["Filtri vajit", "Feroda", "LIQUI MOLY", "K607"];
-const CHIPS_EN = ["Oil filter", "Brake pads", "LIQUI MOLY", "K607"];
+const CHIPS_SQ = ["LIQUI MOLY", "Vaj 5W-30", "Antifriz", "K2"];
+const CHIPS_EN = ["LIQUI MOLY", "Oil 5W-30", "Antifreeze", "K2"];
 
 function SparkleIcon({ className }: { className?: string }) {
   return (
