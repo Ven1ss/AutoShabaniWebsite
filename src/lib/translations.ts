@@ -40,21 +40,26 @@ export const translations = {
     searchFitmentNote:
       "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin ose na pyet.",
 
-    // Shabani AI finder (homepage)
-    aiFindBrand: "SHABANI",
-    aiFindAi: "AI",
-    aiFindTagline: "Ta gjenë pjesën",
-    aiFindPlaceholder: "Përshkruaj pjesën, kodin ose veturën…",
-    aiFindSubmit: "Kërko",
-    aiFindClose: "✕ Mbyll",
-    aiFindLive: "Rezultatet nga katalogu ynë",
-    aiFindFound: "Kjo kemi në katalog:",
-    aiFindEmpty: "Nuk e gjeta në faqe — ta gjejmë ne.",
-    aiFindAskWhatsApp: "Pyet në WhatsApp",
+    // Smart stock lookup (homepage)
+    aiFindEyebrow: "Stoku në Prishtinë",
+    aiFindTitle: "Çfarë po kërkon sot?",
+    aiFindSubtitle:
+      "Shkruaj emrin, kodin OE/OEM ose markën. Të tregojmë çfarë kemi gati — pa hamendje për përshtatjen me veturën.",
+    aiFindPlaceholder: "Emër, kod ose markë…",
+    aiFindSubmit: "Kontrollo stokun",
+    aiFindSearching: "Duke kontrolluar…",
+    aiFindClose: "Mbyll",
+    aiFindTry: "Provo shpejt",
+    aiFindLive: "Nga katalogu ynë",
+    aiFindFound: "Ja çfarë përputhet me kërkesën:",
+    aiFindEmpty: "Nuk e kemi të listuar kështu në katalog.",
+    aiFindEmptyHint:
+      "Dërgo kodin, markën e veturës ose një foto — e kontrollojmë në dyqan.",
+    aiFindAskWhatsApp: "Dërgo në WhatsApp",
     aiFindFitmentNote:
-      "Nuk je i sigurt që i përshtatet? Dërgo modelin, vitin ose foto në",
-    aiFindSeeAll: "Shiko të gjitha në katalog",
-    aiFindError: "Ndodhi një gabim, provo prapë.",
+      "Përputhja me veturën verifikohet me kod. Nëse ke dyshim, shkruaj në",
+    aiFindSeeAll: "Hap rezultatet në katalog",
+    aiFindError: "Kontrolli dështoi — provo përsëri.",
 
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
@@ -315,21 +320,26 @@ export const translations = {
     searchFitmentNote:
       "Vehicle fitment is not auto-confirmed — verify the code or ask us.",
 
-    // Shabani AI finder (homepage)
-    aiFindBrand: "SHABANI",
-    aiFindAi: "AI",
-    aiFindTagline: "Finds the part",
-    aiFindPlaceholder: "Describe the part, code, or car…",
-    aiFindSubmit: "Search",
-    aiFindClose: "✕ Close",
-    aiFindLive: "Results from our catalogue",
-    aiFindFound: "Here’s what we have:",
-    aiFindEmpty: "Not on the site — we’ll find it for you.",
-    aiFindAskWhatsApp: "Ask on WhatsApp",
+    // Smart stock lookup (homepage)
+    aiFindEyebrow: "Stock in Prishtina",
+    aiFindTitle: "What are you looking for today?",
+    aiFindSubtitle:
+      "Type a name, OE/OEM code, or brand. We’ll show what’s ready — without guessing vehicle fitment.",
+    aiFindPlaceholder: "Name, code, or brand…",
+    aiFindSubmit: "Check stock",
+    aiFindSearching: "Checking…",
+    aiFindClose: "Close",
+    aiFindTry: "Quick tries",
+    aiFindLive: "From our catalogue",
+    aiFindFound: "Here’s what matches your request:",
+    aiFindEmpty: "Nothing listed that way in the catalogue.",
+    aiFindEmptyHint:
+      "Send the code, vehicle make, or a photo — we’ll check in the shop.",
+    aiFindAskWhatsApp: "Message on WhatsApp",
     aiFindFitmentNote:
-      "Not sure it fits? Send the model, year, or a photo on",
-    aiFindSeeAll: "See all in the catalogue",
-    aiFindError: "Something went wrong — try again.",
+      "Vehicle fitment is confirmed by code. If you’re unsure, message us on",
+    aiFindSeeAll: "Open results in the catalogue",
+    aiFindError: "Stock check failed — try again.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",

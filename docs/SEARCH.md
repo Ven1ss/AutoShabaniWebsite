@@ -34,10 +34,10 @@ There are **no dedicated OE/barcode/fitment columns** today. OE/cross-refs live 
   - Without `rich=1`: product array (backward compatible)
   - With `rich=1`: `{ products, hits[{ id, slug, score, reasons }], meta }`
 - `GET /api/products/suggest?q=&locale=` — autocomplete suggestions
-- `POST /api/ai/find` — homepage **SHABANI AI** finder (Autodekor Buli–style)
+- `POST /api/ai/find` — homepage **smart stock lookup** panel
   - Body: `{ q, locale?, limit? }`
   - Response: `{ intro, items:[{ title, price, url, image, slug, sku, brand }], meta }`
-  - Inline results on the homepage; WhatsApp fallback when empty
+  - Inline results under the parts-counter panel; WhatsApp when empty
   - Items are **only** real catalogue products; fitment is never claimed
 
 Rate-limited per IP.
@@ -67,7 +67,7 @@ Search works fully **without** these keys.
 | Typo / synonym matching | Works in app ranking now |
 | Autocomplete | Works (`/api/products/suggest`) |
 | AI expansion | Needs `OPENAI_API_KEY` |
-| Homepage SHABANI AI finder (Buli-style) | Works now; richer intros with `OPENAI_API_KEY` |
+| Homepage smart stock lookup | Works now; richer intros with `OPENAI_API_KEY` |
 | Verified vehicle fitment filter | Needs fitment data (not present) |
 | Embedding index / pgvector | Not required for current hybrid path |
 

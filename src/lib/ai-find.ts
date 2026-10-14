@@ -38,13 +38,13 @@ function fallbackIntro(query: string, count: number, locale: Locale): string {
   if (locale === "en") {
     if (count === 0) return "";
     return count === 1
-      ? `For “${q}” — we found this:`
-      : `For “${q}” — here’s what we have:`;
+      ? `For “${q}” — one match in the catalogue:`
+      : `For “${q}” — matches in the catalogue:`;
   }
   if (count === 0) return "";
   return count === 1
-    ? `Për “${q}” — kjo kemi:`
-    : `Për “${q}” — këto kemi:`;
+    ? `Për “${q}” — një përputhje në katalog:`
+    : `Për “${q}” — ja çfarë kemi në listë:`;
 }
 
 function toItem(product: Product, locale: Locale): AiFindItem {

@@ -89,10 +89,10 @@ export async function composeFindIntroWithAi(opts: {
           `You write a single short intro line for an auto-parts shop in Kosovo (${lang}). ` +
           "The shop will show real catalogue products under your line. " +
           "Return JSON { intro: string }. " +
-          "Acknowledge what the customer asked for in natural language. " +
+          "Acknowledge what the customer asked for in plain stock-counter language. " +
           "Do NOT invent part numbers, claim vehicle fitment, or name products not in the provided titles. " +
           "Plain text only (no HTML). Max ~90 characters. Examples: " +
-          '"filtri i vajit — kjo kemi:" / "oil filter — here’s what we have:".',
+          '"Për vaj 5W-30 — ja çfarë kemi në listë:" / "For 5W-30 oil — matches in stock:".',
       },
       {
         role: "user",
