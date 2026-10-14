@@ -54,6 +54,13 @@ Homepage dual search:
 - **Normal** → `/katalogu?q=` via existing catalogue search (no AI)
 - **AI** → explicit spark/AI control → `/api/ai/chat` conversation with product cards
 
+### AI understanding layers (`search-understanding.ts`)
+1. **Intent** — product type from triggers, functional phrases (“ujë për radiator”, “liquid that prevents freezing”), or attribute context
+2. **Attributes** — scents etc. (e.g. `dredhez` / `luleshtrydhe` / `strawberry`) must be **verified** in name or description
+3. **Retrieval** — synonym + attribute expanded queries against Supabase + cached catalogue (incl. `hidden_references` server-side)
+4. **Relevance** — type + attribute gates; never claim an unverified scent; conversation refinements keep prior intent
+5. **Completeness** — category / attribute-confirmed sets return all matching catalogue rows (capped)
+
 Rate-limited per IP.
 
 ## Supabase migration

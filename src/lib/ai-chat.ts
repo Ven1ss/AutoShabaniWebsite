@@ -1,7 +1,8 @@
 /**
  * Conversational spare-parts assistant grounded in live Supabase catalogue.
- * Never invents products, prices, codes, or fitment.
- * Uses hidden_references only server-side for matching — never returned to clients.
+ * Never invents products, prices, codes, scents, or fitment.
+ * Uses hidden_references only server-side — never returned to clients.
+ * Attributes (e.g. strawberry scent) must be verified in name/description.
  */
 
 import {
@@ -19,10 +20,10 @@ import { rankProductsForQuery, type MatchReason } from "@/lib/search-engine";
 import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
 import { significantQueryText } from "@/lib/search-normalize";
 import {
-  detectProductIntent,
-  intentSearchQueries,
-  passesStrictRelevance,
-} from "@/lib/search-intent";
+  evaluateProduct,
+  parseCustomerQuery,
+  type ParsedQuery,
+} from "@/lib/search-understanding";
 import {
   aiSearchEnabled,
   expandQueryWithAi,
@@ -48,6 +49,8 @@ export type ChatProductCard = {
   url: string;
   image: string;
   slug: string;
+  /** confirmed = all requested attributes verified in catalogue text */
+  matchConfidence?: "confirmed" | "partial";
 };
 
 export type ChatTurnResponse = {
@@ -59,17 +62,20 @@ export type ChatTurnResponse = {
     resultCount: number;
     grounded: boolean;
     intent?: string | null;
+    attributes?: string[];
   };
 };
 
 const CHAT_TIMEOUT_MS = 12_000;
 const MAX_HISTORY = 8;
-/** Enough context for the model; UI may show more via ranked list. */
 const MAX_CONTEXT_PRODUCTS = 40;
-/** Category / general queries should surface every relevant match. */
 const MAX_RETURN_PRODUCTS = 48;
 
-function toCard(product: Product, locale: Locale): ChatProductCard {
+function toCard(
+  product: Product,
+  locale: Locale,
+  confidence: "confirmed" | "partial" = "confirmed"
+): ChatProductCard {
   const desc = getLocalized(product.description, locale).trim();
   return {
     id: product.id,
@@ -86,6 +92,7 @@ function toCard(product: Product, locale: Locale): ChatProductCard {
     url: productCanonicalPath(product.slug),
     image: product.image || "/logo.png",
     slug: product.slug,
+    matchConfidence: confidence,
   };
 }
 
@@ -97,7 +104,7 @@ function toModelContext(product: AiCatalogueProduct, locale: Locale) {
     sku: product.sku,
     code: product.code,
     category: product.category,
-    description: getLocalized(product.description, locale).slice(0, 160),
+    description: getLocalized(product.description, locale).slice(0, 220),
     sellingPrice:
       product.sellingPrice != null && product.sellingPrice > 0
         ? product.sellingPrice
@@ -106,17 +113,45 @@ function toModelContext(product: AiCatalogueProduct, locale: Locale) {
   };
 }
 
-function fallbackReply(locale: Locale, count: number): string {
+function fallbackReply(
+  locale: Locale,
+  count: number,
+  parsed: ParsedQuery,
+  partialOffered: boolean
+): string {
+  const attrHint = parsed.attributes
+    .map((a) => a.replace("scent:", ""))
+    .join(", ");
+
   if (locale === "en") {
     if (count === 0) {
+      if (parsed.attributes.length && parsed.typeId) {
+        return `No catalogue product verifies “${attrHint}” for that type. Try another scent, brand, or OE/SKU code.`;
+      }
+      if (parsed.typeId === "brake_pads") {
+        return "We don’t currently list brake pads in the online catalogue. Send the vehicle make/model or OE code on WhatsApp and we’ll check in the shop.";
+      }
       return "No confident matches in our catalogue. Share an OE/SKU code, brand, or photo on WhatsApp.";
+    }
+    if (partialOffered) {
+      return `No exact verified match for “${attrHint}”. Closest related options:`;
     }
     return count === 1
       ? "Matching product:"
       : `${count} matching products:`;
   }
+
   if (count === 0) {
+    if (parsed.attributes.length && parsed.typeId) {
+      return `Nuk ka produkt në katalog që konfirmon “${attrHint}” për këtë lloj. Provo aromë tjetër, markë, ose kod OE/SKU.`;
+    }
+    if (parsed.typeId === "brake_pads") {
+      return "Aktualisht nuk kemi feroda të listuara në katalogun online. Dërgo markën/modelin e veturës ose kodin OE në WhatsApp — e kontrollojmë në dyqan.";
+    }
     return "Nuk gjeta përputhje të sigurt në katalog. Dërgo kodin OE/SKU, markën ose një foto në WhatsApp.";
+  }
+  if (partialOffered) {
+    return `Nuk ka përputhje të saktë të verifikuar për “${attrHint}”. Alternative të afërta:`;
   }
   return count === 1
     ? "Produkti që përputhet:"
@@ -170,40 +205,33 @@ async function openAiChatJson(
 
 async function buildSearchQueries(
   userText: string,
-  _locale: Locale
+  parsed: ParsedQuery
 ): Promise<{ queries: string[]; aiUsed: boolean }> {
-  const intent = detectProductIntent(userText);
-  const base = [
-    ...intentSearchQueries(userText, intent),
+  const out = new Set<string>([
+    ...parsed.retrievalQueries,
     ...expandQueryWithSynonyms(userText),
-  ];
-  const out = new Set<string>(base.filter(Boolean));
+  ]);
   let aiUsed = false;
 
   if (aiSearchEnabled()) {
     const expansion = await expandQueryWithAi(userText);
     if (expansion?.expandedTerms?.length) {
       aiUsed = true;
-      for (const term of expansion.expandedTerms) {
-        out.add(term);
-      }
+      for (const term of expansion.expandedTerms) out.add(term);
       if (expansion.brand) out.add(expansion.brand);
       if (expansion.productType) out.add(expansion.productType);
     }
   }
 
-  return { queries: [...out].slice(0, 10), aiUsed };
+  return { queries: [...out].filter(Boolean).slice(0, 14), aiUsed };
 }
 
-/**
- * Optional short reply. Product list is authoritative — model may only
- * reorder ids from the grounded set, never invent.
- */
 async function composeGroundedReply(opts: {
   locale: Locale;
   history: ChatMessage[];
   userText: string;
   candidates: AiCatalogueProduct[];
+  parsed: ParsedQuery;
 }): Promise<{
   reply: string;
   productIds: string[];
@@ -227,12 +255,13 @@ async function composeGroundedReply(opts: {
       role: "system",
       content:
         `You are AUTO SHABANI's spare-parts search assistant (${lang}). ` +
-        "Customers already see product cards — keep reply to ONE short line. " +
+        "Customers see product cards — keep reply to ONE short line. " +
         "Rules:\n" +
-        "- NEVER invent products, prices, SKUs, OE numbers, stock, or vehicle fitment.\n" +
+        "- NEVER invent products, prices, SKUs, scents, OE numbers, stock, or fitment.\n" +
         "- ONLY use product ids from catalogue.\n" +
+        "- If an attribute (e.g. strawberry) was requested, only recommend products whose name/description evidence it.\n" +
         "- Prefer relevance order; for category requests include all relevant ids.\n" +
-        "- clarifying=true ONLY if the request is truly ambiguous AND catalogue is empty/weak.\n" +
+        "- clarifying=true ONLY if truly ambiguous AND catalogue empty.\n" +
         "- Do not mention hidden references.\n" +
         "Return JSON: { reply: string, productIds: string[], clarifying: boolean }",
     },
@@ -241,6 +270,11 @@ async function composeGroundedReply(opts: {
       content: JSON.stringify({
         conversation: historyLines,
         latestUserMessage: opts.userText,
+        parsedIntent: {
+          typeId: opts.parsed.typeId,
+          attributes: opts.parsed.attributes,
+          brand: opts.parsed.brand,
+        },
         catalogue,
       }),
     },
@@ -256,7 +290,7 @@ async function composeGroundedReply(opts: {
     : [];
 
   return {
-    reply: parsed.reply.trim().slice(0, 160),
+    reply: parsed.reply.trim().slice(0, 180),
     productIds,
     clarifying: Boolean(parsed.clarifying) && productIds.length === 0,
     aiUsed: true,
@@ -267,10 +301,23 @@ type Ranked = {
   product: AiCatalogueProduct;
   score: number;
   reasons: MatchReason[];
+  confidence: "confirmed" | "partial";
 };
 
+/** Infer prior intent from earlier user messages for refine-in-conversation. */
+function priorFromHistory(history: ChatMessage[]): ParsedQuery | null {
+  const users = history.filter((m) => m.role === "user");
+  if (users.length < 2) return null;
+  // Parse all but the latest, keeping the richest type/attrs
+  let prior: ParsedQuery | null = null;
+  for (const m of users.slice(0, -1)) {
+    prior = parseCustomerQuery(m.content, prior);
+  }
+  return prior;
+}
+
 /**
- * One assistant turn: retrieve from Supabase → strict relevance → public cards.
+ * One assistant turn: understand → retrieve → verify attributes → public cards.
  */
 export async function runAiChatTurn(opts: {
   messages: ChatMessage[];
@@ -301,14 +348,16 @@ export async function runAiChatTurn(opts: {
         resultCount: 0,
         grounded: true,
         intent: null,
+        attributes: [],
       },
     };
   }
 
-  const intent = detectProductIntent(userText);
+  const prior = priorFromHistory(history);
+  const parsed = parseCustomerQuery(userText, prior);
   const { queries, aiUsed: intentAi } = await buildSearchQueries(
     userText,
-    locale
+    parsed
   );
 
   const focusQuery = significantQueryText(userText) || userText;
@@ -317,43 +366,99 @@ export async function runAiChatTurn(opts: {
   );
 
   const rankedMap = new Map<string, Ranked>();
-  for (const q of [focusQuery, ...queries].slice(0, 8)) {
+  const scoreQueries = [
+    focusQuery,
+    ...parsed.retrievalQueries,
+    ...queries,
+  ].slice(0, 10);
+
+  for (const q of scoreQueries) {
     const cleaned = significantQueryText(q) || q;
     for (const hit of rankProductsForQuery(candidates, cleaned, locale)) {
       const full =
         candidates.find((c) => c.id === hit.product.id) ??
         ({ ...hit.product, hiddenReferences: "" } as AiCatalogueProduct);
+
+      const ev = evaluateProduct(
+        full,
+        parsed,
+        hit.score,
+        hit.reasons,
+        locale
+      );
+      if (ev.confidence === "none") continue;
+      // When attributes are required, only confirmed (verified) matches
+      if (parsed.attributes.length > 0 && ev.confidence !== "confirmed") {
+        continue;
+      }
+
       const prev = rankedMap.get(full.id);
-      if (!prev || hit.score > prev.score) {
+      if (!prev || ev.score > prev.score) {
         rankedMap.set(full.id, {
           product: full,
-          score: hit.score,
-          reasons: hit.reasons,
+          score: ev.score,
+          reasons: ev.reasons,
+          confidence: ev.confidence === "partial" ? "partial" : "confirmed",
         });
-      } else if (prev) {
-        prev.reasons = [...new Set([...prev.reasons, ...hit.reasons])];
       }
     }
   }
 
   let ranked = [...rankedMap.values()].sort((a, b) => b.score - a.score);
 
-  ranked = ranked.filter((r) =>
-    passesStrictRelevance(r.score, r.reasons, r.product, intent, locale, {
-      minScore: intent ? 90 : 120,
-    })
-  );
+  // Soft score floor — typed intents already filtered by evaluateProduct
+  const minScore = parsed.typeId || parsed.attributes.length ? 40 : 120;
+  ranked = ranked.filter((r) => r.score >= minScore);
 
-  // Category intent: keep every relevant match (sorted)
-  const top = ranked
-    .slice(0, intent ? MAX_RETURN_PRODUCTS : Math.min(12, MAX_RETURN_PRODUCTS))
+  if (parsed.preferCheaper) {
+    ranked = [...ranked].sort((a, b) => {
+      const pa = a.product.sellingPrice ?? Number.POSITIVE_INFINITY;
+      const pb = b.product.sellingPrice ?? Number.POSITIVE_INFINITY;
+      return pa - pb || b.score - a.score;
+    });
+  }
+
+  const hasTypedIntent = Boolean(parsed.typeId || parsed.attributes.length);
+  let top = ranked
+    .slice(
+      0,
+      hasTypedIntent ? MAX_RETURN_PRODUCTS : Math.min(12, MAX_RETURN_PRODUCTS)
+    )
     .map((r) => r.product);
+
+  // If attribute query found nothing confirmed, offer type-only as partial
+  // alternatives — clearly labeled, never claimed as scent matches.
+  let partialOffered = false;
+  if (top.length === 0 && parsed.attributes.length && parsed.typeId) {
+    const typeOnly = parseCustomerQuery(userText, prior);
+    typeOnly.attributes = []; // drop scent requirement for alternatives
+    const alts: Ranked[] = [];
+    for (const p of candidates) {
+      const ev = evaluateProduct(p, typeOnly, 100, ["category"], locale);
+      if (ev.confidence === "none") continue;
+      alts.push({
+        product: p,
+        score: ev.score,
+        reasons: ev.reasons,
+        confidence: "partial",
+      });
+    }
+    alts.sort((a, b) => b.score - a.score);
+    if (alts.length) {
+      partialOffered = true;
+      top = alts.slice(0, 8).map((a) => a.product);
+      for (const a of alts.slice(0, 8)) {
+        rankedMap.set(a.product.id, a);
+      }
+    }
+  }
 
   const composed = await composeGroundedReply({
     locale,
     history,
     userText,
     candidates: top,
+    parsed,
   });
 
   let selected: AiCatalogueProduct[] = [];
@@ -364,29 +469,41 @@ export async function runAiChatTurn(opts: {
   if (composed && composed.productIds.length > 0) {
     aiUsed = true;
     clarifying = composed.clarifying;
-    // Prefer model order but never drop intent-relevant products it omitted
     const byId = new Map(top.map((p) => [p.id, p]));
     const picked = composed.productIds
       .map((id) => byId.get(id))
       .filter((p): p is AiCatalogueProduct => Boolean(p));
-    if (intent) {
+    if (hasTypedIntent) {
       const seen = new Set(picked.map((p) => p.id));
       selected = [...picked, ...top.filter((p) => !seen.has(p.id))];
     } else {
       selected = picked.length ? picked : top;
     }
-    reply = composed.reply || fallbackReply(locale, selected.length);
+    reply = composed.reply || fallbackReply(locale, selected.length, parsed, partialOffered);
   } else {
     selected = top;
     clarifying = selected.length === 0;
-    reply = composed?.reply || fallbackReply(locale, selected.length);
+    reply =
+      composed?.reply ||
+      fallbackReply(locale, selected.length, parsed, partialOffered);
     if (composed) aiUsed = true;
   }
 
+  const confidenceById = new Map(
+    [...rankedMap.values()].map((r) => [r.product.id, r.confidence])
+  );
+
   const products = selected
     .slice(0, MAX_RETURN_PRODUCTS)
-    .map((p) => toPublicProduct(p))
-    .map((p) => toCard(p, locale));
+    .map((p) =>
+      toCard(
+        toPublicProduct(p),
+        locale,
+        partialOffered
+          ? "partial"
+          : confidenceById.get(p.id) ?? "confirmed"
+      )
+    );
 
   return {
     reply,
@@ -396,7 +513,8 @@ export async function runAiChatTurn(opts: {
       clarifying,
       resultCount: products.length,
       grounded: true,
-      intent: intent?.id ?? null,
+      intent: parsed.typeId,
+      attributes: parsed.attributes,
     },
   };
 }

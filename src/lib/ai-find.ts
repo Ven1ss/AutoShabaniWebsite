@@ -1,6 +1,6 @@
 /**
  * Single-shot stock lookup — grounded in real catalogue products only.
- * Never invents fitment or SKUs.
+ * Never invents fitment, scents, or SKUs.
  */
 
 import { formatPrice, getLocalized, type Product } from "@/lib/products";
@@ -9,10 +9,9 @@ import { gatherAiCandidates, toPublicProduct } from "@/lib/ai-catalogue";
 import { rankProductsForQuery } from "@/lib/search-engine";
 import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
 import {
-  detectProductIntent,
-  intentSearchQueries,
-  passesStrictRelevance,
-} from "@/lib/search-intent";
+  evaluateProduct,
+  parseCustomerQuery,
+} from "@/lib/search-understanding";
 import {
   aiSearchEnabled,
   composeFindIntroWithAi,
@@ -90,9 +89,9 @@ export async function runAiFind(
 
   let aiUsed = false;
   let expandedHint: string[] = [];
-  const intent = detectProductIntent(q);
+  const parsed = parseCustomerQuery(q);
   const queries = [
-    ...intentSearchQueries(q, intent),
+    ...parsed.retrievalQueries,
     ...expandQueryWithSynonyms(q),
   ];
 
@@ -108,23 +107,32 @@ export async function runAiFind(
   }
 
   const candidates = await gatherAiCandidates(queries);
-  const ranked = rankProductsForQuery(candidates, q, locale);
+  const rankedMap = new Map<
+    string,
+    { product: (typeof candidates)[number]; score: number }
+  >();
 
-  const confident = ranked.filter((h) => {
-    const full =
-      candidates.find((c) => c.id === h.product.id) ??
-      ({ ...h.product, hiddenReferences: "" } as (typeof candidates)[number]);
-    return passesStrictRelevance(h.score, h.reasons, full, intent, locale, {
-      minScore: intent ? 90 : 140,
-    });
-  });
+  for (const sq of [q, ...parsed.retrievalQueries].slice(0, 8)) {
+    for (const hit of rankProductsForQuery(candidates, sq, locale)) {
+      const full =
+        candidates.find((c) => c.id === hit.product.id) ??
+        ({ ...hit.product, hiddenReferences: "" } as (typeof candidates)[number]);
+      const ev = evaluateProduct(full, parsed, hit.score, hit.reasons, locale);
+      if (ev.confidence === "none") continue;
+      if (parsed.attributes.length && ev.confidence !== "confirmed") continue;
+      const prev = rankedMap.get(full.id);
+      if (!prev || ev.score > prev.score) {
+        rankedMap.set(full.id, { product: full, score: ev.score });
+      }
+    }
+  }
 
-  // Category intents: return every relevant match (capped)
-  const take = intent ? Math.max(limit, 48) : limit;
-  const items = confident.slice(0, take).map((h) => {
-    const full = candidates.find((c) => c.id === h.product.id);
-    return toItem(full ? toPublicProduct(full) : h.product, locale);
-  });
+  const confident = [...rankedMap.values()].sort((a, b) => b.score - a.score);
+  const typed = Boolean(parsed.typeId || parsed.attributes.length);
+  const take = typed ? Math.max(limit, 48) : limit;
+  const items = confident
+    .slice(0, take)
+    .map((h) => toItem(toPublicProduct(h.product), locale));
 
   let intro = fallbackIntro(q, items.length, locale);
   if (items.length > 0 && aiSearchEnabled()) {

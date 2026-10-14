@@ -184,6 +184,17 @@ function scoreAgainstQuery(
       reasons.add("description");
     }
 
+    // Token-level description matching — critical for scent / attributes
+    // that live only in description text (e.g. luleshtrydheje).
+    for (const token of tokens) {
+      if (token.length < 4) continue;
+      if (descN.includes(token) || compactText(fields.description).includes(compactText(token))) {
+        score += Math.floor(WEIGHTS.descriptionIncludes * 0.55);
+        reasons.add("description");
+        break;
+      }
+    }
+
     if (qText.length >= 3 && catN.includes(qText)) {
       score += WEIGHTS.categoryIncludes;
       reasons.add("category");
