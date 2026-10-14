@@ -93,7 +93,7 @@ export const translations = {
     catalogueSortName: "Emri A–Z",
     catalogueClearFilters: "Pastro filtrat",
     catalogueBrowseAll: "Shiko produktet",
-    catalogueFeatured: "Produktet më të kërkuara",
+    catalogueFeatured: "Disa nga produktet tona",
     catalogueViewMore: "Shiko më shumë",
     catalogueViewLess: "Shiko më pak",
     cataloguePrevPage: "Faqja e mëparshme",
