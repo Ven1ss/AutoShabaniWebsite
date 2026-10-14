@@ -188,6 +188,7 @@ export function topReason(hit: ScoredProduct | SearchHit): MatchReason | null {
   const priority: MatchReason[] = [
     "sku",
     "code",
+    "hidden_ref",
     "identifier",
     "name",
     "brand",

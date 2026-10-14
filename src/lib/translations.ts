@@ -40,17 +40,23 @@ export const translations = {
     searchFitmentNote:
       "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin ose na pyet.",
 
-    // Smart stock lookup (homepage)
-    aiFindEyebrow: "Stoku në Prishtinë",
-    aiFindTitle: "Çfarë po kërkon sot?",
+    // In-site parts assistant (homepage)
+    aiFindEyebrow: "Asistenti i pjesëve",
+    aiFindTitle: "Pyet si në bisedë — gjej nga stoku ynë",
     aiFindSubtitle:
-      "Shkruaj emrin, kodin OE/OEM ose markën. Të tregojmë çfarë kemi gati — pa hamendje për përshtatjen me veturën.",
-    aiFindPlaceholder: "Emër, kod ose markë…",
-    aiFindSubmit: "Kontrollo stokun",
-    aiFindSearching: "Duke kontrolluar…",
+      "Shkruaj me fjalët e tua: emër, kod OE/SKU, markë, ose përshkrim. Asistenti lexon katalogun real në Supabase dhe të tregon vetëm produkte që ekzistojnë.",
+    aiFindBullet1: "Kupton gabime shkrimi, sinonime dhe kode të pjesshme",
+    aiFindBullet2: "Kërkon edhe referenca të brendshme (të fshehura nga klienti)",
+    aiFindBullet3: "Nuk shpik produkte, çmime apo përshtatje me veturën",
+    aiFindPlaceholder: "P.sh. kam nevojë për vaj 5W-30 ose kodin…",
+    aiFindSubmit: "Dërgo",
+    aiFindSearching: "Duke kërkuar…",
     aiFindClose: "Mbyll",
+    aiFindNewChat: "Bisedë e re",
     aiFindTry: "Provo shpejt",
-    aiFindLive: "Nga katalogu ynë",
+    aiFindLive: "Biseda me katalogun",
+    aiFindWelcome:
+      "Përshëndetje — më thuaj çfarë po kërkon. Mund të fillosh me një nga këto:",
     aiFindFound: "Ja çfarë përputhet me kërkesën:",
     aiFindEmpty: "Nuk e kemi të listuar kështu në katalog.",
     aiFindEmptyHint:
@@ -59,7 +65,9 @@ export const translations = {
     aiFindFitmentNote:
       "Përputhja me veturën verifikohet me kod. Nëse ke dyshim, shkruaj në",
     aiFindSeeAll: "Hap rezultatet në katalog",
-    aiFindError: "Kontrolli dështoi — provo përsëri.",
+    aiFindDisclaimer:
+      "Përgjigjet bazohen vetëm në produktet e katalogut AUTO SHABANI.",
+    aiFindError: "Kërkimi dështoi — provo përsëri.",
 
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
@@ -320,17 +328,23 @@ export const translations = {
     searchFitmentNote:
       "Vehicle fitment is not auto-confirmed — verify the code or ask us.",
 
-    // Smart stock lookup (homepage)
-    aiFindEyebrow: "Stock in Prishtina",
-    aiFindTitle: "What are you looking for today?",
+    // In-site parts assistant (homepage)
+    aiFindEyebrow: "Parts assistant",
+    aiFindTitle: "Ask in plain language — search our stock",
     aiFindSubtitle:
-      "Type a name, OE/OEM code, or brand. We’ll show what’s ready — without guessing vehicle fitment.",
-    aiFindPlaceholder: "Name, code, or brand…",
-    aiFindSubmit: "Check stock",
-    aiFindSearching: "Checking…",
+      "Write in your own words: name, OE/SKU code, brand, or a description. The assistant reads our real Supabase catalogue and only shows products that exist.",
+    aiFindBullet1: "Handles typos, synonyms, and partial codes",
+    aiFindBullet2: "Also searches internal cross-references (hidden from customers)",
+    aiFindBullet3: "Never invents products, prices, or vehicle fitment",
+    aiFindPlaceholder: "e.g. I need 5W-30 oil or a code…",
+    aiFindSubmit: "Send",
+    aiFindSearching: "Searching…",
     aiFindClose: "Close",
+    aiFindNewChat: "New chat",
     aiFindTry: "Quick tries",
-    aiFindLive: "From our catalogue",
+    aiFindLive: "Catalogue chat",
+    aiFindWelcome:
+      "Hi — tell me what you need. You can start with one of these:",
     aiFindFound: "Here’s what matches your request:",
     aiFindEmpty: "Nothing listed that way in the catalogue.",
     aiFindEmptyHint:
@@ -339,7 +353,9 @@ export const translations = {
     aiFindFitmentNote:
       "Vehicle fitment is confirmed by code. If you’re unsure, message us on",
     aiFindSeeAll: "Open results in the catalogue",
-    aiFindError: "Stock check failed — try again.",
+    aiFindDisclaimer:
+      "Answers are based only on AUTO SHABANI catalogue products.",
+    aiFindError: "Search failed — try again.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",

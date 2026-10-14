@@ -65,4 +65,18 @@ describe("ai finder confidence gate", () => {
     );
     expect(confident.length).toBe(0);
   });
+
+  it("matches via hidden_references without exposing them as the product name", () => {
+    const withHidden = {
+      ...oil,
+      id: "3",
+      sku: "XREF1",
+      name: { sq: "Filter OEM partner", en: "Filter OEM partner" },
+      brand: "MANN",
+      hiddenReferences: "038 109 101 AH",
+    };
+    const ranked = rankProductsForQuery([antifreeze, withHidden], "038109101AH", "sq");
+    expect(ranked[0]?.product.id).toBe("3");
+    expect(ranked[0]?.reasons).toContain("hidden_ref");
+  });
 });

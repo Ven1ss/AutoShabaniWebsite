@@ -13,12 +13,18 @@ export type MatchReason =
   | "sku"
   | "code"
   | "identifier"
+  | "hidden_ref"
   | "brand"
   | "name"
   | "description"
   | "category"
   | "synonym"
   | "fuzzy";
+
+/** Optional server-only fields used for ranking (never sent to clients). */
+export type RankableProduct = Product & {
+  hiddenReferences?: string;
+};
 
 export type ScoredProduct = {
   product: Product;
@@ -78,7 +84,7 @@ function fieldHaystacks(product: Product, locale: "sq" | "en") {
 }
 
 function scoreAgainstQuery(
-  product: Product,
+  product: RankableProduct,
   query: string,
   locale: "sq" | "en",
   fromSynonym: boolean
@@ -96,8 +102,11 @@ function scoreAgainstQuery(
 
   const skuId = normalizeIdentifier(fields.sku);
   const codeId = normalizeIdentifier(fields.code);
+  const hiddenRaw = product.hiddenReferences ?? "";
+  const hiddenId = normalizeIdentifier(hiddenRaw);
+  const hiddenCompact = compactText(hiddenRaw);
 
-  // Layer A — identifiers
+  // Layer A — identifiers (SKU / code / hidden cross-refs)
   if (qId.length >= 3) {
     if (skuId && skuId === qId) {
       score += WEIGHTS.skuExact;
@@ -105,6 +114,9 @@ function scoreAgainstQuery(
     } else if (codeId && codeId === qId) {
       score += WEIGHTS.codeExact;
       reasons.add("code");
+    } else if (hiddenId && hiddenId === qId) {
+      score += WEIGHTS.codeExact;
+      reasons.add("hidden_ref");
     } else if (skuId && (skuId.includes(qId) || qId.includes(skuId))) {
       // Prefer prefix/contains for partial SKU; penalize if very short query
       const boost =
@@ -116,6 +128,20 @@ function scoreAgainstQuery(
         qId.length >= 5 ? WEIGHTS.idIncludes : Math.floor(WEIGHTS.idIncludes * 0.45);
       score += boost;
       reasons.add("code");
+    } else if (
+      hiddenId &&
+      qId.length >= 5 &&
+      (hiddenId.includes(qId) || qId.includes(hiddenId))
+    ) {
+      score += WEIGHTS.idIncludes;
+      reasons.add("hidden_ref");
+    } else if (
+      qCompact.length >= 4 &&
+      hiddenCompact &&
+      hiddenCompact.includes(qCompact)
+    ) {
+      score += Math.floor(WEIGHTS.idIncludes * 0.85);
+      reasons.add("hidden_ref");
     }
   }
 
@@ -213,7 +239,7 @@ function scoreAgainstQuery(
  * Does not invent products — only scores the provided catalogue rows.
  */
 export function rankProductsForQuery(
-  products: Product[],
+  products: RankableProduct[],
   query: string,
   locale: "sq" | "en" = "sq"
 ): ScoredProduct[] {

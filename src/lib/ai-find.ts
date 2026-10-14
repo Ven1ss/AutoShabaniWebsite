@@ -1,11 +1,13 @@
 /**
- * "Gjej pjesën" — Buli-style AI parts finder.
- * Returns only real catalogue products. Never invents fitment or SKUs.
+ * Single-shot stock lookup — grounded in real catalogue products only.
+ * Never invents fitment or SKUs.
  */
 
 import { formatPrice, getLocalized, type Product } from "@/lib/products";
 import { productCanonicalPath } from "@/lib/seo";
-import { runProductSearch } from "@/lib/search-service";
+import { gatherAiCandidates, toPublicProduct } from "@/lib/ai-catalogue";
+import { rankProductsForQuery } from "@/lib/search-engine";
+import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
 import {
   aiSearchEnabled,
   composeFindIntroWithAi,
@@ -83,37 +85,40 @@ export async function runAiFind(
 
   let aiUsed = false;
   let expandedHint: string[] = [];
+  const queries = expandQueryWithSynonyms(q);
 
   if (aiSearchEnabled()) {
     const expansion = await expandQueryWithAi(q);
     if (expansion?.expandedTerms?.length) {
       aiUsed = true;
       expandedHint = expansion.expandedTerms;
+      for (const term of expansion.expandedTerms) {
+        if (!queries.includes(term)) queries.push(term);
+      }
     }
   }
 
-  const search = await runProductSearch(q, {
-    locale,
-    limit: Math.max(limit * 2, 16),
-    useAi: true,
-  });
-  aiUsed = aiUsed || search.meta.aiUsed;
+  const candidates = await gatherAiCandidates(queries);
+  const ranked = rankProductsForQuery(candidates, q, locale);
 
   /**
-   * Stricter gate than catalogue browse: only surface confident hits so the
-   * AI panel never looks like it “guessed” antifreeze for “filtri vajit”.
-   * Weak / empty → WhatsApp handoff (same as Autodekor Buli).
+   * Stricter gate than catalogue browse: only surface confident hits.
+   * Weak / empty → WhatsApp handoff in the UI.
    */
   const MIN_AI_SCORE = 140;
-  const confident = search.hits.filter((h) => {
+  const confident = ranked.filter((h) => {
     if (h.score < MIN_AI_SCORE) return false;
-    // Require a concrete catalogue field hit — not fuzzy-only noise.
     return h.reasons.some((r) =>
-      ["sku", "code", "identifier", "name", "brand"].includes(r)
+      ["sku", "code", "hidden_ref", "identifier", "name", "brand"].includes(r)
     );
   });
 
-  const items = confident.slice(0, limit).map((h) => toItem(h.product, locale));
+  const items = confident
+    .slice(0, limit)
+    .map((h) => {
+      const full = candidates.find((c) => c.id === h.product.id);
+      return toItem(full ? toPublicProduct(full) : h.product, locale);
+    });
 
   let intro = fallbackIntro(q, items.length, locale);
   if (items.length > 0 && aiSearchEnabled()) {
