@@ -357,10 +357,9 @@ export async function runAiChatTurn(opts: {
       selected = top.slice(0, MAX_RETURN_PRODUCTS);
     }
   } else {
-    clarifying = top.length === 0 || top.length > 4;
     selected = top.slice(0, MAX_RETURN_PRODUCTS);
-    reply = fallbackReply(locale, selected.length, clarifying && selected.length > 0);
-    if (selected.length === 0) clarifying = true;
+    clarifying = selected.length === 0;
+    reply = fallbackReply(locale, selected.length, false);
   }
 
   // Absolute ground: only real DB products, public fields only
