@@ -1,34 +1,3 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
-import { pushRecentSearch } from "@/lib/recent-searches";
-
-/** Homepage search — jumps straight into /katalogu with the query. */
-export default function HomeSearchStrip() {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-
-  function go(value: string) {
-    const q = value.trim();
-    if (q) pushRecentSearch(q);
-    router.push(q ? `/katalogu?q=${encodeURIComponent(q)}` : "/katalogu");
-  }
-
-  return (
-    <section className="relative z-20 -mt-4 sm:-mt-6 px-0">
-      <div className="container-as min-w-0">
-        <div className="min-w-0 rounded-xl border border-steel-light/80 bg-as-white p-3 sm:p-4 shadow-card">
-          <CatalogueSearchTicket
-            value={query}
-            onChange={setQuery}
-            onSubmit={go}
-            size="bar"
-            autoFocus={false}
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
+export { default } from "@/components/home/AiPartsFinder";

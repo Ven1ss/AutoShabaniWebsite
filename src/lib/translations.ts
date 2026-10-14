@@ -40,6 +40,22 @@ export const translations = {
     searchFitmentNote:
       "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin ose na pyet.",
 
+    // Shabani AI finder (homepage)
+    aiFindBrand: "SHABANI",
+    aiFindAi: "AI",
+    aiFindTagline: "Ta gjenë pjesën",
+    aiFindPlaceholder: "Përshkruaj pjesën, kodin ose veturën…",
+    aiFindSubmit: "Kërko",
+    aiFindClose: "✕ Mbyll",
+    aiFindLive: "Rezultatet nga katalogu ynë",
+    aiFindFound: "Kjo kemi në katalog:",
+    aiFindEmpty: "Nuk e gjeta në faqe — ta gjejmë ne.",
+    aiFindAskWhatsApp: "Pyet në WhatsApp",
+    aiFindFitmentNote:
+      "Nuk je i sigurt që i përshtatet? Dërgo modelin, vitin ose foto në",
+    aiFindSeeAll: "Shiko të gjitha në katalog",
+    aiFindError: "Ndodhi një gabim, provo prapë.",
+
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
     catalogueInteriorNotice:
@@ -298,6 +314,22 @@ export const translations = {
     searchMatchSynonym: "Terminology match",
     searchFitmentNote:
       "Vehicle fitment is not auto-confirmed — verify the code or ask us.",
+
+    // Shabani AI finder (homepage)
+    aiFindBrand: "SHABANI",
+    aiFindAi: "AI",
+    aiFindTagline: "Finds the part",
+    aiFindPlaceholder: "Describe the part, code, or car…",
+    aiFindSubmit: "Search",
+    aiFindClose: "✕ Close",
+    aiFindLive: "Results from our catalogue",
+    aiFindFound: "Here’s what we have:",
+    aiFindEmpty: "Not on the site — we’ll find it for you.",
+    aiFindAskWhatsApp: "Ask on WhatsApp",
+    aiFindFitmentNote:
+      "Not sure it fits? Send the model, year, or a photo on",
+    aiFindSeeAll: "See all in the catalogue",
+    aiFindError: "Something went wrong — try again.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
