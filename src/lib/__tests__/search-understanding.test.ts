@@ -98,11 +98,11 @@ describe("parseCustomerQuery", () => {
   it("maps radiator water and functional freeze description to antifreeze", () => {
     expect(parseCustomerQuery("ujë për radiator").typeId).toBe("antifreeze");
     expect(parseCustomerQuery("uje per radiator").typeId).toBe("antifreeze");
-    expect(
-      parseCustomerQuery(
-        "I need the liquid that prevents the engine from freezing in winter"
-      ).typeId
-    ).toBe("antifreeze");
+    const functional = parseCustomerQuery(
+      "I need the liquid that prevents the engine from freezing in winter"
+    );
+    expect(functional.typeId).toBe("antifreeze");
+    expect(functional.brand).toBeUndefined();
     expect(parseCustomerQuery("antifriz per makin").typeId).toBe("antifreeze");
   });
 

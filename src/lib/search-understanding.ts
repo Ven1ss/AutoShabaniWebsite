@@ -278,14 +278,33 @@ export function parseCustomerQuery(
     normalizeText(raw).includes(normalizeText(p))
   );
 
-  // Brand: capitalised token or known after "vetëm"/"only"
+  // Brand after explicit refine cues only — never "from freezing" etc.
   let brand = prior?.brand;
   const tokens = tokenizeQuery(raw);
   const brandHint = raw.match(
-    /\b(?:vetëm|vetem|only|nga|from|brand)\s+([A-Za-z0-9][A-Za-z0-9\- ]{1,24})/i
+    /\b(?:vetëm|vetem|only|brand)\s+([A-Za-z][A-Za-z0-9][A-Za-z0-9\-]{0,22})\b/i
   );
   if (brandHint?.[1]) {
-    brand = brandHint[1].trim().split(/\s+/).slice(0, 2).join(" ");
+    const candidate = brandHint[1].trim();
+    // Ignore common non-brand words accidentally captured
+    const notBrand = new Set([
+      "freezing",
+      "winter",
+      "cheaper",
+      "this",
+      "that",
+      "these",
+      "those",
+      "products",
+      "options",
+      "makina",
+      "makine",
+      "vetura",
+      "kerr",
+    ]);
+    if (!notBrand.has(normalizeText(candidate))) {
+      brand = candidate;
+    }
   }
 
   // Residual tokens — drop type/attr lexicon terms
