@@ -31,21 +31,21 @@ export default function HomeHero() {
 
       <div className="relative z-10 container-as pb-8 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.5rem))] sm:pb-10">
         <FadeIn y={16}>
-          <p className="font-ethnocentric text-xs sm:text-sm tracking-brand text-white/90 mb-3">
+          <p className="font-ethnocentric text-[0.65rem] sm:text-xs tracking-brand text-white/85 mb-3">
             {t.brandName}
           </p>
-          <h1 className="text-[clamp(1.75rem,1.2rem+2.8vw,3.25rem)] font-semibold tracking-[-0.03em] text-white max-w-2xl leading-[1.1]">
+          <h1 className="text-hero text-white max-w-xl">
             {t.heroSubtitle}
           </h1>
-          <p className="mt-3 text-body text-white/70 max-w-md">
+          <p className="mt-4 text-body text-white/75 max-w-md">
             {t.heroTradeNote}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Button
               href="/katalogu"
               variant="primary"
               tone="dark"
-              className="min-w-[11rem]"
+              className="min-w-[10.5rem]"
             >
               {t.heroCtaPrimary}
             </Button>

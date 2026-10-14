@@ -25,11 +25,11 @@
   --gap-lg: clamp(1.25rem, 0.6rem + 2.5vw, 3.5rem);
   --radius-card: clamp(0.5rem, 0.4rem + 0.45vw, 0.75rem);
   --radius-media: clamp(0.625rem, 0.45rem + 0.6vw, 1rem);
-  --text-caption: clamp(0.6875rem, 0.64rem + 0.2vw, 0.75rem);
-  --text-body: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
-  --text-price: clamp(0.9375rem, 0.88rem + 0.25vw, 1.0625rem);
-  --text-title: clamp(1.35rem, 0.9rem + 2.2vw, 2.75rem);
-  --text-price-lg: clamp(1.35rem, 1rem + 1.6vw, 2rem);
+  --text-caption: clamp(0.75rem, 0.7rem + 0.2vw, 0.8125rem);
+  --text-body: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --text-price: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --text-title: clamp(1.35rem, 1.05rem + 1.4vw, 2.25rem);
+  --text-price-lg: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
   --media-pad: clamp(0.75rem, 0.4rem + 1.5vw, 2.5rem);
   --control-h: clamp(2.5rem, 2.2rem + 0.8vw, 3rem);
   --container-wide: 1480px;
@@ -47,6 +47,8 @@ html {
 body {
   background-color: var(--as-snow);
   color: var(--as-dark);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -68,7 +70,7 @@ body {
 }
 
 .font-ethnocentric {
-  font-family: "Ethnocentric Rg", var(--font-geist-sans), system-ui, sans-serif;
+  font-family: "Ethnocentric Rg", var(--font-manrope), system-ui, sans-serif;
 }
 
 .section-pad {

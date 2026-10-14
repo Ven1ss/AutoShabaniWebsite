@@ -17,7 +17,6 @@ export default function HomeContact() {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           <FadeIn>
             <SectionHeading
-              eyebrow={t.contactHeading}
               title={t.contactTitle}
               align="left"
               tone="dark"

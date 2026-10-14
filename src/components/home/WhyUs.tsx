@@ -31,10 +31,10 @@ export default function WhyUs() {
           {items.map((item, i) => (
             <FadeIn key={item.title} delay={0.03 * i}>
               <article className="border-t border-steel-light pt-5">
-                <h3 className="text-lg font-semibold tracking-tight text-as-dark mb-2">
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-as-dark mb-2">
                   {item.title}
                 </h3>
-                <p className="text-body text-as-secondary leading-relaxed">
+                <p className="text-body text-as-secondary max-w-prose">
                   {item.desc}
                 </p>
               </article>

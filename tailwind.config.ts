@@ -53,40 +53,40 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        display: ["var(--font-manrope)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
-        brand: ["Ethnocentric Rg", "var(--font-geist-sans)", "sans-serif"],
+        brand: ["Ethnocentric Rg", "var(--font-manrope)", "sans-serif"],
       },
       fontSize: {
-        // Fluid type scale — tracks viewport continuously
+        // Fluid type scale — readable, restrained
         caption: [
           "var(--text-caption)",
-          { lineHeight: "1.333", letterSpacing: "0.01em", fontWeight: "400" },
+          { lineHeight: "1.4", letterSpacing: "0", fontWeight: "500" },
         ],
         body: [
           "var(--text-body)",
-          { lineHeight: "1.4706", letterSpacing: "-0.011em", fontWeight: "400" },
+          { lineHeight: "1.6", letterSpacing: "-0.01em", fontWeight: "400" },
         ],
         price: [
           "var(--text-price)",
-          { lineHeight: "1.2", letterSpacing: "-0.011em", fontWeight: "600" },
+          { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "600" },
         ],
         button: [
           "var(--text-body)",
-          { lineHeight: "1.176", letterSpacing: "-0.022em", fontWeight: "500" },
+          { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "500" },
         ],
         subhead: [
-          "clamp(1.125rem, 1rem + 0.7vw, 1.3125rem)",
-          { lineHeight: "1.381", letterSpacing: "-0.016em", fontWeight: "400" },
+          "clamp(1.0625rem, 0.98rem + 0.35vw, 1.1875rem)",
+          { lineHeight: "1.55", letterSpacing: "-0.01em", fontWeight: "400" },
         ],
         section: [
-          "clamp(1.75rem, 1.2rem + 2.4vw, 3rem)",
-          { lineHeight: "1.083", letterSpacing: "-0.025em", fontWeight: "600" },
+          "clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem)",
+          { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" },
         ],
         hero: [
-          "clamp(2.25rem, 1.4rem + 5vw, 5rem)",
-          { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "600" },
+          "clamp(1.75rem, 1.35rem + 2vw, 2.75rem)",
+          { lineHeight: "1.15", letterSpacing: "-0.025em", fontWeight: "700" },
         ],
       },
       maxWidth: {

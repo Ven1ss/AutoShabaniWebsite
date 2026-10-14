@@ -8,16 +8,17 @@ export const translations = {
     heroTitle1: "Saktësi.",
     heroTitle2: "Performancë.",
     heroTitle3: "Perfeksion.",
-    heroTitle: "Saktësi. Performancë. Perfeksion.",
-    heroSubtitle: "Pjesë këmbimi origjinale në Prishtinë",
-    heroCtaPrimary: "Shiko Katalogun",
+    heroTitle: "Pjesë këmbimi për vetura",
+    heroSubtitle: "Pjesë këmbimi për vetura",
+    heroCtaPrimary: "Shiko produktet",
     heroCtaSecondary: "Na kontaktoni",
-    heroTradeNote: "Për punishte / shumicë: na shkruani në WhatsApp.",
+    heroTradeNote:
+      "Zgjedhje e gjerë e pjesëve për marka të ndryshme të veturave. Për servise dhe klientë individualë.",
 
     // Nav
     navCatalogue: "Katalogu",
     navAbout: "Rreth nesh",
-    navContact: "Kontakt",
+    navContact: "Kontakti",
     navTrade: "Shumicë",
 
     // Search ticket
@@ -29,7 +30,7 @@ export const translations = {
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
     catalogueInteriorNotice:
-      "Për pjesët e brendshme të makinës na kontaktoni",
+      "Për pjesët e brendshme të veturës na kontaktoni",
     catalogueInteriorNoticeLink: "na kontaktoni",
     catalogueSearch: "Kërko sipas emrit, SKU, kodit ose markës…",
     catalogueBrand: "Marka",
@@ -59,8 +60,8 @@ export const translations = {
     catalogueSortPriceDesc: "Çmimi ↓",
     catalogueSortName: "Emri A–Z",
     catalogueClearFilters: "Pastro filtrat",
-    catalogueBrowseAll: "Shiko të gjitha",
-    catalogueFeatured: "Disa nga produktet tona",
+    catalogueBrowseAll: "Shiko produktet",
+    catalogueFeatured: "Produktet më të kërkuara",
     catalogueViewMore: "Shiko më shumë",
     catalogueViewLess: "Shiko më pak",
     cataloguePrevPage: "Faqja e mëparshme",
@@ -94,7 +95,7 @@ export const translations = {
     cartClose: "Mbyll shportën",
     cartEmpty: "Shporta është bosh.",
     cartEmptyHint: "Shto produkte në stok nga katalogu.",
-    cartBrowse: "Shiko katalogun",
+    cartBrowse: "Shiko produktet",
     cartAdd: "Shto në shportë",
     cartAdded: "U shtua",
     cartInCart: "Në shportë",
@@ -207,26 +208,26 @@ export const translations = {
 
     // Trust / Why us
     trustHeading: "Pse te ne",
-    trust1Title: "Origjinale & OEM",
-    trust1Desc: "Pjesë autentike që përputhen me specifikën e prodhuesit.",
-    trust2Title: "Njohuri ekspertësh",
-    trust2Desc: "Thuaj kodin ose dërgo foto — ta gjejmë shpejt.",
-    trust3Title: "Disponueshmëri e shpejtë",
-    trust3Desc: "Qasje e shpejtë te pjesët që të duhen, kur të duhen.",
-    trust4Title: "I besuar nga profesionistët",
-    trust4Desc: "Zgjedhja e punishteve dhe entuziastëve në rajon.",
+    trust1Title: "Pjesë origjinale dhe OEM",
+    trust1Desc: "Pjesë që përputhen me specifikimet e prodhuesit.",
+    trust2Title: "Identifikim i saktë i pjesës",
+    trust2Desc: "Thuaj kodin ose dërgo një foto — e gjejmë shpejt.",
+    trust3Title: "Disponueshmëri",
+    trust3Desc: "Stok lokal dhe porosi sipas nevojës, me përgjigje të shpejtë.",
+    trust4Title: "Për servise dhe individë",
+    trust4Desc: "Çmime të qarta për klientë individualë; pyet për shumicë nëse je servis.",
 
     // Brands
-    brandsHeading: "Markat që mbajmë",
+    brandsHeading: "Brendet",
 
-    // About (compressed)
-    aboutTitle: "Dyqani i pjesëve, jo fjalë të mëdha",
+    // About
+    aboutTitle: "Rreth nesh",
     aboutText:
-      "AUTO SHABANI në Prishtinë — pjesë këmbimi për makina, për klientë që duan pjesën e saktë me çmim të qartë. Nëse je punishte, pyet për shumicë; nëse je individ, çmimet e shfaqura janë për ty.",
+      "AUTO SHABANI në Prishtinë — dyqan pjesësh këmbimi për vetura. Për servise dhe klientë individualë.",
 
     // Contact
     contactHeading: "Kontakt",
-    contactTitle: "Na gjeni në Prishtinë",
+    contactTitle: "Na kontaktoni",
     contactPhone: "Telefoni",
     contactEmail: "Email",
     contactInstagram: "Instagram",
@@ -254,11 +255,12 @@ export const translations = {
     heroTitle1: "Precision.",
     heroTitle2: "Performance.",
     heroTitle3: "Perfection.",
-    heroTitle: "Precision. Performance. Perfection.",
-    heroSubtitle: "Original car spare parts in Prishtina",
-    heroCtaPrimary: "View Catalogue",
+    heroTitle: "Car spare parts",
+    heroSubtitle: "Car spare parts",
+    heroCtaPrimary: "View products",
     heroCtaSecondary: "Contact us",
-    heroTradeNote: "Workshops / wholesale: message us on WhatsApp.",
+    heroTradeNote:
+      "A wide selection of parts for different car brands. For workshops and individual customers.",
 
     navCatalogue: "Catalogue",
     navAbout: "About",
@@ -301,8 +303,8 @@ export const translations = {
     catalogueSortPriceDesc: "Price ↓",
     catalogueSortName: "Name A–Z",
     catalogueClearFilters: "Clear filters",
-    catalogueBrowseAll: "See all",
-    catalogueFeatured: "Some of our parts",
+    catalogueBrowseAll: "View products",
+    catalogueFeatured: "Popular products",
     catalogueViewMore: "View more",
     catalogueViewLess: "View less",
     cataloguePrevPage: "Previous page",
@@ -336,7 +338,7 @@ export const translations = {
     cartClose: "Close cart",
     cartEmpty: "Your cart is empty.",
     cartEmptyHint: "Add in-stock products from the catalogue.",
-    cartBrowse: "Browse catalogue",
+    cartBrowse: "View products",
     cartAdd: "Add to cart",
     cartAdded: "Added",
     cartInCart: "In cart",
@@ -448,23 +450,23 @@ export const translations = {
     adminStock: "Stock",
 
     trustHeading: "Why us",
-    trust1Title: "Genuine & OEM",
-    trust1Desc: "Authentic parts that match manufacturer specs.",
-    trust2Title: "Expert knowledge",
-    trust2Desc: "Say the code or send a photo — we’ll find it fast.",
-    trust3Title: "Fast availability",
-    trust3Desc: "Quick access to the parts you need, when you need them.",
-    trust4Title: "Trusted by professionals",
-    trust4Desc: "The choice of workshops and enthusiasts across the region.",
+    trust1Title: "Original and OEM parts",
+    trust1Desc: "Parts that match manufacturer specifications.",
+    trust2Title: "Accurate part identification",
+    trust2Desc: "Tell us the code or send a photo — we’ll find it quickly.",
+    trust3Title: "Availability",
+    trust3Desc: "Local stock and on-request ordering, with a fast reply.",
+    trust4Title: "For workshops and individuals",
+    trust4Desc: "Clear retail pricing; ask about wholesale if you run a workshop.",
 
-    brandsHeading: "Brands we stock",
+    brandsHeading: "Brands",
 
-    aboutTitle: "A parts counter, not a slogan",
+    aboutTitle: "About us",
     aboutText:
-      "AUTO SHABANI in Prishtina — car parts for people who want the right part at a clear price. Workshops: ask about wholesale. Retail: the prices you see are for you.",
+      "AUTO SHABANI in Prishtina — car spare parts for workshops and individual customers.",
 
     contactHeading: "Contact",
-    contactTitle: "Find us in Prishtina",
+    contactTitle: "Contact us",
     contactPhone: "Phone",
     contactEmail: "Email",
     contactInstagram: "Instagram",

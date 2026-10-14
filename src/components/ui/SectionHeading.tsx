@@ -21,13 +21,17 @@ export default function SectionHeading({
   const eyeCls = tone === "dark" ? "text-white/55" : "text-as-gray";
 
   return (
-    <div className={`max-w-3xl ${alignCls} ${className}`}>
+    <div className={`max-w-2xl ${alignCls} ${className}`}>
       {eyebrow ? (
-        <p className={`mb-3 text-sm ${eyeCls}`}>{eyebrow}</p>
+        <p className={`mb-2 text-sm font-medium ${eyeCls}`}>{eyebrow}</p>
       ) : null}
       <h2 className={`text-section ${titleCls}`}>{title}</h2>
       {subhead ? (
-        <p className={`mt-4 text-subhead ${subCls} max-w-2xl ${align === "center" ? "mx-auto" : ""}`}>
+        <p
+          className={`mt-3 text-subhead ${subCls} max-w-xl ${
+            align === "center" ? "mx-auto" : ""
+          }`}
+        >
           {subhead}
         </p>
       ) : null}

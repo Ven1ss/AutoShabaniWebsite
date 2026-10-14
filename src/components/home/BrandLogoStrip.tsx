@@ -13,7 +13,7 @@ export default function BrandLogoStrip() {
     <section className="surface-white border-b border-black/[0.04]">
       <div className="container-as py-12 sm:py-14 md:py-16">
         <FadeIn>
-          <p className="text-center text-caption font-semibold uppercase tracking-[0.16em] text-as-gray mb-8 sm:mb-10">
+          <p className="text-center text-sm font-medium text-as-secondary mb-8 sm:mb-10">
             {t.brandsHeading}
           </p>
           <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:gap-x-10 md:gap-x-12">

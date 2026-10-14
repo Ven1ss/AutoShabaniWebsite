@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { GeistSans } from "geist/font/sans";
+import { Manrope } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import Analytics from "@/components/Analytics";
 import Providers from "@/components/Providers";
 import { getServerLocale } from "@/lib/locale";
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
@@ -20,13 +26,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",
+    default: "AUTO SHABANI | Pjesë këmbimi për vetura — Prishtinë",
     template: "%s | AUTO SHABANI",
   },
   description:
-    "Saktësi. Performancë. Perfeksion. Pjesë këmbimi origjinale në Prishtinë — AUTO SHABANI. Dërgo listën në WhatsApp.",
+    "Pjesë këmbimi për vetura në Prishtinë. Zgjedhje e gjerë për marka të ndryshme — për servise dhe klientë individualë. AUTO SHABANI.",
   keywords: [
     "pjesë këmbimi",
+    "vetura",
     "auto parts Kosovo",
     "Prishtina",
     "OEM",
@@ -39,9 +46,9 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",
+    title: "AUTO SHABANI | Pjesë këmbimi për vetura — Prishtinë",
     description:
-      "Pjesë këmbimi origjinale në Prishtinë. Shiko katalogun dhe dërgo listën në WhatsApp.",
+      "Pjesë këmbimi për vetura në Prishtinë. Për servise dhe klientë individualë.",
     type: "website",
     locale: "sq_AL",
     url: siteUrl,
@@ -49,9 +56,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "AUTO SHABANI | Pjesë këmbimi — Prishtinë",
+    title: "AUTO SHABANI | Pjesë këmbimi për vetura — Prishtinë",
     description:
-      "Pjesë këmbimi origjinale në Prishtinë. Shiko katalogun — AUTO SHABANI.",
+      "Pjesë këmbimi për vetura në Prishtinë — AUTO SHABANI.",
     images: ["/logo.png"],
   },
   robots: { index: true, follow: true },
@@ -77,7 +84,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${manrope.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
       <head>
