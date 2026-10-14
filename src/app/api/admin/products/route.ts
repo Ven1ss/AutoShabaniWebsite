@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   normalizeAdminProductCreate,
@@ -5,6 +6,12 @@ import {
   requireAdmin,
 } from "@/lib/admin";
 import type { AdminProductInput } from "@/lib/admin";
+
+function revalidateCatalogue(slug?: string | null) {
+  revalidatePath("/katalogu");
+  revalidatePath("/");
+  if (slug) revalidatePath(`/katalogu/${slug}`);
+}
 
 export async function GET() {
   const { supabase, isAdmin } = await requireAdmin();
@@ -62,6 +69,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  revalidateCatalogue(data?.slug);
   return NextResponse.json({ product: data });
 }
 
@@ -88,6 +96,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  revalidateCatalogue(data?.slug);
   return NextResponse.json({ product: data });
 }
 
@@ -108,5 +117,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  revalidateCatalogue();
   return NextResponse.json({ ok: true });
 }

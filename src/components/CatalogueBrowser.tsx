@@ -8,10 +8,13 @@ import {
   useState,
   useTransition,
 } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import BackToTopButton from "@/components/BackToTopButton";
-import CatalogueSearchTicket from "@/components/CatalogueSearchTicket";
+import CatalogueSearchTicket, {
+  type SearchSuggestion,
+} from "@/components/CatalogueSearchTicket";
 import ProductCard from "@/components/ProductCard";
 import {
   filterProducts,
@@ -25,7 +28,7 @@ import {
   pushRecentSearch,
   readRecentSearches,
 } from "@/lib/recent-searches";
-import { fieldMatchesQuery } from "@/lib/search-rank";
+import { rankProductsForQuery } from "@/lib/search-engine";
 
 const PAGE_SIZE = 50;
 
@@ -79,23 +82,7 @@ function countBy(
 function localFuzzySearch(products: Product[], query: string, locale: "sq" | "en") {
   const q = query.trim();
   if (!q) return products;
-  // fieldMatchesQuery strips spaces (same as search_products RPC).
-  const scored = products
-    .map((p) => {
-      const fields = [p.sku, p.code, p.brand, p.name[locale], p.name.en, p.name.sq];
-      let score = 0;
-      for (const field of fields) {
-        const m = fieldMatchesQuery(field, q);
-        if (m === "exact") score += 40;
-        else if (m === "includes") score += 20;
-        else if (m === "fuzzy") score += 8;
-      }
-      if (p.featured) score += 2;
-      return { p, score };
-    })
-    .filter((row) => row.score > 0)
-    .sort((a, b) => b.score - a.score);
-  return scored.map((row) => row.p);
+  return rankProductsForQuery(products, q, locale).map((row) => row.product);
 }
 
 export default function CatalogueBrowser({ products }: Props) {
@@ -119,6 +106,9 @@ export default function CatalogueBrowser({ products }: Props) {
   const [sort, setSort] = useState<ProductSort>("relevance");
   const [page, setPage] = useState(urlPage);
   const [remoteMatches, setRemoteMatches] = useState<Product[] | null>(null);
+  const [matchHints, setMatchHints] = useState<Record<string, string[]>>({});
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   // Bumped on submit / URL sync so the search field can adopt an external
   // query without re-binding on every keystroke.
@@ -153,35 +143,83 @@ export default function CatalogueBrowser({ products }: Props) {
     const q = deferredQuery.trim();
     if (!q) {
       setRemoteMatches(null);
+      setMatchHints({});
       return;
     }
 
     // Drop stale remote hits so local fuzzy (for the current query) shows
     // until the new request finishes.
     setRemoteMatches(null);
+    setMatchHints({});
 
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/products/search?q=${encodeURIComponent(q)}`,
+          `/api/products/search?q=${encodeURIComponent(q)}&locale=${locale}&rich=1`,
           { signal: controller.signal }
         );
         if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-        const data = (await res.json()) as Product[];
-        setRemoteMatches(data);
+        const data = (await res.json()) as {
+          products?: Product[];
+          hits?: { id: string; reasons: string[] }[];
+        };
+        const list = data.products ?? [];
+        setRemoteMatches(list);
+        const hints: Record<string, string[]> = {};
+        for (const hit of data.hits ?? []) {
+          hints[hit.id] = hit.reasons ?? [];
+        }
+        setMatchHints(hints);
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("[catalogue] Remote search failed:", error);
-        setRemoteMatches(localFuzzySearch(products, q, locale));
+        const local = rankProductsForQuery(products, q, locale);
+        setRemoteMatches(local.map((row) => row.product));
+        const hints: Record<string, string[]> = {};
+        for (const row of local) hints[row.product.id] = row.reasons;
+        setMatchHints(hints);
       }
-    }, 200);
+    }, 220);
 
     return () => {
       controller.abort();
       window.clearTimeout(timer);
     };
   }, [deferredQuery, products, locale]);
+
+  useEffect(() => {
+    const q = deferredQuery.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setSuggestionsLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/products/suggest?q=${encodeURIComponent(q)}&locale=${locale}`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error(`Suggest failed: ${res.status}`);
+        const data = (await res.json()) as { suggestions?: SearchSuggestion[] };
+        setSuggestions(data.suggestions ?? []);
+      } catch {
+        if (controller.signal.aborted) return;
+        setSuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) setSuggestionsLoading(false);
+      }
+    }, 280);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [deferredQuery, locale]);
 
   function syncUrl(next: {
     q?: string;
@@ -288,6 +326,15 @@ export default function CatalogueBrowser({ products }: Props) {
           onChange={setQuery}
           onSubmit={submitSearch}
           size="bar"
+          suggestions={suggestions}
+          suggestionsLoading={suggestionsLoading}
+          onSuggestionSelect={(item) => {
+            if (item.type === "product" && item.slug) {
+              router.push(`/katalogu/${item.slug}`);
+              return;
+            }
+            submitSearch(item.query || item.label);
+          }}
         />
       </div>
 
@@ -552,11 +599,25 @@ export default function CatalogueBrowser({ products }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-12 sm:py-16 px-4 text-center text-as-secondary border border-dashed border-steel-light text-sm sm:text-base rounded-xl">
-          {t.catalogueEmpty}
-        </p>
+        <div className="py-12 sm:py-16 px-4 text-center border border-dashed border-steel-light rounded-xl space-y-3">
+          <p className="text-as-secondary text-sm sm:text-base">
+            {deferredQuery.trim() ? t.searchNoExact : t.catalogueEmpty}
+          </p>
+          {deferredQuery.trim() ? (
+            <p className="text-caption text-as-gray">{t.searchFitmentNote}</p>
+          ) : null}
+          <Link
+            href="/#contact"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-as-dark underline underline-offset-2"
+          >
+            {t.searchContactHelp}
+          </Link>
+        </div>
       ) : (
         <>
+          {deferredQuery.trim() && Object.keys(matchHints).length > 0 ? (
+            <p className="mb-3 text-caption text-as-gray">{t.searchFitmentNote}</p>
+          ) : null}
           <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-[clamp(0.55rem,0.4rem+0.7vw,1rem)]">
             {pageItems.map((product) => (
               <li key={product.slug}>

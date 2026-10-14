@@ -1,7 +1,28 @@
--- Catalogue search: match name / name_en / sku / code / brand / hidden_references
--- without ever returning purchase_price or hidden_references.
--- Spaces are ignored in both the query and the stored values.
+-- Catalogue hybrid search (kept in sync with migrations/007_intelligent_search.sql)
+-- Spaces / hyphens ignored for identifiers. Never returns purchase_price or hidden_references.
 -- Safe to re-run.
+
+create or replace function public.as_search_compact(value text)
+returns text
+language sql
+immutable
+as $$
+  select lower(regexp_replace(coalesce(value, ''), '[^a-zA-Z0-9]+', '', 'g'));
+$$;
+
+create or replace function public.as_search_ident(value text)
+returns text
+language sql
+immutable
+as $$
+  select upper(regexp_replace(coalesce(value, ''), '[^a-zA-Z0-9]+', '', 'g'));
+$$;
+
+create index if not exists products_search_sku_ident_idx
+  on public.products (public.as_search_ident(sku));
+
+create index if not exists products_search_code_ident_idx
+  on public.products (public.as_search_ident(code));
 
 create schema if not exists private;
 
@@ -35,69 +56,65 @@ security definer
 set search_path = public
 as $$
 declare
-  q text := regexp_replace(trim(coalesce(search_query, '')), '\s+', '', 'g');
+  raw text := trim(coalesce(search_query, ''));
+  q_compact text := public.as_search_compact(raw);
+  q_ident text := public.as_search_ident(raw);
   pattern text;
 begin
-  if q = '' then
+  if raw = '' or q_compact = '' then
     return query
     select
-      p.id,
-      p.slug,
-      p.name,
-      p.name_en,
-      p.sku,
-      p.code,
-      p.brand,
-      p.description,
-      p.description_en,
-      p.category,
-      p.image_url,
-      p.selling_price,
-      p.featured,
-      p.stock_status,
-      p.stock_qty
+      p.id, p.slug, p.name, p.name_en, p.sku, p.code, p.brand,
+      p.description, p.description_en, p.category, p.image_url,
+      p.selling_price, p.featured, p.stock_status, p.stock_qty
     from public.products p
-    order by p.featured desc, p.brand nulls last, p.name;
+    order by p.featured desc, p.brand nulls last, p.name
+    limit 200;
     return;
   end if;
 
-  pattern := '%' || replace(replace(replace(q, E'\\', E'\\\\'), '%', E'\\%'), '_', E'\\_') || '%';
+  pattern := '%' || replace(replace(replace(q_compact, E'\\', E'\\\\'), '%', E'\\%'), '_', E'\\_') || '%';
 
   return query
   select
-    p.id,
-    p.slug,
-    p.name,
-    p.name_en,
-    p.sku,
-    p.code,
-    p.brand,
-    p.description,
-    p.description_en,
-    p.category,
-    p.image_url,
-    p.selling_price,
-    p.featured,
-    p.stock_status,
-    p.stock_qty
+    p.id, p.slug, p.name, p.name_en, p.sku, p.code, p.brand,
+    p.description, p.description_en, p.category, p.image_url,
+    p.selling_price, p.featured, p.stock_status, p.stock_qty
   from public.products p
   where
-    regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(coalesce(p.name_en, ''), '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(coalesce(p.code, ''), '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(coalesce(p.brand, ''), '\s+', '', 'g') ilike pattern escape E'\\'
-    or regexp_replace(coalesce(p.hidden_references, ''), '\s+', '', 'g') ilike pattern escape E'\\'
+    public.as_search_ident(p.sku) = q_ident
+    or public.as_search_ident(coalesce(p.code, '')) = q_ident
+    or public.as_search_compact(p.name) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.name_en, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(p.sku) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.code, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.brand, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.description, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.description_en, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.category, '')) ilike pattern escape E'\\'
+    or public.as_search_compact(coalesce(p.hidden_references, '')) ilike pattern escape E'\\'
+    or (
+      length(q_ident) >= 5
+      and (
+        public.as_search_ident(p.sku) like '%' || q_ident || '%'
+        or public.as_search_ident(coalesce(p.code, '')) like '%' || q_ident || '%'
+        or public.as_search_ident(coalesce(p.hidden_references, '')) like '%' || q_ident || '%'
+      )
+    )
   order by
     case
-      when regexp_replace(p.sku, '\s+', '', 'g') ilike pattern escape E'\\' then 0
-      when regexp_replace(coalesce(p.brand, ''), '\s+', '', 'g') ilike pattern escape E'\\' then 1
-      when regexp_replace(p.name, '\s+', '', 'g') ilike pattern escape E'\\' then 2
-      else 3
+      when public.as_search_ident(p.sku) = q_ident then 0
+      when public.as_search_ident(coalesce(p.code, '')) = q_ident then 1
+      when public.as_search_ident(p.sku) like q_ident || '%' then 2
+      when public.as_search_ident(coalesce(p.code, '')) like q_ident || '%' then 3
+      when public.as_search_compact(coalesce(p.brand, '')) ilike pattern escape E'\\' then 4
+      when public.as_search_compact(p.name) ilike pattern escape E'\\' then 5
+      else 6
     end,
     p.featured desc,
     p.brand nulls last,
-    p.name;
+    p.name
+  limit 120;
 end;
 $$;
 
@@ -134,4 +151,4 @@ revoke all on function public.search_products(text) from public;
 grant execute on function public.search_products(text) to anon, authenticated, service_role;
 
 comment on function public.search_products(text) is
-  'Catalogue search by name, sku, code, brand, or hidden_references. Spaces are ignored. Never returns purchase_price or hidden_references.';
+  'Hybrid catalogue search: compact/identifier matching across name, sku, code, brand, description, category, hidden_references. Never returns purchase_price or hidden_references.';

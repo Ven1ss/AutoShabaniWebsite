@@ -23,9 +23,22 @@ export const translations = {
 
     // Search ticket
     searchLabel: "Kërko",
-    searchPlaceholder: "Emër, SKU, kod ose markë…",
+    searchPlaceholder: "Kërko pjesë, kod, OE/OEM ose markë…",
     searchSubmit: "Kërko",
-    searchHint: "Hapësirat injorohen — p.sh. K607 = K 6 0 7",
+    searchHint: "Emër, kod, OE/OEM ose markë — hapësirat injorohen (K607 = K 6 0 7)",
+    searchClear: "Pastro kërkimin",
+    searchSuggestLoading: "Duke kërkuar…",
+    searchNoExact:
+      "Nuk gjetëm një përputhje të saktë. Provo një emër tjetër ose kërko sipas kodit të pjesës.",
+    searchContactHelp: "Na kontaktoni për ndihmë",
+    searchMatchSku: "Përputhje me SKU",
+    searchMatchCode: "Përputhje me kodin",
+    searchMatchName: "Përputhje me emrin",
+    searchMatchBrand: "Përputhje me markën",
+    searchMatchFuzzy: "Përputhje e përafërt",
+    searchMatchSynonym: "Sipas terminologjisë",
+    searchFitmentNote:
+      "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin ose na pyet.",
 
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
@@ -37,7 +50,8 @@ export const translations = {
     catalogueCategory: "Kategoria",
     catalogueAll: "Të gjitha",
     catalogueResults: "produkte",
-    catalogueEmpty: "Asnjë rezultat. Provo një SKU tjetër ose na telefononi.",
+    catalogueEmpty:
+      "Nuk gjetëm një përputhje të saktë. Provo një emër tjetër ose kërko sipas kodit të pjesës.",
     catalogueView: "Shiko",
     catalogueSku: "SKU",
     catalogueCode: "Kodi",
@@ -268,9 +282,22 @@ export const translations = {
     navTrade: "Wholesale",
 
     searchLabel: "Search",
-    searchPlaceholder: "Name, SKU, code or brand…",
+    searchPlaceholder: "Search parts, code, OE/OEM or brand…",
     searchSubmit: "Search",
-    searchHint: "Spaces are ignored — e.g. K607 = K 6 0 7",
+    searchHint: "Name, code, OE/OEM or brand — spaces ignored (K607 = K 6 0 7)",
+    searchClear: "Clear search",
+    searchSuggestLoading: "Searching…",
+    searchNoExact:
+      "No exact match found. Try another name or search by part code.",
+    searchContactHelp: "Contact us for help",
+    searchMatchSku: "SKU match",
+    searchMatchCode: "Code match",
+    searchMatchName: "Name match",
+    searchMatchBrand: "Brand match",
+    searchMatchFuzzy: "Approximate match",
+    searchMatchSynonym: "Terminology match",
+    searchFitmentNote:
+      "Vehicle fitment is not auto-confirmed — verify the code or ask us.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
@@ -280,7 +307,8 @@ export const translations = {
     catalogueCategory: "Category",
     catalogueAll: "All",
     catalogueResults: "products",
-    catalogueEmpty: "No results. Try another SKU or call us.",
+    catalogueEmpty:
+      "No exact match found. Try another name or search by part code.",
     catalogueView: "View",
     catalogueSku: "SKU",
     catalogueCode: "Code",
