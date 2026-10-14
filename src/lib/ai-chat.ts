@@ -404,17 +404,15 @@ export async function runAiChatTurn(opts: {
     }
   }
 
-  // Functional / type-known queries often share no lexical tokens with product
-  // names (e.g. "liquid that prevents freezing"). Scan catalogue by type.
-  if (parsed.typeId && rankedMap.size === 0) {
+  // Type-known queries (esp. functional phrases like "liquid that prevents
+  // freezing") often share no lexical tokens with product names. Always
+  // recall by type/attributes from the catalogue, then merge scores.
+  if (parsed.typeId) {
+    const typeBase =
+      parsed.typeSource === "functional" || rankedMap.size === 0 ? 180 : 100;
     for (const full of candidates) {
-      consider(full, 120, ["category"]);
-    }
-  } else if (parsed.typeId && parsed.attributes.length > 0) {
-    // Also ensure attribute-confirmed products aren't missed by weak RPC recall
-    for (const full of candidates) {
-      if (rankedMap.has(full.id)) continue;
-      consider(full, 100, ["description"]);
+      if (rankedMap.has(full.id) && !parsed.attributes.length) continue;
+      consider(full, typeBase, ["category", "description"]);
     }
   }
 
