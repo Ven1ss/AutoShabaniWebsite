@@ -17,6 +17,7 @@ import {
 } from "@/lib/ai-catalogue";
 import { rankProductsForQuery } from "@/lib/search-engine";
 import { expandQueryWithSynonyms } from "@/lib/search-synonyms";
+import { significantQueryText } from "@/lib/search-normalize";
 import {
   aiSearchEnabled,
   expandQueryWithAi,
@@ -305,17 +306,19 @@ export async function runAiChatTurn(opts: {
     locale
   );
 
+  const focusQuery = significantQueryText(userText) || userText;
   const candidates = await gatherAiCandidates(
-    queries.length ? queries : [userText]
+    queries.length ? queries : [focusQuery]
   );
 
-  // Rank across primary query + expansions
+  // Rank across primary query + expansions (ignore chat filler words)
   const rankedMap = new Map<
     string,
     { product: AiCatalogueProduct; score: number }
   >();
-  for (const q of [userText, ...queries].slice(0, 5)) {
-    for (const hit of rankProductsForQuery(candidates, q, locale)) {
+  for (const q of [focusQuery, userText, ...queries].slice(0, 5)) {
+    const cleaned = significantQueryText(q) || q;
+    for (const hit of rankProductsForQuery(candidates, cleaned, locale)) {
       const full =
         candidates.find((c) => c.id === hit.product.id) ??
         ({ ...hit.product, hiddenReferences: "" } as AiCatalogueProduct);
