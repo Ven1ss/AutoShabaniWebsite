@@ -13,9 +13,9 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.cdnfonts.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.cdnfonts.com https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data: https://fonts.cdnfonts.com",
+      "font-src 'self' data: https://fonts.cdnfonts.com https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.stripe.com",
       "frame-src 'self' https://www.google.com https://maps.google.com https://js.stripe.com",
       "object-src 'none'",

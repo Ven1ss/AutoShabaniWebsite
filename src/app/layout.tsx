@@ -88,6 +88,16 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Critical fallback so the shell never flashes unstyled if CSS is delayed. */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root{--as-snow:#f5f5f7;--as-dark:#1d1d1f;--as-accent:#c8102e;--as-white:#ffffff;--as-mist:#e8e8ed}
+              html{background:var(--as-snow)}
+              body{margin:0;min-height:100vh;background:var(--as-snow);color:var(--as-dark);font-family:var(--font-manrope),system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+            `,
+          }}
+        />
         {supabaseOrigin ? (
           <>
             <link
