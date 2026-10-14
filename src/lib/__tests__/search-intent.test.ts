@@ -60,6 +60,28 @@ describe("search intent", () => {
     expect(intent).toBeTruthy();
     expect(productMatchesIntent(antifreeze, intent!, "sq")).toBe(true);
     expect(productMatchesIntent(perfume, intent!, "sq")).toBe(false);
+    const klimaFresh = product({
+      id: "ar2",
+      sku: "KLIMA1",
+      name: {
+        sq: "Arome per klim K2 KLIMA FRESH LEMON | 150ml",
+        en: "Cabin freshener",
+      },
+      brand: "K2",
+      category: "Aksesore per veture",
+    });
+    const radiatorFlush = product({
+      id: "rf1",
+      sku: "RF1",
+      name: {
+        sq: "Pastrues i radiatorit K2 RADIATOR FLUSH | 250ml",
+        en: "Radiator flush",
+      },
+      brand: "K2",
+      category: "Aksesore per veture",
+    });
+    expect(productMatchesIntent(klimaFresh, intent!, "sq")).toBe(false);
+    expect(productMatchesIntent(radiatorFlush, intent!, "sq")).toBe(false);
   });
 
   it("ranks antifreeze above perfume and filters perfume out", () => {

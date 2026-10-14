@@ -15,6 +15,8 @@ export type ProductIntent = {
   mustMatch: string[];
   /** Optional category substrings that confirm the intent. */
   categories?: string[];
+  /** Hard exclude terms (air fresheners, unrelated accessories, etc.). */
+  exclude?: string[];
 };
 
 /** High-confidence spare-parts intents for Kosovo retail language. */
@@ -34,8 +36,22 @@ export const PRODUCT_INTENTS: ProductIntent[] = [
       "g12",
       "g13",
     ],
+    // Require the fluid itself — not radiator flush / stop-leak accessories
     mustMatch: ["antifriz", "antifreeze", "coolant", "ftohje"],
-    categories: ["antifriz", "coolant"],
+    categories: ["antifriz"],
+    exclude: [
+      "arome",
+      "aroma",
+      "parfum",
+      "perfume",
+      "freshener",
+      "scent",
+      "klima fresh",
+      "stop leak",
+      "radiator flush",
+      "pastrues i radiatorit",
+      "ndalues i rrjedhjes",
+    ],
   },
   {
     id: "engine_oil",
@@ -136,12 +152,14 @@ export function productMatchesIntent(
   intent: ProductIntent,
   locale: "sq" | "en" = "sq"
 ): boolean {
-  const hay = normalizeText(
+  const nameHay = normalizeText(
+    [product.name[locale], product.name.sq, product.name.en, product.category]
+      .filter(Boolean)
+      .join(" ")
+  );
+  const fullHay = normalizeText(
     [
-      product.name[locale],
-      product.name.sq,
-      product.name.en,
-      product.category,
+      nameHay,
       product.description[locale],
       product.description.sq,
       product.description.en,
@@ -150,11 +168,19 @@ export function productMatchesIntent(
       .filter(Boolean)
       .join(" ")
   );
-  const hayC = compact(hay);
+  const nameC = compact(nameHay);
 
   if (
-    intent.categories?.some((c) => hay.includes(normalizeText(c)))
+    intent.exclude?.some((ex) => {
+      const e = normalizeText(ex);
+      return e.length >= 3 && fullHay.includes(e);
+    })
   ) {
+    return false;
+  }
+
+  // Prefer name/category evidence (not buried description noise)
+  if (intent.categories?.some((c) => nameHay.includes(normalizeText(c)))) {
     return true;
   }
 
@@ -162,8 +188,8 @@ export function productMatchesIntent(
     const t = normalizeText(term);
     const tc = compact(term);
     return (
-      (t.length >= 3 && hay.includes(t)) ||
-      (tc.length >= 4 && hayC.includes(tc))
+      (t.length >= 3 && nameHay.includes(t)) ||
+      (tc.length >= 4 && nameC.includes(tc))
     );
   });
 }
