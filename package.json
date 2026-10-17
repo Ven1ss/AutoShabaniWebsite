@@ -13,12 +13,14 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "ai": "^7.0.143",
     "framer-motion": "^11.11.17",
     "geist": "^1.7.2",
     "next": "15.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "stripe": "^22.4.0"
+    "stripe": "^22.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
