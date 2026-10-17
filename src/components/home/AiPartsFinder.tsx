@@ -23,6 +23,8 @@ type UiMessage = {
   content: string;
   products?: ChatProductCard[];
   clarifying?: boolean;
+  eventId?: string | null;
+  feedback?: "helpful" | "not_helpful" | null;
 };
 
 type SearchMode = "normal" | "ai";
@@ -71,6 +73,12 @@ export default function AiPartsFinder() {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [aiOpen, setAiOpen] = useState(false);
+  const [sessionId] = useState(() => {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
+    }
+    return `s-${Date.now()}`;
+  });
 
   useEffect(() => {
     if (!aiOpen) return;
@@ -111,6 +119,7 @@ export default function AiPartsFinder() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale,
+          sessionId,
           messages: nextHistory.map((m) => ({
             role: m.role,
             content: m.content,
@@ -121,7 +130,7 @@ export default function AiPartsFinder() {
       const data = (await res.json()) as {
         reply: string;
         products: ChatProductCard[];
-        meta?: { clarifying?: boolean };
+        meta?: { clarifying?: boolean; eventId?: string | null };
       };
 
       setMessages((prev) => [
@@ -132,6 +141,8 @@ export default function AiPartsFinder() {
           content: data.reply,
           products: data.products ?? [],
           clarifying: Boolean(data.meta?.clarifying),
+          eventId: data.meta?.eventId ?? null,
+          feedback: null,
         },
       ]);
     } catch {
@@ -181,6 +192,49 @@ export default function AiPartsFinder() {
     setMessages([]);
     setDraft("");
     inputRef.current?.focus();
+  }
+
+  async function postFeedbackSignal(opts: {
+    eventId?: string | null;
+    signal: "helpful" | "not_helpful" | "clicked_product";
+    productId?: string;
+  }) {
+    try {
+      await fetch("/api/ai/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: opts.eventId || null,
+          signal: opts.signal,
+          productId: opts.productId || null,
+          sessionId,
+        }),
+      });
+    } catch {
+      /* non-blocking */
+    }
+  }
+
+  async function sendFeedback(
+    messageId: string,
+    eventId: string | null | undefined,
+    signal: "helpful" | "not_helpful"
+  ) {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === messageId ? { ...m, feedback: signal } : m))
+    );
+    await postFeedbackSignal({ eventId, signal });
+  }
+
+  function logProductClick(
+    eventId: string | null | undefined,
+    productId: string
+  ) {
+    void postFeedbackSignal({
+      eventId,
+      signal: "clicked_product",
+      productId,
+    });
   }
 
   const waHelp = whatsappEnquireUrl(
@@ -337,6 +391,12 @@ export default function AiPartsFinder() {
                             <li key={item.id}>
                               <Link
                                 href={item.url}
+                                onClick={() => {
+                                  trackEvent("ai_product_click", {
+                                    id: item.id.slice(0, 36),
+                                  });
+                                  logProductClick(m.eventId, item.id);
+                                }}
                                 className="group flex items-center gap-3 bg-as-snow/60 p-3 hover:bg-as-snow sm:gap-4"
                               >
                                 <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-as-white">
@@ -388,6 +448,50 @@ export default function AiPartsFinder() {
                         >
                           {t.aiFindAskWhatsApp}
                         </a>
+                      ) : null}
+
+                      {m.role === "assistant" &&
+                      m.feedback !== undefined ? (
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          {m.feedback === "helpful" ||
+                          m.feedback === "not_helpful" ? (
+                            <p className="text-[0.7rem] text-as-gray">
+                              {t.aiFeedbackThanks}
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-[0.7rem] text-as-gray">
+                                {t.aiFeedbackPrompt}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void sendFeedback(
+                                    m.id,
+                                    m.eventId,
+                                    "helpful"
+                                  )
+                                }
+                                className="rounded-sm border border-as-mist bg-as-snow px-2.5 py-1 text-[0.7rem] font-medium text-as-dark hover:bg-as-mist"
+                              >
+                                {t.aiFeedbackYes}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void sendFeedback(
+                                    m.id,
+                                    m.eventId,
+                                    "not_helpful"
+                                  )
+                                }
+                                className="rounded-sm border border-as-mist bg-as-snow px-2.5 py-1 text-[0.7rem] font-medium text-as-dark hover:bg-as-mist"
+                              >
+                                {t.aiFeedbackNo}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       ) : null}
                     </div>
                   </div>

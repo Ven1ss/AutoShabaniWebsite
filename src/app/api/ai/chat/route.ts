@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  let body: { messages?: unknown; locale?: unknown };
+  let body: { messages?: unknown; locale?: unknown; sessionId?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
   }
 
   const locale = body.locale === "en" ? "en" : "sq";
+  const sessionId =
+    typeof body.sessionId === "string" ? body.sessionId.slice(0, 80) : null;
   const rawMessages = Array.isArray(body.messages) ? body.messages : [];
   const messages: ChatMessage[] = rawMessages
     .filter(
@@ -64,7 +66,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "messages required" }, { status: 400 });
   }
 
-  const result = await runAiChatTurn({ messages, locale });
+  const result = await runAiChatTurn({
+    messages,
+    locale,
+    sessionId,
+    ip,
+  });
 
   return NextResponse.json(result, {
     headers: { "Cache-Control": "private, no-store" },

@@ -57,6 +57,10 @@ export const translations = {
     aiFindWelcome: "Shkruaj kërkesën dhe kliko «Kërko me AI» — produktet shfaqen menjëherë.",
     aiFindAskWhatsApp: "Dërgo në WhatsApp",
     aiFindError: "Kërkimi dështoi — provo përsëri.",
+    aiFeedbackPrompt: "A ishte e dobishme?",
+    aiFeedbackYes: "Po",
+    aiFeedbackNo: "Jo",
+    aiFeedbackThanks: "Faleminderit për reagimin.",
 
     // Catalogue
     catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
@@ -334,6 +338,10 @@ export const translations = {
     aiFindWelcome: "Type your request and click “Search with AI” — products appear immediately.",
     aiFindAskWhatsApp: "Message on WhatsApp",
     aiFindError: "Search failed — try again.",
+    aiFeedbackPrompt: "Was this helpful?",
+    aiFeedbackYes: "Yes",
+    aiFeedbackNo: "No",
+    aiFeedbackThanks: "Thanks for the feedback.",
 
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
