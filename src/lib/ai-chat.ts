@@ -125,13 +125,29 @@ function fallbackReply(
   partialOffered: boolean
 ): string {
   const attrHint = parsed.attributes
-    .map((a) => a.replace("scent:", ""))
+    .map((a) => {
+      if (a.startsWith("grade:")) return a.replace(/^grade:/i, "G").toUpperCase();
+      if (a.startsWith("scent:")) return a.slice("scent:".length);
+      return a;
+    })
     .join(", ");
+  const hasScent = parsed.attributes.some((a) => a.startsWith("scent:"));
+  const hasGrade = parsed.attributes.some((a) => a.startsWith("grade:"));
+  const retryHintEn = hasGrade
+    ? "Try another grade (G12/G13), brand, or OE/SKU code."
+    : hasScent
+      ? "Try another scent, brand, or OE/SKU code."
+      : "Try another brand, size, or OE/SKU code.";
+  const retryHintSq = hasGrade
+    ? "Provo gradë tjetër (G12/G13), markë, ose kod OE/SKU."
+    : hasScent
+      ? "Provo aromë tjetër, markë, ose kod OE/SKU."
+      : "Provo markë tjetër, madhësi, ose kod OE/SKU.";
 
   if (locale === "en") {
     if (count === 0) {
       if (parsed.attributes.length && parsed.typeId) {
-        return `No catalogue product verifies “${attrHint}” for that type. Try another scent, brand, or OE/SKU code.`;
+        return `No catalogue product verifies “${attrHint}” for that type. ${retryHintEn}`;
       }
       if (parsed.typeId === "brake_pads") {
         return "We don’t currently list brake pads in the online catalogue. Send the vehicle make/model or OE code on WhatsApp and we’ll check in the shop.";
@@ -148,7 +164,7 @@ function fallbackReply(
 
   if (count === 0) {
     if (parsed.attributes.length && parsed.typeId) {
-      return `Nuk ka produkt në katalog që konfirmon “${attrHint}” për këtë lloj. Provo aromë tjetër, markë, ose kod OE/SKU.`;
+      return `Nuk ka produkt në katalog që konfirmon “${attrHint}” për këtë lloj. ${retryHintSq}`;
     }
     if (parsed.typeId === "brake_pads") {
       return "Aktualisht nuk kemi feroda të listuara në katalogun online. Dërgo markën/modelin e veturës ose kodin OE në WhatsApp — e kontrollojmë në dyqan.";
