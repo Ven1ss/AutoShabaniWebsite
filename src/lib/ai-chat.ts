@@ -126,7 +126,7 @@ function fallbackReply(
 ): string {
   const attrHint = parsed.attributes
     .map((a) => {
-      if (a.startsWith("grade:")) return a.replace(/^grade:/i, "G").toUpperCase();
+      if (a.startsWith("grade:")) return a.slice("grade:".length).toUpperCase();
       if (a.startsWith("scent:")) return a.slice("scent:".length);
       return a;
     })
