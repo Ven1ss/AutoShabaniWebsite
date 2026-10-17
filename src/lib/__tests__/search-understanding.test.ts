@@ -5,6 +5,7 @@ import {
   parseCustomerQuery,
   productHasAttribute,
   productMatchesType,
+  textHasTerm,
 } from "@/lib/search-understanding";
 
 function product(
@@ -174,5 +175,78 @@ describe("attribute evidence", () => {
     expect(
       evaluateProduct(protectant, parsed, 200, ["fuzzy"], "sq").confidence
     ).toBe("none");
+  });
+
+  it("does not match sea inside seats (word boundary)", () => {
+    expect(textHasTerm("leather seats cleaner", "sea")).toBe(false);
+    expect(textHasTerm("ocean sea breeze", "sea")).toBe(true);
+    expect(textHasTerm("antifriz g11", "g11")).toBe(true);
+  });
+
+  it("does not map leather seats to ocean air fresheners", () => {
+    for (const q of [
+      "Products to maintain leather seats",
+      "leather seat cleaner",
+      "Leather cleaner",
+    ]) {
+      const p = parseCustomerQuery(q);
+      expect(p.attributes, q).not.toContain("scent:ocean");
+      expect(p.typeId, q).not.toBe("air_freshener");
+      expect(
+        p.typeId === "leather_care" || p.typeId === null,
+        `${q} → ${p.typeId}`
+      ).toBe(true);
+    }
+    expect(parseCustomerQuery("Leather cleaner").typeId).toBe("leather_care");
+    expect(parseCustomerQuery("Products to maintain leather seats").typeId).toBe(
+      "leather_care"
+    );
+  });
+
+  it("maps G11 antifreeze grade and verifies product evidence", () => {
+    const g11 = product({
+      id: "af-g11",
+      sku: "G11",
+      name: { sq: "Antifriz BELL G11 Super 100 | 1L", en: "Antifreeze G11" },
+      brand: "BELL",
+      category: "Antifriz",
+    });
+    const g13 = product({
+      id: "af-g13",
+      sku: "G13",
+      name: { sq: "Antifriz PRIMOIL G13 | 1L", en: "Antifreeze G13" },
+      brand: "PRIMOIL",
+      category: "Antifriz",
+    });
+    const perfumeLeather = product({
+      id: "ar-leather",
+      sku: "CAYON-L",
+      name: {
+        sq: "Arome sprej K2 CAYON REAL LEATHER | 250ml",
+        en: "Leather scent spray",
+      },
+      brand: "K2",
+      category: "Aksesore per veture",
+    });
+    const leatherCleaner = product({
+      id: "letan",
+      sku: "LETAN",
+      name: { sq: "Pastrues i lekures K2 LETAN | 250ml", en: "Leather cleaner" },
+      brand: "K2",
+      category: "Aksesore per veture",
+    });
+
+    const parsed = parseCustomerQuery("Antifriz makine G11");
+    expect(parsed.typeId).toBe("antifreeze");
+    expect(parsed.attributes).toContain("grade:g11");
+    expect(evaluateProduct(g11, parsed, 100, ["name"], "sq").confidence).toBe(
+      "confirmed"
+    );
+    expect(evaluateProduct(g13, parsed, 100, ["name"], "sq").confidence).toBe(
+      "partial"
+    );
+
+    expect(productMatchesType(leatherCleaner, "leather_care")).toBe(true);
+    expect(productMatchesType(perfumeLeather, "leather_care")).toBe(false);
   });
 });

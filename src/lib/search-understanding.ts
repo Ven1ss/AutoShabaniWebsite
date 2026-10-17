@@ -13,7 +13,6 @@ import {
   TYPE_GROUPS,
 } from "@/lib/search-lexicon";
 import {
-  compactText,
   normalizeText,
   significantQueryText,
   tokenizeQuery,
@@ -54,18 +53,44 @@ function compact(s: string): string {
   return normalizeText(s).replace(/\s+/g, "");
 }
 
-function includesAny(hay: string, terms: string[]): boolean {
+/**
+ * Word-boundary / token-safe match.
+ * Prevents "sea" matching inside "seats", "arom" noise, etc.
+ */
+export function textHasTerm(hay: string, term: string): boolean {
   const h = normalizeText(hay);
-  const hc = compact(hay);
-  return terms.some((term) => {
-    const t = normalizeText(term);
-    const tc = compact(term);
-    if (!t) return false;
-    return (
-      (t.length >= 2 && h.includes(t)) ||
-      (tc.length >= 3 && hc.includes(tc))
-    );
-  });
+  const t = normalizeText(term);
+  if (!t || !h) return false;
+
+  if (h === t) return true;
+  if (h.includes(` ${t} `) || h.startsWith(`${t} `) || h.endsWith(` ${t}`)) {
+    return true;
+  }
+
+  // Multi-word phrases: space-aware includes is enough
+  if (t.includes(" ") && h.includes(t)) return true;
+
+  // Compact alphanumeric codes / grades (g11, 5w30) — whole token only
+  const tokens = h.split(" ").filter(Boolean);
+  if (tokens.includes(t)) return true;
+
+  const tc = compact(term);
+  if (tc.length >= 5) {
+    const hc = compact(hay);
+    // Require compact hit not to be a longer token prefix/suffix trap for short words
+    if (hc.includes(tc)) {
+      // Reject if compact term is embedded in a longer alphabetic run without separators
+      // e.g. "sea" inside "seats" → seats compact = seats, sea compact = sea
+      if (tc.length <= 3) return tokens.some((tok) => tok === t || compact(tok) === tc);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function includesAny(hay: string, terms: string[]): boolean {
+  return terms.some((term) => textHasTerm(hay, term));
 }
 
 /** Full searchable product text — name, category, brand, BOTH descriptions. */
@@ -111,25 +136,9 @@ export function typeTerms(typeId: string): string[] {
 
 /** Detect attributes mentioned in the query. */
 export function detectAttributes(query: string): string[] {
-  const q = normalizeText(query);
-  const qc = compact(query);
   const hit: string[] = [];
   for (const group of ATTRIBUTE_GROUPS) {
-    if (
-      group.terms.some((term) => {
-        const t = normalizeText(term);
-        const tc = compact(term);
-        return (
-          (t.length >= 3 &&
-            (q === t ||
-              q.includes(` ${t} `) ||
-              q.startsWith(`${t} `) ||
-              q.endsWith(` ${t}`) ||
-              q.includes(t))) ||
-          (tc.length >= 4 && qc.includes(tc))
-        );
-      })
-    ) {
+    if (group.terms.some((term) => textHasTerm(query, term))) {
       hit.push(group.id);
     }
   }
@@ -137,22 +146,14 @@ export function detectAttributes(query: string): string[] {
 }
 
 function detectTypeFromTriggers(query: string): string | null {
-  const q = normalizeText(significantQueryText(query) || query);
-  const qc = compact(q);
+  const q = significantQueryText(query) || query;
   let best: { id: string; len: number } | null = null;
   for (const group of TYPE_GROUPS) {
     for (const term of group.terms) {
-      const t = normalizeText(term);
-      const tc = compact(term);
-      if (!t) continue;
-      const hit =
-        q === t ||
-        q.includes(` ${t} `) ||
-        q.startsWith(`${t} `) ||
-        q.endsWith(` ${t}`) ||
-        (tc.length >= 4 && qc.includes(tc));
-      if (hit && (!best || t.length > best.len)) {
-        best = { id: group.id, len: t.length };
+      if (!textHasTerm(q, term) && !textHasTerm(query, term)) continue;
+      const len = normalizeText(term).length;
+      if (!best || len > best.len) {
+        best = { id: group.id, len };
       }
     }
   }
@@ -175,22 +176,16 @@ export function productMatchesType(
   typeId: string,
   locale: "sq" | "en" = "sq"
 ): boolean {
-  const { name, full, nameC, fullC } = productEvidenceText(product, locale);
+  const { name, full } = productEvidenceText(product, locale);
   const exclude = TYPE_EXCLUDE[typeId] ?? [];
   if (includesAny(full, exclude)) return false;
 
   const evidence = TYPE_EVIDENCE[typeId] ?? typeTerms(typeId);
 
-  // Require type cue in NAME or CATEGORY. Descriptions alone are too noisy
-  // (interior cleaners often mention "aromë" without being air fresheners).
-  return evidence.some((term) => {
-    const t = normalizeText(term);
-    const tc = compact(term);
-    return (
-      (t.length >= 3 && name.includes(t)) ||
-      (tc.length >= 4 && nameC.includes(tc))
-    );
-  });
+  // Prefer name/category; allow description for leather care (set names vary)
+  const hay =
+    typeId === "leather_care" || typeId === "interior_cleaner" ? full : name;
+  return evidence.some((term) => textHasTerm(hay, term));
 }
 
 /**
@@ -204,15 +199,8 @@ export function productHasAttribute(
 ): boolean {
   const terms = attributeTerms(attrId);
   if (!terms.length) return false;
-  const { full, fullC } = productEvidenceText(product, locale);
-  return terms.some((term) => {
-    const t = normalizeText(term);
-    const tc = compact(term);
-    return (
-      (t.length >= 3 && full.includes(t)) ||
-      (tc.length >= 4 && fullC.includes(tc))
-    );
-  });
+  const { full } = productEvidenceText(product, locale);
+  return terms.some((term) => textHasTerm(full, term));
 }
 
 function buildRetrievalQueries(parsed: ParsedQuery, raw: string): string[] {
@@ -260,8 +248,21 @@ export function parseCustomerQuery(
     if (typeId) typeSource = "functional";
   }
 
-  // Scent without type → assume car perfume when scent or perfume-ish context
-  if (!typeId && attrs.some((a) => a.startsWith("scent:"))) {
+  // Grade without type → antifreeze
+  if (!typeId && attrs.some((a) => a.startsWith("grade:"))) {
+    typeId = "antifreeze";
+    typeSource = "attribute_context";
+  }
+
+  // Scent without type → car perfume (never from leather/seat care wording)
+  if (
+    !typeId &&
+    attrs.some((a) => a.startsWith("scent:")) &&
+    !textHasTerm(raw, "leather") &&
+    !textHasTerm(raw, "lekure") &&
+    !textHasTerm(raw, "seat") &&
+    !textHasTerm(raw, "seats")
+  ) {
     typeId = "air_freshener";
     typeSource = "attribute_context";
   }

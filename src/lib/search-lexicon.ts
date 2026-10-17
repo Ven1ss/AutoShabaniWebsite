@@ -1,16 +1,46 @@
 /**
- * Automotive lexicon: product types, attributes (scents, etc.), functional
- * phrases, and Albanian/English colloquial variants used for intent parsing.
+ * Automotive lexicon: product types, attributes (scents, grades, etc.),
+ * functional phrases, and Albanian/English colloquial variants.
  */
 
 export type LexemeGroup = {
   id: string;
-  /** Canonical English-ish id used in attributes. */
   terms: string[];
 };
 
 /** Product-type groups — any term can signal the type. */
 export const TYPE_GROUPS: LexemeGroup[] = [
+  {
+    id: "leather_care",
+    terms: [
+      "leather cleaner",
+      "leather care",
+      "leather seat",
+      "leather seats",
+      "maintain leather",
+      "clean leather",
+      "pastrues i lekures",
+      "pastrues lekure",
+      "lekure",
+      "lëkure",
+      "karriga te lekures",
+      "karrige lekure",
+      "set pastrimi per karriga",
+      "auron",
+      "letan",
+    ],
+  },
+  {
+    id: "interior_cleaner",
+    terms: [
+      "interior cleaner",
+      "dashboard cleaner",
+      "plastic cleaner",
+      "pastrues interiori",
+      "pastrues plastike",
+      "polo protectant",
+    ],
+  },
   {
     id: "air_freshener",
     terms: [
@@ -31,7 +61,6 @@ export const TYPE_GROUPS: LexemeGroup[] = [
       "parfum veture",
       "parfum per veture",
       "perfume",
-      "scent",
     ],
   },
   {
@@ -148,25 +177,49 @@ export const ATTRIBUTE_GROUPS: LexemeGroup[] = [
   },
   {
     id: "scent:ocean",
-    terms: ["ocean", "oqeani", "oqean", "deti", "sea"],
+    // Avoid bare "sea" — matches inside "seats"
+    terms: ["ocean", "oqeani", "oqean", "deti", "blue ocean"],
   },
   {
     id: "scent:bubblegum",
     terms: ["bubble gum", "bubblegum", "çamçakëz", "camcakez", "camçakëz"],
   },
+  {
+    id: "grade:g11",
+    terms: ["g11", "g 11"],
+  },
+  {
+    id: "grade:g12",
+    terms: ["g12", "g12+", "g 12"],
+  },
+  {
+    id: "grade:g13",
+    terms: ["g13", "g 13"],
+  },
 ];
 
 /**
  * Functional / descriptive phrases → product type.
- * Matched against normalized query text.
+ * Matched against normalizeText() output (no diacritics).
  */
 export const FUNCTIONAL_PATTERNS: {
   typeId: string;
   patterns: RegExp[];
 }[] = [
   {
+    typeId: "leather_care",
+    patterns: [
+      /leather\s+(seat|seats|cleaner|care|clean|maintain)/,
+      /maintain\s+leather/,
+      /clean(ing)?\s+leather/,
+      /products?\s+to\s+maintain\s+leather/,
+      /pastrues\s+(i\s+)?lekure/,
+      /karrig[ae].{0,20}lekure/,
+      /lekure.{0,20}(pastr|mirembaj|mirëmbaj)/,
+    ],
+  },
+  {
     typeId: "antifreeze",
-    // Patterns run on normalizeText() output (no diacritics).
     patterns: [
       /uje\s*(per)?\s*radiator/,
       /water\s*(for\s*)?radiator/,
@@ -188,8 +241,23 @@ export const FUNCTIONAL_PATTERNS: {
   },
 ];
 
-/** Evidence terms that confirm a product belongs to a type (name/category/desc). */
+/** Evidence terms that confirm a product belongs to a type (name/category). */
 export const TYPE_EVIDENCE: Record<string, string[]> = {
+  leather_care: [
+    "lekure",
+    "lëkure",
+    "leather",
+    "letan",
+    "auron",
+    "karriga te lekures",
+  ],
+  interior_cleaner: [
+    "polo protectant",
+    "pastrues",
+    "plastika",
+    "interiori",
+    "dashboard",
+  ],
   air_freshener: [
     "arome",
     "aroma",
@@ -198,7 +266,6 @@ export const TYPE_EVIDENCE: Record<string, string[]> = {
     "perfume",
     "freshener",
     "parfum",
-    "scent",
   ],
   antifreeze: ["antifriz", "antifreeze", "coolant", "ftohje"],
   engine_oil: ["vaj motori", "engine oil", "motor oil", "5w", "10w", "0w"],
@@ -208,8 +275,24 @@ export const TYPE_EVIDENCE: Record<string, string[]> = {
   brake_disc: ["disk fren", "disqe fren", "brake disc", "brake disk"],
 };
 
-/** Hard negatives per type — products that share words but are wrong. */
+/** Hard negatives per type. */
 export const TYPE_EXCLUDE: Record<string, string[]> = {
+  leather_care: [
+    "arome",
+    "aroma",
+    "cayon",
+    "vento",
+    "roko",
+    "freshener",
+    "parfum",
+    "perfume",
+    "scent",
+    "antifriz",
+    "brake caliper",
+    "dpf",
+    "aditiv",
+  ],
+  interior_cleaner: ["arome", "antifriz", "ferod", "vaj motori"],
   antifreeze: [
     "arome",
     "aroma",
@@ -234,6 +317,10 @@ export const TYPE_EXCLUDE: Record<string, string[]> = {
     "plastika",
     "interiori",
     "panel",
+    "lekure",
+    "leather",
+    "letan",
+    "auron",
   ],
   brake_pads: [
     "pastrues",
@@ -256,7 +343,6 @@ export const TYPE_EXCLUDE: Record<string, string[]> = {
   ],
 };
 
-/** Refinement phrases for multi-turn chat. */
 export const REFINE_CHEAPER = [
   "cheaper",
   "cheapest",

@@ -308,6 +308,98 @@ export type Database = {
         Update: Partial<OrderEventRow>;
         Relationships: [];
       };
+      product_embeddings: {
+        Row: {
+          product_id: string;
+          embedding: number[] | string;
+          content_hash: string;
+          updated_at: string;
+        };
+        Insert: {
+          product_id: string;
+          embedding: number[] | string;
+          content_hash: string;
+          updated_at?: string;
+        };
+        Update: {
+          product_id?: string;
+          embedding?: number[] | string;
+          content_hash?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      search_events: {
+        Row: {
+          id: string;
+          created_at: string;
+          locale: string;
+          mode: string;
+          query: string;
+          intent: string | null;
+          attributes: string[];
+          result_ids: string[];
+          result_count: number;
+          ai_used: boolean;
+          session_id: string | null;
+          ip_hash: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          locale?: string;
+          mode?: string;
+          query: string;
+          intent?: string | null;
+          attributes?: string[];
+          result_ids?: string[];
+          result_count?: number;
+          ai_used?: boolean;
+          session_id?: string | null;
+          ip_hash?: string | null;
+        };
+        Update: Partial<{
+          locale: string;
+          mode: string;
+          query: string;
+          intent: string | null;
+          attributes: string[];
+          result_ids: string[];
+          result_count: number;
+          ai_used: boolean;
+          session_id: string | null;
+          ip_hash: string | null;
+        }>;
+        Relationships: [];
+      };
+      search_feedback: {
+        Row: {
+          id: string;
+          created_at: string;
+          event_id: string | null;
+          signal: string;
+          product_id: string | null;
+          note: string | null;
+          session_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          event_id?: string | null;
+          signal: string;
+          product_id?: string | null;
+          note?: string | null;
+          session_id?: string | null;
+        };
+        Update: Partial<{
+          event_id: string | null;
+          signal: string;
+          product_id: string | null;
+          note: string | null;
+          session_id: string | null;
+        }>;
+        Relationships: [];
+      };
     };
     Views: {
       products_public: {
@@ -327,6 +419,14 @@ export type Database = {
       search_products: {
         Args: { search_query: string };
         Returns: ProductPublicRow[];
+      };
+      match_products: {
+        Args: {
+          query_embedding: number[] | string;
+          match_count?: number;
+          min_similarity?: number;
+        };
+        Returns: { product_id: string; similarity: number }[];
       };
       is_admin: {
         Args: Record<string, never>;

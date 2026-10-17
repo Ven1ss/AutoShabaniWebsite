@@ -49,6 +49,7 @@ Fill `.env.local`, then `npm run dev`.
 6. `supabase/migrations/005_simplify_product_fields.sql` then re-run `search_products.sql`
 7. `supabase/migrations/006_allow_duplicate_skus.sql` (SKU no longer unique)
 8. `supabase/migrations/007_intelligent_search.sql` (or re-run `supabase/search_products.sql`)
+9. `supabase/migrations/008_ai_embeddings_and_feedback.sql` (pgvector embeddings + search feedback)
 
 Promote an admin:
 
@@ -65,6 +66,7 @@ See `.env.example`. For live ordering you need at least:
 - `NEXT_PUBLIC_SITE_URL`
 - Optional card pay: `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (endpoint `/api/webhooks/stripe`)
 - Optional email: `RESEND_API_KEY` + `ORDER_FROM_EMAIL`, or `ORDER_WEBHOOK_URL`
+- Optional AI search: `AI_GATEWAY_API_KEY` (preferred) or `OPENAI_API_KEY` — see `docs/SEARCH.md`
 
 ### Stripe webhook
 

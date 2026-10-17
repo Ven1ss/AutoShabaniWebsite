@@ -92,6 +92,14 @@ export const BUILTIN_SYNONYM_GROUPS: SynonymGroup[] = [
     "brake pads",
     "brake pad",
   ],
+  [
+    "leather cleaner",
+    "pastrues i lekures",
+    "pastrues lekure",
+    "leather care",
+    "karriga te lekures",
+    "maintain leather seats",
+  ],
 ];
 
 function loadExtraGroups(): SynonymGroup[] {

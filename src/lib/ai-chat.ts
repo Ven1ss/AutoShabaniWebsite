@@ -27,7 +27,11 @@ import {
 import {
   aiSearchEnabled,
   expandQueryWithAi,
+  parseIntentWithAi,
 } from "@/lib/search-ai";
+import { getAiProviderConfig } from "@/lib/ai-provider";
+import { matchProductsByEmbedding } from "@/lib/search-embeddings";
+import { logSearchEvent } from "@/lib/search-feedback";
 import type { Locale } from "@/lib/translations";
 
 export type ChatRole = "user" | "assistant";
@@ -63,6 +67,7 @@ export type ChatTurnResponse = {
     grounded: boolean;
     intent?: string | null;
     attributes?: string[];
+    eventId?: string | null;
   };
 };
 
@@ -161,23 +166,22 @@ function fallbackReply(
 async function openAiChatJson(
   messages: { role: "system" | "user" | "assistant"; content: string }[]
 ): Promise<Record<string, unknown> | null> {
-  const key = process.env.OPENAI_API_KEY?.trim();
-  if (!key) return null;
+  const cfg = getAiProviderConfig();
+  if (!cfg) return null;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
   try {
-    const model = process.env.OPENAI_SEARCH_MODEL?.trim() || "gpt-4o-mini";
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: `Bearer ${key}`,
+        Authorization: `Bearer ${cfg.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model,
+        model: cfg.chatModel,
         temperature: 0.1,
         response_format: { type: "json_object" },
         messages,
@@ -206,24 +210,59 @@ async function openAiChatJson(
 async function buildSearchQueries(
   userText: string,
   parsed: ParsedQuery
-): Promise<{ queries: string[]; aiUsed: boolean }> {
+): Promise<{ queries: string[]; aiUsed: boolean; parsed: ParsedQuery }> {
   const out = new Set<string>([
     ...parsed.retrievalQueries,
     ...expandQueryWithSynonyms(userText),
   ]);
   let aiUsed = false;
+  let next = parsed;
 
   if (aiSearchEnabled()) {
-    const expansion = await expandQueryWithAi(userText);
+    const [expansion, llmIntent] = await Promise.all([
+      expandQueryWithAi(userText),
+      // Use LLM intent for vague / missing-type queries
+      !parsed.typeId || parsed.typeSource === "functional"
+        ? parseIntentWithAi(userText)
+        : Promise.resolve(null),
+    ]);
+
     if (expansion?.expandedTerms?.length) {
       aiUsed = true;
       for (const term of expansion.expandedTerms) out.add(term);
       if (expansion.brand) out.add(expansion.brand);
       if (expansion.productType) out.add(expansion.productType);
     }
+
+    if (llmIntent) {
+      aiUsed = true;
+      if (!next.typeId && llmIntent.productType) {
+        next = {
+          ...next,
+          typeId: llmIntent.productType,
+          typeSource: "attribute_context",
+        };
+      }
+      if (llmIntent.grade && !next.attributes.includes(`grade:${llmIntent.grade}`)) {
+        next = {
+          ...next,
+          attributes: [...next.attributes, `grade:${llmIntent.grade}`],
+        };
+      }
+      if (llmIntent.attributes?.length) {
+        next = {
+          ...next,
+          attributes: [...new Set([...next.attributes, ...llmIntent.attributes])],
+        };
+      }
+      if (llmIntent.brand && !next.brand) {
+        next = { ...next, brand: llmIntent.brand };
+      }
+      for (const phrase of llmIntent.searchPhrases ?? []) out.add(phrase);
+    }
   }
 
-  return { queries: [...out].filter(Boolean).slice(0, 14), aiUsed };
+  return { queries: [...out].filter(Boolean).slice(0, 14), aiUsed, parsed: next };
 }
 
 async function composeGroundedReply(opts: {
@@ -322,6 +361,8 @@ function priorFromHistory(history: ChatMessage[]): ParsedQuery | null {
 export async function runAiChatTurn(opts: {
   messages: ChatMessage[];
   locale?: Locale;
+  sessionId?: string | null;
+  ip?: string | null;
 }): Promise<ChatTurnResponse> {
   const locale = opts.locale ?? "sq";
   const history = opts.messages
@@ -349,21 +390,23 @@ export async function runAiChatTurn(opts: {
         grounded: true,
         intent: null,
         attributes: [],
+        eventId: null,
       },
     };
   }
 
   const prior = priorFromHistory(history);
-  const parsed = parseCustomerQuery(userText, prior);
-  const { queries, aiUsed: intentAi } = await buildSearchQueries(
-    userText,
-    parsed
-  );
+  let parsed = parseCustomerQuery(userText, prior);
+  const built = await buildSearchQueries(userText, parsed);
+  parsed = built.parsed;
+  const queries = built.queries;
+  const intentAi = built.aiUsed;
 
   const focusQuery = significantQueryText(userText) || userText;
-  const candidates = await gatherAiCandidates(
-    queries.length ? queries : [focusQuery]
-  );
+  const [candidates, semanticHits] = await Promise.all([
+    gatherAiCandidates(queries.length ? queries : [focusQuery]),
+    matchProductsByEmbedding(userText, { matchCount: 24, minSimilarity: 0.5 }),
+  ]);
 
   const rankedMap = new Map<string, Ranked>();
   const scoreQueries = [
@@ -404,9 +447,18 @@ export async function runAiChatTurn(opts: {
     }
   }
 
+  // Semantic neighbors — still must pass evaluateProduct / attribute gates
+  for (const hit of semanticHits) {
+    const full = candidates.find((c) => c.id === hit.productId);
+    if (!full) continue;
+    const boost = Math.round(80 + hit.similarity * 220);
+    consider(full, boost, ["description", "name"]);
+  }
+
   // Type-known queries (esp. functional phrases like "liquid that prevents
   // freezing") often share no lexical tokens with product names. Always
   // recall by type/attributes from the catalogue, then merge scores.
+  // Skip scent-only false contexts — typeSource attribute_context for grades/leather is OK.
   if (parsed.typeId) {
     const typeBase =
       parsed.typeSource === "functional" || rankedMap.size === 0 ? 180 : 100;
@@ -517,6 +569,20 @@ export async function runAiChatTurn(opts: {
       )
     );
 
+  if (semanticHits.length > 0) aiUsed = true;
+
+  const eventId = await logSearchEvent({
+    query: userText,
+    locale,
+    mode: "ai",
+    intent: parsed.typeId,
+    attributes: parsed.attributes,
+    resultIds: products.map((p) => p.id),
+    aiUsed,
+    sessionId: opts.sessionId,
+    ip: opts.ip,
+  });
+
   return {
     reply,
     products,
@@ -527,6 +593,7 @@ export async function runAiChatTurn(opts: {
       grounded: true,
       intent: parsed.typeId,
       attributes: parsed.attributes,
+      eventId,
     },
   };
 }
