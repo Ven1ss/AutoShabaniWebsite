@@ -100,6 +100,17 @@ export const BUILTIN_SYNONYM_GROUPS: SynonymGroup[] = [
     "karriga te lekures",
     "maintain leather seats",
   ],
+  [
+    "pastrues per fellne",
+    "pastrues fellne",
+    "pastrues i fellneve",
+    "pastrues fellnave",
+    "pastrues fellnev",
+    "rim cleaner",
+    "wheel cleaner",
+    "roton",
+    "neorim",
+  ],
 ];
 
 function loadExtraGroups(): SynonymGroup[] {

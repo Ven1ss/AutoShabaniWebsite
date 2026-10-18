@@ -174,9 +174,10 @@ export async function parseIntentWithAi(
         content:
           "You extract spare-parts search intent for AUTO SHABANI (Kosovo). " +
           "Return JSON only: { productType, attributes, brand, grade, clarify, searchPhrases }. " +
-          "productType one of: air_freshener, antifreeze, engine_oil, oil_filter, air_filter, brake_pads, brake_disc, leather_care, interior_cleaner, null. " +
+          "productType one of: air_freshener, antifreeze, engine_oil, oil_filter, air_filter, brake_pads, brake_disc, leather_care, rim_cleaner, interior_cleaner, null. " +
           "attributes: array like scent:strawberry or empty. " +
           "grade: g11|g12|g13|null for coolant. " +
+          "fellne/felna/rim/wheel cleaner → rim_cleaner (never air_freshener). " +
           "searchPhrases: up to 5 catalogue search phrases in Albanian/English. " +
           "clarify=true only if truly ambiguous. Never invent products or fitment.",
       },
