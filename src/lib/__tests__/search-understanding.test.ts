@@ -177,6 +177,19 @@ describe("attribute evidence", () => {
     ).toBe("none");
   });
 
+  it("maps rim / fellne cleaner and does not inherit cola from history", () => {
+    expect(parseCustomerQuery("pastrues per fellne").typeId).toBe("rim_cleaner");
+    expect(parseCustomerQuery("rim cleaner").typeId).toBe("rim_cleaner");
+
+    const priorCola = parseCustomerQuery("arome cola");
+    expect(priorCola.typeId).toBe("air_freshener");
+    expect(priorCola.attributes).toContain("scent:cola");
+
+    const next = parseCustomerQuery("pastrues per fellne", priorCola);
+    expect(next.typeId).toBe("rim_cleaner");
+    expect(next.attributes).not.toContain("scent:cola");
+  });
+
   it("does not match sea inside seats (word boundary)", () => {
     expect(textHasTerm("leather seats cleaner", "sea")).toBe(false);
     expect(textHasTerm("ocean sea breeze", "sea")).toBe(true);

@@ -170,6 +170,33 @@ function detectTypeFromFunctional(query: string): string | null {
   return null;
 }
 
+/**
+ * True for short follow-ups that refine the previous ask (price, brand, grade).
+ * Full product queries must NOT inherit prior scent/type — that caused
+ * "pastrues per fellne" to keep cola air-fresheners from an earlier turn.
+ */
+export function isRefinementQuery(query: string): boolean {
+  const raw = query.trim();
+  if (!raw) return false;
+  const n = normalizeText(raw);
+  if (REFINE_CHEAPER.some((p) => n.includes(normalizeText(p)))) return true;
+  if (/\b(vetem|vetëm|only|brand)\s+[a-z0-9][a-z0-9\-]{0,22}\b/i.test(raw)) {
+    return true;
+  }
+  if (/^(g\s*)?1[123]\+?$/.test(n)) return true;
+  if (
+    /^(me te lira|me lire|cheaper|cheapest|more|te tjera|others?|tjet[eë]r)$/.test(
+      n
+    )
+  ) {
+    return true;
+  }
+  const tokens = tokenizeQuery(raw);
+  // Single short token (likely a brand) — still a refine
+  if (tokens.length === 1 && tokens[0].length <= 14) return true;
+  return false;
+}
+
 /** True if product text evidences the product type. */
 export function productMatchesType(
   product: RankableProduct,
@@ -182,9 +209,13 @@ export function productMatchesType(
 
   const evidence = TYPE_EVIDENCE[typeId] ?? typeTerms(typeId);
 
-  // Prefer name/category; allow description for leather care (set names vary)
+  // Prefer name/category; allow description for care cleaners (set names vary)
   const hay =
-    typeId === "leather_care" || typeId === "interior_cleaner" ? full : name;
+    typeId === "leather_care" ||
+    typeId === "interior_cleaner" ||
+    typeId === "rim_cleaner"
+      ? full
+      : name;
   return evidence.some((term) => textHasTerm(hay, term));
 }
 
@@ -267,20 +298,28 @@ export function parseCustomerQuery(
     typeSource = "attribute_context";
   }
 
-  // Conversation refinement: keep prior type/attrs unless overridden
-  if (prior?.typeId && !typeId) {
+  // Conversation refinement: ONLY inherit prior type/attrs for short refine
+  // turns (cheaper / only brand / grade). A new product ask like
+  // "pastrues per fellne" must not keep a prior scent:cola context.
+  const refineTurn = isRefinementQuery(raw);
+
+  if (prior?.typeId && !typeId && refineTurn) {
     typeId = prior.typeId;
     typeSource = "history";
   }
   const mergedAttrs =
-    attrs.length > 0 ? attrs : prior?.attributes?.length ? prior.attributes : [];
+    attrs.length > 0
+      ? attrs
+      : prior?.attributes?.length && refineTurn
+        ? prior.attributes
+        : [];
 
   const cheaper = REFINE_CHEAPER.some((p) =>
     normalizeText(raw).includes(normalizeText(p))
   );
 
   // Brand after explicit refine cues only — never "from freezing" etc.
-  let brand = prior?.brand;
+  let brand = refineTurn ? prior?.brand : undefined;
   const tokens = tokenizeQuery(raw);
   const brandHint = raw.match(
     /\b(?:vetëm|vetem|only|brand)\s+([A-Za-z][A-Za-z0-9][A-Za-z0-9\-]{0,22})\b/i
@@ -326,7 +365,7 @@ export function parseCustomerQuery(
     typeId,
     attributes: mergedAttrs,
     brand,
-    preferCheaper: cheaper || prior?.preferCheaper,
+    preferCheaper: cheaper || (refineTurn ? Boolean(prior?.preferCheaper) : false),
     residualTokens,
     retrievalQueries: [],
     typeSource,
