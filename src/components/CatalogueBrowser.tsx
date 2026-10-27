@@ -321,12 +321,6 @@ export default function CatalogueBrowser({ products }: Props) {
   const categoryLabel =
     category === "all" ? t.catalogueAll : categoryDisplayName(category);
 
-  const chipBase =
-    "inline-flex min-h-10 items-center gap-1.5 rounded-control border px-3.5 py-2 text-sm transition-colors";
-  const chipIdle =
-    "border-as-mist bg-as-white text-as-dark hover:border-as-dark/20 hover:bg-as-snow";
-  const chipActive = "border-as-dark bg-as-dark text-white";
-
   return (
     <div>
       <div className="mb-5 min-w-0 sm:mb-6">
@@ -374,103 +368,41 @@ export default function CatalogueBrowser({ products }: Props) {
         </div>
       ) : null}
 
-      {categoryFacets.length > 0 ? (
-        <section className="mb-6 sm:mb-7" aria-labelledby="catalogue-categories">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <div>
-              <h2
-                id="catalogue-categories"
-                className="text-sm font-semibold tracking-tight text-as-dark"
-              >
-                {t.catalogueCategory}
-              </h2>
-              <p className="mt-0.5 text-caption text-as-gray">
-                {t.catalogueCategoriesHint}
-              </p>
-            </div>
-            {category !== "all" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  startTransition(() => {
-                    setCategory("all");
-                    setPage(1);
-                    syncUrl({ category: "all", page: 1 });
-                  });
-                }}
-                className="shrink-0 text-caption font-medium text-as-dark underline underline-offset-2"
-              >
-                {t.facetAll}
-              </button>
-            ) : null}
-          </div>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  startTransition(() => {
-                    setCategory("all");
-                    setPage(1);
-                    syncUrl({ category: "all", page: 1 });
-                  });
-                }}
-                className={`w-full justify-between ${chipBase} ${
-                  category === "all" ? chipActive : chipIdle
-                }`}
-              >
-                <span className="truncate text-left">{t.facetAll}</span>
-                <span
-                  className={`tabular-nums text-caption ${
-                    category === "all" ? "text-white/70" : "text-as-gray"
-                  }`}
-                >
-                  {products.length}
-                </span>
-              </button>
-            </li>
-            {categoryFacets.map((facet) => {
-              const label = categoryDisplayName(facet.value);
-              const active = category === facet.value;
-              return (
-                <li key={facet.value}>
-                  <button
-                    type="button"
-                    title={label}
-                    onClick={() => {
-                      startTransition(() => {
-                        const next = active ? "all" : facet.value;
-                        setCategory(next);
-                        setPage(1);
-                        syncUrl({ category: next, page: 1 });
-                      });
-                    }}
-                    className={`w-full justify-between ${chipBase} ${
-                      active ? chipActive : chipIdle
-                    }`}
-                  >
-                    <span className="truncate text-left">{label}</span>
-                    <span
-                      className={`shrink-0 tabular-nums text-caption ${
-                        active ? "text-white/70" : "text-as-gray"
-                      }`}
-                    >
-                      {facet.count}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-
       <div
         ref={resultsTopRef}
-        className="mb-5 sm:mb-6 overflow-hidden rounded-xl border border-as-mist bg-as-white"
+        className="mb-5 sm:mb-6 overflow-hidden rounded-xl border border-as-mist bg-as-white shadow-sm"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 sm:p-4 sm:gap-4">
-          <label className="relative flex flex-col gap-1.5 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-as-mist">
+          <label className="relative flex flex-col gap-1.5 min-w-0 p-3 sm:p-4">
+            <span className="text-caption font-medium text-as-gray">
+              {t.catalogueCategory}
+            </span>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  startTransition(() => {
+                    setCategory(value);
+                    setPage(1);
+                    syncUrl({ category: value, page: 1 });
+                  });
+                }}
+                className={selectClass}
+                aria-label={t.catalogueCategory}
+              >
+                <option value="all">{t.catalogueAll}</option>
+                {categoryFacets.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {categoryDisplayName(c.value)} ({c.count})
+                  </option>
+                ))}
+              </select>
+              <ChevronIcon />
+            </div>
+          </label>
+
+          <label className="relative flex flex-col gap-1.5 min-w-0 p-3 sm:p-4">
             <span className="text-caption font-medium text-as-gray">
               {t.catalogueBrand}
             </span>
@@ -499,7 +431,7 @@ export default function CatalogueBrowser({ products }: Props) {
             </div>
           </label>
 
-          <label className="relative flex flex-col gap-1.5 min-w-0">
+          <label className="relative flex flex-col gap-1.5 min-w-0 p-3 sm:p-4">
             <span className="text-caption font-medium text-as-gray">
               {t.catalogueSort}
             </span>
