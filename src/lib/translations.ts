@@ -87,9 +87,10 @@ export const translations = {
     catalogueInteriorNotice:
       "Për pjesët e brendshme të veturës na kontaktoni",
     catalogueInteriorNoticeLink: "na kontaktoni",
+    catalogueCategoriesHint: "Zgjedh një kategori për të filtruar katalogun.",
     catalogueSearch: "Kërko sipas emrit, SKU, kodit ose markës…",
     catalogueBrand: "Marka",
-    catalogueCategory: "Kategoria",
+    catalogueCategory: "Kategoritë",
     catalogueAll: "Të gjitha",
     catalogueResults: "produkte",
     catalogueEmpty:
@@ -384,9 +385,10 @@ export const translations = {
     catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
     catalogueInteriorNoticeLink: "contact us",
+    catalogueCategoriesHint: "Pick a category to filter the catalogue.",
     catalogueSearch: "Search by name, SKU, code or brand…",
     catalogueBrand: "Brand",
-    catalogueCategory: "Category",
+    catalogueCategory: "Categories",
     catalogueAll: "All",
     catalogueResults: "products",
     catalogueEmpty:
