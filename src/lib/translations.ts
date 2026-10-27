@@ -329,22 +329,6 @@ export const translations = {
     popCatLeather: "Leather care",
     popCatWipers: "Wiper blades",
 
-    vehicleTitle: "Search by vehicle",
-    vehicleSub:
-      "Pick make, model, year, and engine. Fitment is confirmed via OE code or with us.",
-    vehicleMake: "Make",
-    vehicleModel: "Model",
-    vehicleYear: "Year",
-    vehicleEngine: "Engine",
-    vehicleSelectMake: "Select make",
-    vehicleSelectModel: "Select model",
-    vehicleSelectYear: "Select year",
-    vehicleSelectEngine: "Optional",
-    vehicleSubmit: "Find parts",
-    vehicleFitmentNote:
-      "Vehicle fitment is not auto-confirmed — verify the OE code or ask on WhatsApp.",
-    vehicleAskWhatsApp: "Ask with this vehicle",
-
     productReturnsTitle: "Returns",
     productReturnsBody:
       "Unused products can be returned within 14 days with a receipt. Contact us before you visit.",
