@@ -27,23 +27,6 @@ export const translations = {
     popCatLeather: "Kujdesi i lëkurës",
     popCatWipers: "Shporta",
 
-    // Vehicle finder
-    vehicleTitle: "Kërko sipas veturës",
-    vehicleSub:
-      "Zgjedh markën, modelin, vitin dhe motorin. Përputhja me veturën verifikohet me kod OE ose me ne.",
-    vehicleMake: "Marka",
-    vehicleModel: "Modeli",
-    vehicleYear: "Viti",
-    vehicleEngine: "Motori",
-    vehicleSelectMake: "Zgjedh markën",
-    vehicleSelectModel: "Zgjedh modelin",
-    vehicleSelectYear: "Zgjedh vitin",
-    vehicleSelectEngine: "Opsionale",
-    vehicleSubmit: "Kërko pjesë",
-    vehicleFitmentNote:
-      "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin OE ose pyet në WhatsApp.",
-    vehicleAskWhatsApp: "Pyet me këtë veturë",
-
     // Returns / trust on PDP
     productReturnsTitle: "Kthimi",
     productReturnsBody:
