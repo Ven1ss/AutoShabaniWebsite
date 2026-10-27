@@ -306,20 +306,30 @@ export default function CatalogueBrowser({ products }: Props) {
   const hasActiveFilters =
     brand !== "all" || category !== "all" || sort !== "relevance";
 
-  const categoryLabel =
-    category === "all"
-      ? t.catalogueAll
-      : isProductCategory(category)
-        ? t[`cat_${category}`]
-        : category;
-
   const selectClass =
-    "peer w-full min-h-12 sm:min-h-11 appearance-none rounded-md border border-steel-light bg-as-white pl-3 pr-10 text-base text-as-dark outline-none transition-[border-color,box-shadow] duration-motion-fast ease-apple hover:border-as-gray/50 focus:border-as-dark/30 focus:shadow-[0_0_0_3px_rgba(29,29,31,0.06)]";
-  const labelClass = "text-sm text-as-secondary";
+    "peer w-full min-h-11 appearance-none rounded-control border border-as-mist bg-as-white pl-3 pr-10 text-sm text-as-dark outline-none transition-[border-color,box-shadow] duration-motion-fast hover:border-as-gray/40 focus:border-as-dark/25 focus:shadow-[0_0_0_3px_rgba(29,29,31,0.06)]";
+
+  function categoryDisplayName(value: string): string {
+    if (isProductCategory(value)) return t[`cat_${value}`];
+    // Soften raw DB strings: "Aksesore per veture" → title-ish
+    return value
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  const categoryLabel =
+    category === "all" ? t.catalogueAll : categoryDisplayName(category);
+
+  const chipBase =
+    "inline-flex min-h-10 items-center gap-1.5 rounded-control border px-3.5 py-2 text-sm transition-colors";
+  const chipIdle =
+    "border-as-mist bg-as-white text-as-dark hover:border-as-dark/20 hover:bg-as-snow";
+  const chipActive = "border-as-dark bg-as-dark text-white";
 
   return (
     <div>
-      <div className="mb-3 min-w-0 sm:mb-4">
+      <div className="mb-5 min-w-0 sm:mb-6">
         <CatalogueSearchTicket
           value={query}
           syncKey={searchSyncKey}
@@ -339,117 +349,131 @@ export default function CatalogueBrowser({ products }: Props) {
       </div>
 
       {recent.length > 0 ? (
-        <div className="mb-4 -mx-1 overflow-x-auto">
-          <div className="flex min-w-min items-center gap-2 px-1 pb-1">
-            <span className="shrink-0 text-caption text-as-gray">
-              {t.recentSearches}
-            </span>
-            {recent.map((term) => (
-              <button
-                key={term}
-                type="button"
-                onClick={() => submitSearch(term)}
-                className="shrink-0 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
-              >
-                {term}
-              </button>
-            ))}
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <span className="text-caption text-as-gray">{t.recentSearches}</span>
+          {recent.map((term) => (
             <button
+              key={term}
               type="button"
-              onClick={() => {
-                clearRecentSearches();
-                setRecent([]);
-              }}
-              className="shrink-0 text-caption text-as-gray underline"
+              onClick={() => submitSearch(term)}
+              className="rounded-control border border-as-mist bg-as-white px-2.5 py-1.5 text-caption text-as-dark hover:border-as-dark/20"
             >
-              ×
+              {term}
             </button>
-          </div>
-        </div>
-      ) : null}
-
-      {brandFacets.length > 0 ? (
-        <div className="mb-3 -mx-1 overflow-x-auto">
-          <div className="flex min-w-min gap-2 px-1 pb-1">
-            <button
-              type="button"
-              onClick={() => {
-                startTransition(() => {
-                  setBrand("all");
-                  setPage(1);
-                  syncUrl({ brand: "all", page: 1 });
-                });
-              }}
-              className={`shrink-0 rounded-md px-3 py-2 text-caption ${
-                brand === "all"
-                  ? "bg-as-dark text-white"
-                  : "border border-steel-light bg-as-white text-as-dark"
-              }`}
-            >
-              {t.facetAll}
-            </button>
-            {brandFacets.slice(0, 12).map((facet) => (
-              <button
-                key={facet.value}
-                type="button"
-                onClick={() => {
-                  startTransition(() => {
-                    setBrand(facet.value);
-                    setPage(1);
-                    syncUrl({ brand: facet.value, page: 1 });
-                  });
-                }}
-                className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
-                  brand === facet.value
-                    ? "bg-as-dark text-white"
-                    : "border border-steel-light bg-as-white text-as-dark"
-                }`}
-              >
-                {facet.value} ({facet.count})
-              </button>
-            ))}
-          </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              clearRecentSearches();
+              setRecent([]);
+            }}
+            className="text-caption text-as-gray underline underline-offset-2"
+          >
+            {t.catalogueClearFilters}
+          </button>
         </div>
       ) : null}
 
       {categoryFacets.length > 0 ? (
-        <div className="mb-5 -mx-1 overflow-x-auto">
-          <div className="flex min-w-min gap-2 px-1 pb-1">
-            {categoryFacets.slice(0, 12).map((facet) => {
-              const label = isProductCategory(facet.value)
-                ? t[`cat_${facet.value}`]
-                : facet.value;
-              return (
-                <button
-                  key={facet.value}
-                  type="button"
-                  onClick={() => {
-                    startTransition(() => {
-                      const next =
-                        category === facet.value ? "all" : facet.value;
-                      setCategory(next);
-                      setPage(1);
-                      syncUrl({ category: next, page: 1 });
-                    });
-                  }}
-                  className={`shrink-0 rounded-md px-3 py-2 text-caption tabular-nums ${
-                    category === facet.value
-                      ? "bg-as-dark text-white"
-                      : "border border-steel-light bg-as-white text-as-dark"
+        <section className="mb-6 sm:mb-7" aria-labelledby="catalogue-categories">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <h2
+                id="catalogue-categories"
+                className="text-sm font-semibold tracking-tight text-as-dark"
+              >
+                {t.catalogueCategory}
+              </h2>
+              <p className="mt-0.5 text-caption text-as-gray">
+                {t.catalogueCategoriesHint}
+              </p>
+            </div>
+            {category !== "all" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    setCategory("all");
+                    setPage(1);
+                    syncUrl({ category: "all", page: 1 });
+                  });
+                }}
+                className="shrink-0 text-caption font-medium text-as-dark underline underline-offset-2"
+              >
+                {t.facetAll}
+              </button>
+            ) : null}
+          </div>
+          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    setCategory("all");
+                    setPage(1);
+                    syncUrl({ category: "all", page: 1 });
+                  });
+                }}
+                className={`w-full justify-between ${chipBase} ${
+                  category === "all" ? chipActive : chipIdle
+                }`}
+              >
+                <span className="truncate text-left">{t.facetAll}</span>
+                <span
+                  className={`tabular-nums text-caption ${
+                    category === "all" ? "text-white/70" : "text-as-gray"
                   }`}
                 >
-                  {label} ({facet.count})
-                </button>
+                  {products.length}
+                </span>
+              </button>
+            </li>
+            {categoryFacets.map((facet) => {
+              const label = categoryDisplayName(facet.value);
+              const active = category === facet.value;
+              return (
+                <li key={facet.value}>
+                  <button
+                    type="button"
+                    title={label}
+                    onClick={() => {
+                      startTransition(() => {
+                        const next = active ? "all" : facet.value;
+                        setCategory(next);
+                        setPage(1);
+                        syncUrl({ category: next, page: 1 });
+                      });
+                    }}
+                    className={`w-full justify-between ${chipBase} ${
+                      active ? chipActive : chipIdle
+                    }`}
+                  >
+                    <span className="truncate text-left">{label}</span>
+                    <span
+                      className={`shrink-0 tabular-nums text-caption ${
+                        active ? "text-white/70" : "text-as-gray"
+                      }`}
+                    >
+                      {facet.count}
+                    </span>
+                  </button>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ul>
+        </section>
       ) : null}
 
-      <div className="mb-5 sm:mb-6 overflow-hidden rounded-xl border border-steel-light bg-as-white">
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-steel-light">
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
-            <span className={labelClass}>{t.catalogueBrand}</span>
+      <div
+        ref={resultsTopRef}
+        className="mb-5 sm:mb-6 overflow-hidden rounded-xl border border-as-mist bg-as-white"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 sm:p-4 sm:gap-4">
+          <label className="relative flex flex-col gap-1.5 min-w-0">
+            <span className="text-caption font-medium text-as-gray">
+              {t.catalogueBrand}
+            </span>
             <div className="relative">
               <select
                 value={brand}
@@ -475,38 +499,10 @@ export default function CatalogueBrowser({ products }: Props) {
             </div>
           </label>
 
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
-            <span className={labelClass}>{t.catalogueCategory}</span>
-            <div className="relative">
-              <select
-                value={category}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  startTransition(() => {
-                    setCategory(value);
-                    setPage(1);
-                    syncUrl({ category: value, page: 1 });
-                  });
-                }}
-                className={selectClass}
-                aria-label={t.catalogueCategory}
-              >
-                <option value="all">{t.catalogueAll}</option>
-                {categoryFacets.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {isProductCategory(c.value)
-                      ? t[`cat_${c.value}`]
-                      : c.value}{" "}
-                    ({c.count})
-                  </option>
-                ))}
-              </select>
-              <ChevronIcon />
-            </div>
-          </label>
-
-          <label className="relative flex flex-col gap-1.5 p-3 sm:p-4">
-            <span className={labelClass}>{t.catalogueSort}</span>
+          <label className="relative flex flex-col gap-1.5 min-w-0">
+            <span className="text-caption font-medium text-as-gray">
+              {t.catalogueSort}
+            </span>
             <div className="relative">
               <select
                 value={sort}
@@ -530,10 +526,7 @@ export default function CatalogueBrowser({ products }: Props) {
           </label>
         </div>
 
-        <div
-          ref={resultsTopRef}
-          className="flex flex-wrap items-center justify-between gap-2 border-t border-steel-light bg-as-snow/70 px-3 py-2.5 sm:px-4"
-        >
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-as-mist bg-as-snow/80 px-3 py-3 sm:px-4">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p className="text-sm text-as-secondary tabular-nums">
               <span className="font-semibold text-as-dark">
@@ -562,9 +555,10 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ brand: "all", page: 1 });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-control border border-as-mist bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
               >
-                <span className="truncate">{brand}</span>
+                <span className="text-as-gray">{t.catalogueBrand}:</span>
+                <span className="truncate font-medium">{brand}</span>
                 <span aria-hidden>×</span>
               </button>
             ) : null}
@@ -578,9 +572,10 @@ export default function CatalogueBrowser({ products }: Props) {
                     syncUrl({ category: "all", page: 1 });
                   });
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-steel-light bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-control border border-as-mist bg-as-white px-2.5 py-1.5 text-caption text-as-dark"
               >
-                <span className="truncate">{categoryLabel}</span>
+                <span className="text-as-gray">{t.catalogueCategory}:</span>
+                <span className="truncate font-medium">{categoryLabel}</span>
                 <span aria-hidden>×</span>
               </button>
             ) : null}
