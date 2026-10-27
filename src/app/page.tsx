@@ -5,7 +5,6 @@ import HomeHero from "@/components/home/HomeHero";
 import HomeSearchStrip from "@/components/home/HomeSearchStrip";
 import HomeTrustBar from "@/components/home/HomeTrustBar";
 import PopularCategories from "@/components/home/PopularCategories";
-import VehicleFinder from "@/components/home/VehicleFinder";
 import BrandLogoStrip from "@/components/home/BrandLogoStrip";
 import WhyUs from "@/components/home/WhyUs";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -59,7 +58,6 @@ export default async function Home() {
         <HomeSearchStrip />
         <HomeTrustBar />
         <PopularCategories />
-        <VehicleFinder />
         <FeaturedProducts products={featured} />
         <BrandLogoStrip />
         <WhyUs />

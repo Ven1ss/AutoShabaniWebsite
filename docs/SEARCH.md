@@ -12,8 +12,8 @@ Auto Shabani uses a **hybrid** search stack plus an in-site **ChatGPT-style part
 6. **Typos + Albanian terminology** — synonym groups + fuzzy edit-distance on name/brand/description tokens (distance 2 for longer tokens).
 7. **Optional LLM** — Vercel AI Gateway (`AI_GATEWAY_API_KEY`) or direct OpenAI (`OPENAI_API_KEY`): structured intent, query expansion, grounded one-line replies.
 8. **Optional embeddings** — pgvector `product_embeddings` + `match_products` RPC; merged with lexical hits, still gated by type/attribute verification.
-9. **Vehicle picker** — homepage make/model/year/engine scopes the query / WhatsApp ask; fitment is never invented (see migration `009`).
-10. **Feedback loop** — `search_events` / `search_feedback`; UI thumbs + product clicks; `GET /api/ai/learning` suggests synonym promotions.
+9. **Feedback loop** — `search_events` / `search_feedback`; UI thumbs + product clicks; `GET /api/ai/learning` suggests synonym promotions.
+10. **Vehicle / TecDoc fitment** — not in the UI yet; migration `009` is reserved for a future TecDoc catalogue connection. Fitment must never be invented.
 
 ## Ranking
 

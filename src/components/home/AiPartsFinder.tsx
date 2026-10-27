@@ -16,11 +16,6 @@ import { whatsappEnquireUrl } from "@/lib/contact";
 import { trackEvent } from "@/lib/analytics";
 import { pushRecentSearch } from "@/lib/recent-searches";
 import type { ChatProductCard } from "@/lib/ai-chat";
-import {
-  formatVehicleLabel,
-  readStoredVehicle,
-  type VehicleSelection,
-} from "@/lib/vehicles";
 
 type UiMessage = {
   id: string;
@@ -84,11 +79,6 @@ export default function AiPartsFinder() {
     }
     return `s-${Date.now()}`;
   });
-  const [vehicle, setVehicle] = useState<VehicleSelection | null>(null);
-
-  useEffect(() => {
-    setVehicle(readStoredVehicle());
-  }, []);
 
   useEffect(() => {
     if (!aiOpen) return;
@@ -102,10 +92,7 @@ export default function AiPartsFinder() {
     const query = q.trim();
     if (query) pushRecentSearch(query);
     trackEvent("search_normal", { q: query.slice(0, 80), locale });
-    const params = new URLSearchParams();
-    if (query) params.set("q", query);
-    if (vehicle) params.set("vehicle", "1");
-    router.push(params.toString() ? `/katalogu?${params}` : "/katalogu");
+    router.push(query ? `/katalogu?q=${encodeURIComponent(query)}` : "/katalogu");
   }
 
   async function runAiSearch(text: string) {
@@ -114,13 +101,6 @@ export default function AiPartsFinder() {
 
     setAiOpen(true);
     setMode("ai");
-
-    const vehiclePrefix = vehicle
-      ? locale === "sq"
-        ? `[Vetura: ${formatVehicleLabel(vehicle, locale)}] `
-        : `[Vehicle: ${formatVehicleLabel(vehicle, locale)}] `
-      : "";
-    const contentForApi = `${vehiclePrefix}${content}`.trim();
 
     const userMsg: UiMessage = {
       id: `u-${Date.now()}`,
@@ -140,13 +120,10 @@ export default function AiPartsFinder() {
         body: JSON.stringify({
           locale,
           sessionId,
-          messages: [
-            ...messages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            { role: "user" as const, content: contentForApi },
-          ],
+          messages: nextHistory.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
         }),
       });
       if (!res.ok) throw new Error("chat_failed");
@@ -347,18 +324,6 @@ export default function AiPartsFinder() {
           <p className="mt-2 text-center text-[0.7rem] text-as-gray">
             {mode === "ai" ? t.aiSearchModeHint : t.normalSearchModeHint}
           </p>
-          {vehicle ? (
-            <p className="mt-1.5 text-center text-[0.7rem] text-as-secondary">
-              {locale === "sq" ? "Vetura:" : "Vehicle:"}{" "}
-              <span className="font-medium text-as-dark">
-                {formatVehicleLabel(vehicle, locale)}
-              </span>
-              {" · "}
-              <a href="#vehicle" className="underline underline-offset-2">
-                {locale === "sq" ? "Ndrysho" : "Change"}
-              </a>
-            </p>
-          ) : null}
 
           {/* AI chat — only after deliberate AI search */}
           {aiOpen ? (
