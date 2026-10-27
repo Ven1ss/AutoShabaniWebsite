@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Button from "@/components/ui/Button";
 import FadeIn from "@/components/ui/FadeIn";
 import { useLanguage } from "@/context/LanguageContext";
 
 /**
- * Compact brand hero — real local asset, then catalogue takes over the page.
+ * Brand-first full-bleed hero. Search sits just below (HomeSearchStrip) as the
+ * primary action — keeps the first composition to brand + one headline + one line.
  */
 export default function HomeHero() {
   const { t } = useLanguage();
@@ -14,7 +14,7 @@ export default function HomeHero() {
   return (
     <section
       id="hero"
-      className="relative min-h-[min(58svh,28rem)] sm:min-h-[min(72svh,36rem)] flex flex-col justify-end overflow-hidden bg-as-dark text-white"
+      className="relative min-h-[min(52svh,24rem)] sm:min-h-[min(62svh,30rem)] flex flex-col justify-end overflow-hidden bg-as-dark text-white"
     >
       <Image
         src="/hero-car.png"
@@ -22,34 +22,24 @@ export default function HomeHero() {
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[center_40%]"
+        className="object-cover object-[center_38%]"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-t from-as-dark via-as-dark/70 to-as-dark/35"
+        className="absolute inset-0 bg-gradient-to-t from-as-dark via-as-dark/75 to-as-dark/40"
         aria-hidden
       />
 
-      <div className="relative z-10 container-as pb-8 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.5rem))] sm:pb-10">
-        <FadeIn y={16}>
-          <p className="font-ethnocentric text-[0.65rem] sm:text-xs tracking-brand text-white/85 mb-3">
+      <div className="relative z-10 container-as pb-10 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.5rem))] sm:pb-12">
+        <FadeIn y={14}>
+          <p className="font-ethnocentric text-2xl sm:text-3xl md:text-4xl tracking-brand text-white mb-3 sm:mb-4">
             {t.brandName}
           </p>
-          <h1 className="text-hero text-white max-w-xl">
+          <h1 className="max-w-xl text-[1.35rem] sm:text-2xl md:text-[1.75rem] font-semibold tracking-tight text-white/95 leading-snug">
             {t.heroSubtitle}
           </h1>
-          <p className="mt-4 text-body text-white/75 max-w-md">
+          <p className="mt-3 max-w-md text-sm sm:text-body text-white/70">
             {t.heroTradeNote}
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button
-              href="/katalogu"
-              variant="primary"
-              tone="dark"
-              className="min-w-[10.5rem]"
-            >
-              {t.heroCtaPrimary}
-            </Button>
-          </div>
         </FadeIn>
       </div>
     </section>

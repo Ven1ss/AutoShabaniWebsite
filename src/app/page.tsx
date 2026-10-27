@@ -1,8 +1,11 @@
 import { unstable_noStore as noStore } from "next/cache";
 import SiteNav from "@/components/ui/SiteNav";
+import type { Metadata } from "next";
 import HomeHero from "@/components/home/HomeHero";
 import HomeSearchStrip from "@/components/home/HomeSearchStrip";
 import HomeTrustBar from "@/components/home/HomeTrustBar";
+import PopularCategories from "@/components/home/PopularCategories";
+import VehicleFinder from "@/components/home/VehicleFinder";
 import BrandLogoStrip from "@/components/home/BrandLogoStrip";
 import WhyUs from "@/components/home/WhyUs";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -12,8 +15,25 @@ import OrganizationJsonLd from "@/components/OrganizationJsonLd";
 import { getProductsCached } from "@/lib/products-api";
 import { getRatingStatsMapCached } from "@/lib/rating-stats";
 import { pickRandomProducts } from "@/lib/products";
+import { SITE_URL } from "@/lib/seo";
 
 const FEATURED_COUNT = 8;
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "AUTO SHABANI | Pjesë këmbimi — kërkim me AI, Prishtinë",
+  },
+  description:
+    "Gjej pjesë këmbimi me kërkim inteligjent: emër, kod OE, markë ose përshkrim. Stok lokal në Prishtinë — AUTO SHABANI.",
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: "AUTO SHABANI | Pjesë këmbimi me kërkim inteligjent",
+    description:
+      "Kërko sipas emrit, kodit OE, markës ose veturës. Çmime dhe stok të qarta.",
+    url: SITE_URL,
+    images: [{ url: "/hero-car.png", width: 1600, height: 900, alt: "AUTO SHABANI" }],
+  },
+};
 
 export default async function Home() {
   // Fresh featured pick on every visit; product list itself stays cached.
@@ -38,6 +58,8 @@ export default async function Home() {
         <HomeHero />
         <HomeSearchStrip />
         <HomeTrustBar />
+        <PopularCategories />
+        <VehicleFinder />
         <FeaturedProducts products={featured} />
         <BrandLogoStrip />
         <WhyUs />

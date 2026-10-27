@@ -50,6 +50,7 @@ Fill `.env.local`, then `npm run dev`.
 7. `supabase/migrations/006_allow_duplicate_skus.sql` (SKU no longer unique)
 8. `supabase/migrations/007_intelligent_search.sql` (or re-run `supabase/search_products.sql`)
 9. `supabase/migrations/008_ai_embeddings_and_feedback.sql` (pgvector embeddings + search feedback)
+10. `supabase/migrations/009_vehicle_fitment_foundation.sql` (optional vehicle make/model/fitment tables)
 
 Promote an admin:
 

@@ -219,24 +219,28 @@ function scoreAgainstQuery(
     }
     if (tokenHit) continue;
 
-    // Edit-distance only for longer tokens (avoid "makin" ≈ random short words)
-    if (t.length < 5) continue;
+    // Edit-distance for typos (antifriz/antifrix, feroda/ferode).
+    // Longer tokens allow distance 2; brand tokens get a light boost.
+    if (t.length < 4) continue;
     for (const field of candidates) {
-      const words = field.split(" ").filter((w) => w.length >= 4);
+      const words = field.split(" ").filter((w) => w.length >= 3);
       for (const w of words) {
-        const maxDist = t.length >= 7 ? 2 : 1;
-        if (withinEditDistance(w.slice(0, t.length + 1), t, maxDist)) {
-          score += Math.floor(WEIGHTS.fuzzyToken * 0.55);
-          reasons.add("fuzzy");
+        const maxDist = t.length >= 6 ? 2 : 1;
+        if (withinEditDistance(w, t, maxDist) || withinEditDistance(w.slice(0, t.length + 1), t, maxDist)) {
+          const brandField = field === brandN;
+          score += Math.floor(
+            WEIGHTS.fuzzyToken * (brandField ? 0.75 : 0.55)
+          );
+          reasons.add(brandField ? "brand" : "fuzzy");
           tokenHit = true;
           break;
         }
         if (
           t.length >= 5 &&
           w.length >= 5 &&
-          editDistance(t, w.slice(0, t.length)) <= 1
+          editDistance(t, w.slice(0, Math.max(t.length, w.length))) <= maxDist
         ) {
-          score += Math.floor(WEIGHTS.fuzzyToken * 0.55);
+          score += Math.floor(WEIGHTS.fuzzyToken * 0.5);
           reasons.add("fuzzy");
           tokenHit = true;
           break;

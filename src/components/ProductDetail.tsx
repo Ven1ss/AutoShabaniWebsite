@@ -293,6 +293,16 @@ export default function ProductDetail({ product, related = [] }: Props) {
               )}
             </div>
 
+            <div className="mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] rounded-xl border border-steel-light bg-as-snow/80 p-3.5 sm:p-4">
+              <h2 className="text-sm font-medium text-as-dark mb-1.5">
+                {t.productReturnsTitle}
+              </h2>
+              <p className="text-sm text-as-secondary leading-relaxed">
+                {t.productReturnsBody}
+              </p>
+              <p className="mt-2 text-xs text-as-gray">{t.searchFitmentNote}</p>
+            </div>
+
             <ProductEnquiry product={product} />
           </div>
 

@@ -48,15 +48,32 @@ function alreadyIncludes(haystack: string, needle: string): boolean {
   return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
-/** Albanian-primary title. Skips missing parts; never keyword-stuffs. */
+/**
+ * Unique indexable title. Prefer sq name; append en name when it adds signal.
+ * Skips missing parts; never keyword-stuffs.
+ */
 export function buildProductTitle(product: Product): string {
-  const name = primaryName(product);
+  const nameSq = (product.name.sq || "").trim();
+  const nameEn = (product.name.en || "").trim();
+  const name =
+    nameSq ||
+    nameEn ||
+    "";
   const brand = product.brand.trim();
   const code = product.code.trim();
   const chunks: string[] = [];
 
   if (brand && !alreadyIncludes(name, brand)) chunks.push(brand);
   if (name) chunks.push(name);
+  if (
+    nameEn &&
+    nameSq &&
+    nameEn.toLowerCase() !== nameSq.toLowerCase() &&
+    !alreadyIncludes(nameSq, nameEn) &&
+    nameEn.length <= 48
+  ) {
+    chunks.push(`(${nameEn})`);
+  }
   if (code && !alreadyIncludes(chunks.join(" "), code)) chunks.push(code);
 
   const gtin = inferGtin(product);
@@ -79,7 +96,17 @@ function clip(text: string, max = 160): string {
 /** Prefer the real description; otherwise a short factual fallback. */
 export function buildProductDescription(product: Product): string {
   const fromDb = (product.description.sq || product.description.en || "").trim();
-  if (fromDb) return clip(fromDb);
+  if (fromDb) {
+    const brand = product.brand.trim();
+    const code = product.code.trim();
+    const suffixBits = [
+      brand && !alreadyIncludes(fromDb, brand) ? brand : "",
+      code && !alreadyIncludes(fromDb, code) ? `kod ${code}` : "",
+      "Prishtinë",
+      "AUTO SHABANI",
+    ].filter(Boolean);
+    return clip(`${fromDb} — ${suffixBits.join(" · ")}`);
+  }
 
   const name = primaryName(product);
   const bits = [product.brand.trim(), name, product.code.trim(), product.sku.trim()]
@@ -89,7 +116,7 @@ export function buildProductDescription(product: Product): string {
   const lead = bits.join(" · ");
   return clip(
     lead
-      ? `${lead} — pjesë këmbimi në Prishtinë. AUTO SHABANI.`
+      ? `${lead} — pjesë këmbimi në Prishtinë. Çmim me TVSH. AUTO SHABANI.`
       : "Pjesë këmbimi origjinale në Prishtinë — AUTO SHABANI."
   );
 }

@@ -13,7 +13,44 @@ export const translations = {
     heroCtaPrimary: "Shiko produktet",
     heroCtaSecondary: "Na kontaktoni",
     heroTradeNote:
-      "Zgjedhje e gjerë e pjesëve për marka të ndryshme të veturave. Për servise dhe klientë individualë.",
+      "Kërko sipas emrit, kodit OE, markës ose përshkrimit — me AI që kupton shqipen.",
+
+    // Popular categories
+    popCategoriesTitle: "Kategori të kërkuara",
+    popCategoriesSub: "Hap shpejt kategoritë që klientët kërkojnë më shpesh.",
+    popCatAntifreeze: "Antifriz",
+    popCatOil: "Vaj motori",
+    popCatFilters: "Filtra",
+    popCatBrakes: "Feroda",
+    popCatFresheners: "Aromatizues",
+    popCatRims: "Pastrues fellnesh",
+    popCatLeather: "Kujdesi i lëkurës",
+    popCatWipers: "Shporta",
+
+    // Vehicle finder
+    vehicleTitle: "Kërko sipas veturës",
+    vehicleSub:
+      "Zgjedh markën, modelin, vitin dhe motorin. Përputhja me veturën verifikohet me kod OE ose me ne.",
+    vehicleMake: "Marka",
+    vehicleModel: "Modeli",
+    vehicleYear: "Viti",
+    vehicleEngine: "Motori",
+    vehicleSelectMake: "Zgjedh markën",
+    vehicleSelectModel: "Zgjedh modelin",
+    vehicleSelectYear: "Zgjedh vitin",
+    vehicleSelectEngine: "Opsionale",
+    vehicleSubmit: "Kërko pjesë",
+    vehicleFitmentNote:
+      "Përputhja me veturën nuk konfirmohet automatikisht — verifiko kodin OE ose pyet në WhatsApp.",
+    vehicleAskWhatsApp: "Pyet me këtë veturë",
+
+    // Returns / trust on PDP
+    productReturnsTitle: "Kthimi",
+    productReturnsBody:
+      "Produktet e papërdorura mund të kthehen brenda 14 ditëve me faturë. Na kontaktoni para se të vini.",
+    productStockBadgeIn: "Në stok",
+    productStockBadgeOut: "Jashtë stoku",
+    productStockBadgeRequest: "Me porosi",
 
     // Nav
     navCatalogue: "Katalogu",
@@ -244,14 +281,14 @@ export const translations = {
 
     // Trust / Why us
     trustHeading: "Pse te ne",
-    trust1Title: "Pjesë origjinale dhe OEM",
-    trust1Desc: "Pjesë që përputhen me specifikimet e prodhuesit.",
-    trust2Title: "Identifikim i saktë i pjesës",
-    trust2Desc: "Thuaj kodin ose dërgo një foto — e gjejmë shpejt.",
-    trust3Title: "Disponueshmëri",
-    trust3Desc: "Stok lokal dhe porosi sipas nevojës, me përgjigje të shpejtë.",
-    trust4Title: "Për servise dhe individë",
-    trust4Desc: "Çmime të qarta për klientë individualë; pyet për shumicë nëse je servis.",
+    trust1Title: "Foto dhe çmime reale",
+    trust1Desc: "Produktet shfaqen me foto autentike, çmim me TVSH dhe status stoku.",
+    trust2Title: "Kërkim që kupton shqipen",
+    trust2Desc: "Emër, kod OE, markë, gabime shtypi dhe përshkrime — jo vetëm fjalë të sakta.",
+    trust3Title: "Stok lokal në Prishtinë",
+    trust3Desc: "Shiko disponueshmërinë online; pyet në WhatsApp për konfirmim të shpejtë.",
+    trust4Title: "Kthim i thjeshtë",
+    trust4Desc: "Produktet e papërdorura kthehen brenda 14 ditëve me faturë.",
 
     // Brands
     brandsHeading: "Brendet",
@@ -296,7 +333,41 @@ export const translations = {
     heroCtaPrimary: "View products",
     heroCtaSecondary: "Contact us",
     heroTradeNote:
-      "A wide selection of parts for different car brands. For workshops and individual customers.",
+      "Search by name, OE code, brand, or description — with AI that understands Albanian.",
+
+    popCategoriesTitle: "Popular categories",
+    popCategoriesSub: "Jump into the searches customers use most.",
+    popCatAntifreeze: "Antifreeze",
+    popCatOil: "Engine oil",
+    popCatFilters: "Filters",
+    popCatBrakes: "Brake pads",
+    popCatFresheners: "Air fresheners",
+    popCatRims: "Rim cleaners",
+    popCatLeather: "Leather care",
+    popCatWipers: "Wiper blades",
+
+    vehicleTitle: "Search by vehicle",
+    vehicleSub:
+      "Pick make, model, year, and engine. Fitment is confirmed via OE code or with us.",
+    vehicleMake: "Make",
+    vehicleModel: "Model",
+    vehicleYear: "Year",
+    vehicleEngine: "Engine",
+    vehicleSelectMake: "Select make",
+    vehicleSelectModel: "Select model",
+    vehicleSelectYear: "Select year",
+    vehicleSelectEngine: "Optional",
+    vehicleSubmit: "Find parts",
+    vehicleFitmentNote:
+      "Vehicle fitment is not auto-confirmed — verify the OE code or ask on WhatsApp.",
+    vehicleAskWhatsApp: "Ask with this vehicle",
+
+    productReturnsTitle: "Returns",
+    productReturnsBody:
+      "Unused products can be returned within 14 days with a receipt. Contact us before you visit.",
+    productStockBadgeIn: "In stock",
+    productStockBadgeOut: "Out of stock",
+    productStockBadgeRequest: "On request",
 
     navCatalogue: "Catalogue",
     navAbout: "About",
@@ -522,14 +593,14 @@ export const translations = {
     adminStock: "Stock",
 
     trustHeading: "Why us",
-    trust1Title: "Original and OEM parts",
-    trust1Desc: "Parts that match manufacturer specifications.",
-    trust2Title: "Accurate part identification",
-    trust2Desc: "Tell us the code or send a photo — we’ll find it quickly.",
-    trust3Title: "Availability",
-    trust3Desc: "Local stock and on-request ordering, with a fast reply.",
-    trust4Title: "For workshops and individuals",
-    trust4Desc: "Clear retail pricing; ask about wholesale if you run a workshop.",
+    trust1Title: "Real photos and prices",
+    trust1Desc: "Products show authentic photos, VAT-inclusive prices, and stock status.",
+    trust2Title: "Search that understands Albanian",
+    trust2Desc: "Name, OE code, brand, typos, and descriptions — not only exact words.",
+    trust3Title: "Local stock in Prishtina",
+    trust3Desc: "See availability online; confirm quickly on WhatsApp.",
+    trust4Title: "Straightforward returns",
+    trust4Desc: "Unused products can be returned within 14 days with a receipt.",
 
     brandsHeading: "Brands",
 
