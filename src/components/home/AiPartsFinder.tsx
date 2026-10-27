@@ -16,6 +16,11 @@ import { whatsappEnquireUrl } from "@/lib/contact";
 import { trackEvent } from "@/lib/analytics";
 import { pushRecentSearch } from "@/lib/recent-searches";
 import type { ChatProductCard } from "@/lib/ai-chat";
+import {
+  formatVehicleLabel,
+  readStoredVehicle,
+  type VehicleSelection,
+} from "@/lib/vehicles";
 
 type UiMessage = {
   id: string;
@@ -79,6 +84,11 @@ export default function AiPartsFinder() {
     }
     return `s-${Date.now()}`;
   });
+  const [vehicle, setVehicle] = useState<VehicleSelection | null>(null);
+
+  useEffect(() => {
+    setVehicle(readStoredVehicle());
+  }, []);
 
   useEffect(() => {
     if (!aiOpen) return;
@@ -92,7 +102,10 @@ export default function AiPartsFinder() {
     const query = q.trim();
     if (query) pushRecentSearch(query);
     trackEvent("search_normal", { q: query.slice(0, 80), locale });
-    router.push(query ? `/katalogu?q=${encodeURIComponent(query)}` : "/katalogu");
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (vehicle) params.set("vehicle", "1");
+    router.push(params.toString() ? `/katalogu?${params}` : "/katalogu");
   }
 
   async function runAiSearch(text: string) {
@@ -101,6 +114,13 @@ export default function AiPartsFinder() {
 
     setAiOpen(true);
     setMode("ai");
+
+    const vehiclePrefix = vehicle
+      ? locale === "sq"
+        ? `[Vetura: ${formatVehicleLabel(vehicle, locale)}] `
+        : `[Vehicle: ${formatVehicleLabel(vehicle, locale)}] `
+      : "";
+    const contentForApi = `${vehiclePrefix}${content}`.trim();
 
     const userMsg: UiMessage = {
       id: `u-${Date.now()}`,
@@ -120,10 +140,13 @@ export default function AiPartsFinder() {
         body: JSON.stringify({
           locale,
           sessionId,
-          messages: nextHistory.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: [
+            ...messages.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            { role: "user" as const, content: contentForApi },
+          ],
         }),
       });
       if (!res.ok) throw new Error("chat_failed");
@@ -270,14 +293,15 @@ export default function AiPartsFinder() {
                   mode === "ai" ? t.aiSearchPlaceholder : t.searchPlaceholder
                 }
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent py-3.5 text-as-dark text-body outline-none placeholder:text-as-gray"
+                enterKeyHint="search"
+                className="min-w-0 flex-1 bg-transparent py-4 text-as-dark text-body outline-none placeholder:text-as-gray"
               />
               <button
                 type="button"
                 onClick={() => (mode === "ai" ? enableNormal() : enableAi())}
                 aria-pressed={mode === "ai"}
                 title={t.aiSearchToggleHint}
-                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+                className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
                   mode === "ai"
                     ? "bg-accent text-white"
                     : "bg-as-snow text-as-secondary hover:bg-as-mist hover:text-as-dark"
@@ -288,14 +312,14 @@ export default function AiPartsFinder() {
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 border-t border-as-mist px-3 py-2.5 sm:gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2 border-t border-as-mist px-3 py-3 sm:gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setMode("normal");
                   runNormalSearch(draft);
                 }}
-                className="rounded-sm bg-as-snow px-4 py-2 text-sm text-as-dark hover:bg-as-mist transition-colors"
+                className="min-h-[2.75rem] rounded-sm bg-as-snow px-5 py-2.5 text-sm text-as-dark hover:bg-as-mist transition-colors"
               >
                 {t.searchSubmit}
               </button>
@@ -306,7 +330,7 @@ export default function AiPartsFinder() {
                   setMode("ai");
                   void runAiSearch(draft);
                 }}
-                className={`inline-flex items-center gap-1.5 rounded-sm px-4 py-2 text-sm transition-colors disabled:opacity-50 ${
+                className={`inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-sm px-5 py-2.5 text-sm transition-colors disabled:opacity-50 ${
                   mode === "ai"
                     ? "bg-accent text-white hover:bg-accent-deep"
                     : "bg-as-snow text-as-dark hover:bg-as-mist"
@@ -323,6 +347,18 @@ export default function AiPartsFinder() {
           <p className="mt-2 text-center text-[0.7rem] text-as-gray">
             {mode === "ai" ? t.aiSearchModeHint : t.normalSearchModeHint}
           </p>
+          {vehicle ? (
+            <p className="mt-1.5 text-center text-[0.7rem] text-as-secondary">
+              {locale === "sq" ? "Vetura:" : "Vehicle:"}{" "}
+              <span className="font-medium text-as-dark">
+                {formatVehicleLabel(vehicle, locale)}
+              </span>
+              {" · "}
+              <a href="#vehicle" className="underline underline-offset-2">
+                {locale === "sq" ? "Ndrysho" : "Change"}
+              </a>
+            </p>
+          ) : null}
 
           {/* AI chat — only after deliberate AI search */}
           {aiOpen ? (
