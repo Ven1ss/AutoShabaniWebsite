@@ -325,9 +325,6 @@ export const translations = {
     popCatLeather: "Leather care",
     popCatWipers: "Wiper blades",
 
-    productReturnsTitle: "Returns",
-    productReturnsBody:
-      "Unused products can be returned within 14 days with a receipt. Contact us before you visit.",
     productStockBadgeIn: "In stock",
     productStockBadgeOut: "Out of stock",
     productStockBadgeRequest: "On request",
