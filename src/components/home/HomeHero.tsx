@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import FadeIn from "@/components/ui/FadeIn";
+import Button from "@/components/ui/Button";
 import { useLanguage } from "@/context/LanguageContext";
 
 /**
- * Brand-first full-bleed hero. Search sits just below (HomeSearchStrip) as the
- * primary action — keeps the first composition to brand + one headline + one line.
+ * Brand-first full-bleed hero: brand + headline + one line + catalogue CTA.
+ * Search sits just below in HomeSearchStrip.
  */
 export default function HomeHero() {
   const { t } = useLanguage();
@@ -40,6 +41,11 @@ export default function HomeHero() {
           <p className="mt-3 max-w-md text-sm sm:text-body text-white/70">
             {t.heroTradeNote}
           </p>
+          <div className="mt-5 sm:mt-6">
+            <Button href="/katalogu" variant="primary" tone="dark">
+              {t.heroCtaPrimary}
+            </Button>
+          </div>
         </FadeIn>
       </div>
     </section>
