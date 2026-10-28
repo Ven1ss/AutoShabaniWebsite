@@ -124,36 +124,32 @@ export default function ProductDetail({ product, related = [] }: Props) {
         </div>
 
         {/*
-          < md: image → buy box → description → rate
+          < md: full-bleed image → buy box → description → rate
           ≥ md: image | buy box; description + rate under image
         */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-[var(--gap-lg)] items-start">
-          {/* Image — fluid width tracks the column / viewport */}
+          {/* Image — edge-to-edge on phones; column-width from md up */}
           <div className="min-w-0 order-1 md:col-span-6 lg:col-span-7 md:col-start-1 md:row-start-1">
-            <div
-              className="mx-auto w-full md:mx-0"
-              style={{
-                maxWidth:
-                  "min(100%, clamp(13.5rem, 42vw + 2rem, 36rem))",
-              }}
-            >
+            <div className="relative w-[calc(100%+2*var(--page-pad-x))] -mx-[var(--page-pad-x)] md:mx-0 md:w-full">
               {imageSrc ? (
                 <button
                   type="button"
                   onClick={() => setImageZoomOpen(true)}
                   aria-label={t.productImageZoom}
-                  className="group relative aspect-square w-full overflow-hidden rounded-xl border border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-card cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="group relative aspect-square w-full overflow-hidden rounded-none border-y border-x-0 border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-none cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:rounded-xl md:border md:shadow-card"
                 >
                   <Image
                     src={imageSrc}
                     alt={imageAlt}
                     fill
                     priority
-                    sizes="(max-width: 768px) min(100vw, 22rem), (max-width: 1024px) 45vw, 55vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 45vw, 55vw"
                     className="object-contain transition-transform duration-motion ease-apple group-hover:scale-[1.03]"
-                    style={{ padding: "var(--media-pad)" }}
+                    style={{
+                      padding: "clamp(0.5rem, 1.5vw, var(--media-pad))",
+                    }}
                   />
-                  <span className="pointer-events-none absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-steel-light bg-as-white/90 text-as-secondary shadow-card opacity-90 transition-opacity group-hover:opacity-100">
+                  <span className="pointer-events-none absolute bottom-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-steel-light bg-as-white/90 text-as-secondary shadow-card opacity-90 transition-opacity group-hover:opacity-100 sm:h-9 sm:w-9">
                     <svg
                       className="h-4 w-4"
                       fill="none"
@@ -171,7 +167,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
                   </span>
                 </button>
               ) : (
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-card">
+                <div className="relative aspect-square w-full overflow-hidden rounded-none border-y border-x-0 border-steel-light bg-[linear-gradient(180deg,#fafafa_0%,#f0f0f2_100%)] shadow-none md:rounded-xl md:border md:shadow-card">
                   <div className="absolute inset-0 flex items-center justify-center font-mono text-sm tracking-widest uppercase text-as-gray px-4 text-center break-all">
                     {product.sku || "—"}
                   </div>
