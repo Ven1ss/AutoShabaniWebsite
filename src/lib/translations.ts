@@ -27,10 +27,6 @@ export const translations = {
     popCatLeather: "Kujdesi i lëkurës",
     popCatWipers: "Shporta",
 
-    // Returns / trust on PDP
-    productReturnsTitle: "Kthimi",
-    productReturnsBody:
-      "Produktet e papërdorura mund të kthehen brenda 14 ditëve me faturë. Na kontaktoni para se të vini.",
     productStockBadgeIn: "Në stok",
     productStockBadgeOut: "Jashtë stoku",
     productStockBadgeRequest: "Me porosi",
@@ -329,9 +325,6 @@ export const translations = {
     popCatLeather: "Leather care",
     popCatWipers: "Wiper blades",
 
-    productReturnsTitle: "Returns",
-    productReturnsBody:
-      "Unused products can be returned within 14 days with a receipt. Contact us before you visit.",
     productStockBadgeIn: "In stock",
     productStockBadgeOut: "Out of stock",
     productStockBadgeRequest: "On request",
