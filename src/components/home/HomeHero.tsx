@@ -26,7 +26,7 @@ export default function HomeHero() {
         className="object-cover object-[center_38%]"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-t from-as-dark via-as-dark/75 to-as-dark/40"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-as-dark via-as-dark/75 to-as-dark/40"
         aria-hidden
       />
 
