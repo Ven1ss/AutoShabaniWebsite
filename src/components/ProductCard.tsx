@@ -68,21 +68,20 @@ export default function ProductCard({
             {product.sku || "—"}
           </div>
         )}
-        <span
-          className={`absolute left-2 top-2 rounded-sm px-1.5 py-0.5 text-[0.65rem] font-medium tracking-wide ${
-            product.stockStatus === "in_stock"
-              ? "bg-as-dark/90 text-white"
-              : product.stockStatus === "out_of_stock"
-                ? "bg-as-gray/90 text-white"
-                : "bg-as-white/95 text-as-secondary border border-as-mist"
-          }`}
-        >
-          {product.stockStatus === "in_stock"
-            ? t.productStockBadgeIn
-            : product.stockStatus === "out_of_stock"
-              ? t.productStockBadgeOut
-              : t.productStockBadgeRequest}
-        </span>
+        {product.stockStatus === "in_stock" ||
+        product.stockStatus === "out_of_stock" ? (
+          <span
+            className={`absolute left-2 top-2 rounded-sm px-1.5 py-0.5 text-[0.65rem] font-medium tracking-wide ${
+              product.stockStatus === "in_stock"
+                ? "bg-as-dark/90 text-white"
+                : "bg-as-gray/90 text-white"
+            }`}
+          >
+            {product.stockStatus === "in_stock"
+              ? t.productStockBadgeIn
+              : t.productStockBadgeOut}
+          </span>
+        ) : null}
       </Link>
 
       <div
