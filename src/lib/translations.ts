@@ -373,7 +373,6 @@ export const translations = {
     aiFeedbackNo: "No",
     aiFeedbackThanks: "Thanks for the feedback.",
 
-    catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
     catalogueInteriorNoticeLink: "contact us",
     catalogueSearch: "Search by name, SKU, code or brand…",
