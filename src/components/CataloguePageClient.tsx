@@ -40,10 +40,7 @@ export default function CataloguePageClient({ products }: Props) {
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-as-dark">
                 {t.navCatalogue}
               </h1>
-              <p className="mt-2 text-sm sm:text-body text-as-secondary leading-relaxed">
-                {t.catalogueSubtitle}
-              </p>
-              <p className="mt-3 text-sm text-as-secondary leading-relaxed">
+              <p className="mt-2 text-sm text-as-secondary leading-relaxed">
                 {linkIndex >= 0 ? (
                   <>
                     {before}

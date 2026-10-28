@@ -79,7 +79,6 @@ export const translations = {
     aiFeedbackThanks: "Faleminderit për reagimin.",
 
     // Catalogue
-    catalogueSubtitle: "Çmime me TVSH. Pyet për stok para se të vish.",
     catalogueInteriorNotice:
       "Për pjesët e brendshme të veturës na kontaktoni",
     catalogueInteriorNoticeLink: "na kontaktoni",
@@ -374,7 +373,6 @@ export const translations = {
     aiFeedbackNo: "No",
     aiFeedbackThanks: "Thanks for the feedback.",
 
-    catalogueSubtitle: "Prices incl. VAT. Ask about stock before you visit.",
     catalogueInteriorNotice: "For interior car parts, contact us",
     catalogueInteriorNoticeLink: "contact us",
     catalogueSearch: "Search by name, SKU, code or brand…",
