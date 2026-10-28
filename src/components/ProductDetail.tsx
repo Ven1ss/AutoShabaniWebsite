@@ -225,7 +225,7 @@ export default function ProductDetail({ product, related = [] }: Props) {
               <span className="text-sm text-as-gray">{stockLabel}</span>
             </div>
 
-            <dl className="grid gap-[clamp(0.5rem,0.35rem+0.5vw,0.75rem)] mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] text-sm border-y border-steel-light py-[clamp(0.85rem,0.6rem+0.8vw,1.15rem)]">
+            <dl className="grid gap-[clamp(0.5rem,0.35rem+0.5vw,0.75rem)] mb-[clamp(1.25rem,0.75rem+1.5vw,2rem)] rounded-xl border border-steel-light bg-as-white px-3.5 sm:px-4 py-[clamp(0.85rem,0.6rem+0.8vw,1.15rem)] text-sm">
               {product.brand ? (
                 <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 items-baseline min-w-0">
                   <dt className="text-sm text-as-gray">{t.catalogueBrand}</dt>
